@@ -1,32 +1,15 @@
 <?php
 namespace blog\views;
+require_once 'GlobalLayout.php';
 class HomepageView {
 
     function show() : void {
-        ob_start();
-        ?>
+        ob_start();?>
         <main>
-            <h3>salut</h3>
-            <div>
-                <?php
-                if(isset($_SESSION['suid'])) {
-                    ?>
-                    <a href="?action=logout" >
-                        Se déconnecter</a>
-                    <?php
-                } else {
-                    ?>
-                    <a href="?action=authentification" >
-                        Se connecter</a>
-                    <?php
-                }
-                ?>
-            </div>
-            <section id="">
-
-            </section>
+            <h3>Ceci est la page d'accueil</h3>
         </main>
 <?php
+        (new GlobalLayout('Accueil', ob_get_clean()))->show();
     }
 }
 ?>

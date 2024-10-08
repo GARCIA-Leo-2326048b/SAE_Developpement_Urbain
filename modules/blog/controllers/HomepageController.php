@@ -1,10 +1,8 @@
 <?php
 
 namespace blog\controllers;
-
 use blog\views\HomepageView;
-
-require 'modules/blog/views/HomepageView.php';
+require_once 'modules/blog/views/HomepageView.php';
 
 
 class HomepageController {

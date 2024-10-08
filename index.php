@@ -1,7 +1,7 @@
 <?php
-require 'modules/blog/controllers/HomepageController.php';
-require 'modules/blog/controllers/AuthentificationController.php';
 
+
+require 'modules/blog/controllers/HomepageController.php';
 session_start();
 
 
@@ -9,17 +9,8 @@ try {
     if (filter_input(INPUT_GET, 'action')) {
         $action = filter_input(INPUT_GET, 'action');
         switch ($action) {
-            case 'homepage':
+            case 'accueil':
                 (new blog\controllers\HomepageController())->execute();
-                break;
-            case 'authentification':
-                (new blog\controllers\AuthentificationController())->execute();
-                break;
-            case 'login':
-                (new blog\controllers\AuthentificationController())->connexion();
-                break;
-            case 'logout':
-                (new blog\controllers\AuthentificationController())->deconnexion();
                 break;
             default:
                 (new blog\controllers\HomepageController())->execute();
