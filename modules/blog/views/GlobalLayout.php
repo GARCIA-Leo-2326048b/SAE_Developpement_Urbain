@@ -28,7 +28,7 @@ class GlobalLayout
                 <h1>Le Titre</h1>
             </div>
             <section id="header">
-                <a href="?action=accueil">Accueil</a> <a href="">À propos</a> <a href="">Contact</a>
+                <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a> <a href="">Contact</a>
             </section>
         </header>
 
