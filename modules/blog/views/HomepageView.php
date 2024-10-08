@@ -23,7 +23,18 @@ class HomepageView {
                 ?>
             </div>
             <section id="">
+                <h2>Importer un fichier Shapefile</h2>
+                <?php
+                echo var_dump($_SESSION);
 
+                ?>
+                <!-- Formulaire pour télécharger un fichier Shapefile -->
+                <form action="?action=upload" method="POST" enctype="multipart/form-data">
+                    <label for="shapefile">Sélectionnez un fichier Shapefile (.shp) :</label>
+                    <input type="file" id="shapefile" name="shapefile" accept=".shp" required>
+                    <br><br>
+                    <input type="submit" value="Télécharger">
+                </form>
             </section>
         </main>
 <?php
