@@ -4,6 +4,7 @@ require 'modules/blog/controllers/AuthentificationController.php';
 require  'modules/blog/controllers/Upload.php';
 
 
+require 'modules/blog/controllers/AffichageController.php';
 session_start();
 
 
@@ -14,6 +15,8 @@ try {
             case 'homepage':
                 (new blog\controllers\HomepageController())->execute();
                 break;
+            case 'affichage':
+                (new blog\controllers\AffichageController())->execute();
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;
