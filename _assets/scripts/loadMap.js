@@ -24,9 +24,9 @@ function createMap(house,road,vegetation ){
             // Créer la carte
             var map = L.map('map').setView([lat, lng], 16);
 
-            load_map(vegetation, 'vegetation', map) // Charge la végétation
-            load_map(road, 'road', map)             // Charge les routes
-            load_map(house, 'house', map)            // Charge les maisons
+            load_map(vegetation, 'vegetation', map)
+                .then(() => load_map(road, 'road', map))
+                .then(() => load_map(house, 'house', map));
 
 
         })
