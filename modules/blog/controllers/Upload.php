@@ -8,47 +8,63 @@ class Upload
     {
         echo var_dump($_FILES);
         // Vérifiez si un fichier a été téléchargé
-        if (isset($_FILES['shapefile'])) {
-            $file = $_FILES['shapefile'];
+        if (isset($_FILES['shapefiles'])) {
+            $files = $_FILES['shapefiles'];
+            $requiredExtensions = ['shp', 'shx', 'dbf']; // Extensions requises
+            $uploadedFiles = [];
 
-            // Vérifiez les erreurs
-            if ($file['error'] === UPLOAD_ERR_OK) {
-                // Définissez le chemin de destination temporaire pour le fichier
-                $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier où vous voulez stocker les fichiers uploadés temporairement
-                $uploadFile = $uploadDir . basename($file['name']);
+            $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
 
-                // Déplacez le fichier téléchargé
-                if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
-                    echo "Le fichier Shapefile a été téléchargé avec succès.<br>";
+            // Parcourir tous les fichiers téléchargés
+            foreach ($files['name'] as $key => $name) {
+                $fileTmpPath = $files['tmp_name'][$key];
+                $fileExtension = pathinfo($name, PATHINFO_EXTENSION);
 
-                    // Appeler l'API OGRE pour convertir le Shapefile en GeoJSON
-                    $this->convertShapefileToGeoJSON($uploadFile);
+                // Vérifiez si l'extension est dans la liste des fichiers requis
+                if (in_array($fileExtension, $requiredExtensions)) {
+                    $uploadFilePath = $uploadDir . basename($name);
+
+                    // Déplacez chaque fichier dans le répertoire de destination
+                    if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
+                        echo "Le fichier $name a été téléchargé avec succès.<br>";
+                        $uploadedFiles[$fileExtension] = $uploadFilePath;
+                    } else {
+                        echo "Erreur lors du téléchargement de $name.<br>";
+                    }
                 } else {
-                    echo "Erreur lors du déplacement du fichier.";
+                    echo "Fichier $name non valide. Extensions valides : .shp, .shx, .dbf<br>";
                 }
+            }
+
+            // Vérifiez que tous les fichiers requis (.shp, .shx, .dbf) sont présents
+            if (count($uploadedFiles) === count($requiredExtensions)) {
+                $this->convertShapefileToGeoJSON($uploadedFiles);
             } else {
-                echo "Erreur lors du téléchargement du fichier : " . $file['error'];
+                echo "Tous les fichiers requis (.shp, .shx, .dbf) ne sont pas présents.<br>";
             }
         } else {
-            echo "Aucun fichier n'a été téléchargé.";
+            echo "Aucun fichier n'a été téléchargé.<br>";
         }
     }
 
     // Fonction pour appeler l'API OGRE pour convertir le fichier
-    private function convertShapefileToGeoJSON($shapefilePath)
+    private function convertShapefileToGeoJSON($uploadedFiles)
     {
         // URL de l'API OGRE pour la conversion
         $apiUrl = "https://ogre.adc4gis.com/convert";
 
         // Chemin de sortie pour le fichier GeoJSON
+        $shapefilePath = $uploadedFiles['shp']; // Chemin du fichier .shp
         $geojsonFilePath = __DIR__ . '/../../../assets/shapefile/' . pathinfo($shapefilePath, PATHINFO_FILENAME) . '.geojson';
 
         // Utiliser curl pour faire une requête POST vers l'API
         $ch = curl_init();
 
-        // Paramètres de la requête POST avec le fichier shapefile
+        // Paramètres de la requête POST avec les fichiers shapefile
         $data = array(
-            'upload' => new \CURLFile($shapefilePath, 'application/octet-stream', basename($shapefilePath))
+            'upload' => new CURLFile($shapefilePath, 'application/octet-stream', basename($shapefilePath)),
+            'upload_shx' => new CURLFile($uploadedFiles['shx'], 'application/octet-stream', basename($uploadedFiles['shx'])),
+            'upload_dbf' => new CURLFile($uploadedFiles['dbf'], 'application/octet-stream', basename($uploadedFiles['dbf']))
         );
 
         // Configuration de curl
