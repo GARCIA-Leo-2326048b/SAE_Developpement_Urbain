@@ -37,13 +37,25 @@ function style(feature,type) {
         // Coloration en fonction du type de végétation
         switch (feature.properties.Type) {
             case "Sol nu":
-                color = '#e9c597';
+                color = '#efb974';
                 break;
             case "Herbe":
-                color = '#5e8c4b';
+                color = '#496e3a';
                 break;
             case "Végétation basse":
-                color = '#bceba9';
+                color = '#a4d88c';
+                break;
+            case "Végétation haute":
+                color = '#87dc65';
+                break;
+            case "Culture":
+                color = '#e2e900';
+                break;
+            case "Habitation":
+                color = '#8f1c1c';
+                break;
+            case "Eau":
+                color = '#0980bc';
                 break;
             default:
                 color = '#cacdc8';
