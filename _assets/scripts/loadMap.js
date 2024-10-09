@@ -24,24 +24,48 @@ function createMap(house,road,vegetation ){
             // Créer la carte
             var map = L.map('map').setView([lat, lng], 16);
 
-            load_map(vegetation, 'green', map);
-            load_map(road, 'brown', map);
-            load_map(  house, 'red', map);
+            load_map(vegetation, 'vegetation', map) // Charge la végétation
+            load_map(road, 'road', map)             // Charge les routes
+            load_map(house, 'house', map)            // Charge les maisons
+
+
         })
 }
-function style(color) {
+function style(feature,type) {
+    let color;
+    if (type === 'vegetation') {
+        // Coloration en fonction du type de végétation
+        switch (feature.properties.Type) {
+            case "Sol nu":
+                color = '#e9c597';
+                break;
+            case "Herbe":
+                color = '#5e8c4b';
+                break;
+            case "Végétation basse":
+                color = '#bceba9';
+                break;
+            default:
+                color = '#cacdc8';
+        }
+    } else if (type === 'house') {
+        color = '#e4a0b5';
+    } else if (type === 'road') {
+        color = '#614105';
+    }
+
     return {
         color: color,
         weight: 2,
         fillColor: color,
-        fillOpacity: 0.5
+        fillOpacity: 1
     };
 }
 
-function load_map(element, color, map) {
+function load_map(element, type, map) {
     //API JavaScript fetch recupere des ressources
-    fetch(element)
-   // possibilité d'une valeur
+    return fetch(element)
+        // possibilité d'une valeur
         .then(response => {
             //false si requete a échoué
             if (!response.ok) {
@@ -52,7 +76,7 @@ function load_map(element, color, map) {
         })
         .then(data => {
             L.geoJSON(data, {
-                style: style(color)
+                style: (feature) => style(feature,type)
             }).addTo(map); // Ajouter la couche
         })
         .catch(error => {
