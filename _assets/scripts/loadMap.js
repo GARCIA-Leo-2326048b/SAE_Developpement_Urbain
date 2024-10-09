@@ -23,12 +23,15 @@ function createMap(house,road,vegetation ){
             const lng = firstHouse[0]; // Longitude
             // Créer la carte
             var map = L.map('map').setView([lat, lng], 16);
-
+            // Ajouter le fond de carte OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19,
+            }).addTo(map);
+            // Charge la végétation
             load_map(vegetation, 'vegetation', map)
                 .then(() => load_map(road, 'road', map))
                 .then(() => load_map(house, 'house', map));
-
-
         })
 }
 function style(feature,type) {
@@ -40,25 +43,25 @@ function style(feature,type) {
                 color = '#efb974';
                 break;
             case "Herbe":
-                color = '#496e3a';
+                color = '#52cd20';
                 break;
             case "Végétation basse":
-                color = '#a4d88c';
+                color = '#f0ede7';
                 break;
             case "Végétation haute":
-                color = '#87dc65';
+                color = '#accf9d';
                 break;
             case "Culture":
                 color = '#e2e900';
                 break;
             case "Habitation":
-                color = '#8f1c1c';
+                color = '#f7b19b';
                 break;
             case "Eau":
-                color = '#0980bc';
+                color = '#a9d1dd';
                 break;
             default:
-                color = '#cacdc8';
+                color = '#dedddd';
         }
     } else if (type === 'house') {
         color = '#e4a0b5';
@@ -69,6 +72,7 @@ function style(feature,type) {
     return {
         color: color,
         weight: 2,
+
         fillColor: color,
         fillOpacity: 1
     };
