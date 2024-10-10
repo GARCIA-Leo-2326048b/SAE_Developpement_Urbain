@@ -8,21 +8,21 @@ class HomepageView {
         <main>
             <h3>Ceci est la page d'accueil</h3>
             <h3>salut</h3>
-            <div>
-                <?php
-                if(isset($_SESSION['suid'])) {
-                    ?>
-                    <a href="?action=logout" >
-                        Se déconnecter</a>
-                    <?php
-                } else {
-                    ?>
-                    <a href="?action=authentification" >
-                        Se connecter</a>
-                    <?php
-                }
-                ?>
-            </div>
+<!--            <div>-->
+<!--                --><?php
+//                if(isset($_SESSION['suid'])) {
+//                    ?>
+<!--                    <a href="?action=logout" >-->
+<!--                        Se déconnecter</a>-->
+<!--                    --><?php
+//                } else {
+//                    ?>
+<!--                    <a href="?action=authentification" >-->
+<!--                        Se connecter</a>-->
+<!--                    --><?php
+//                }
+//                ?>
+<!--            </div>-->
             <section id="">
                 <h2>Importer un fichier Shapefile ou Raster</h2>
                 <script>
