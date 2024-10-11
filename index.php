@@ -1,7 +1,7 @@
 <?php
-require 'modules/blog/controllers/HomepageController.php';
-require  'modules/blog/controllers/Upload.php';
-require 'modules/blog/controllers/AffichageController.php';
+
+require __DIR__ . '/vendor/autoload.php';
+
 session_start();
 
 
