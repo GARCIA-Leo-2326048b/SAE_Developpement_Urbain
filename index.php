@@ -1,7 +1,10 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-
+//require __DIR__ . '/vendor/autoload.php';
+require 'modules/blog/controllers/AffichageController.php';
+require 'modules/blog/controllers/AuthentificationController.php';
+require 'modules/blog/controllers/HomepageController.php';
+require 'modules/blog/controllers/Upload.php';
 session_start();
 
 
@@ -15,18 +18,18 @@ try {
             case 'affichage':
                 (new blog\controllers\AffichageController())->execute();
                 break;
-//            case 'authentification':
-//                (new blog\controllers\AuthentificationController())->execute();
-//                break;
-//            case 'login':
-//                (new blog\controllers\AuthentificationController())->connexion();
-//                break;
+            case 'authentification':
+                (new blog\controllers\AuthentificationController())->execute();
+                break;
+            case 'login':
+                (new blog\controllers\AuthentificationController())->connexion();
+                break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();
                 break;
-//            case 'logout':
-//                (new blog\controllers\AuthentificationController())->deconnexion();
-//                break;
+            case 'logout':
+                (new blog\controllers\AuthentificationController())->deconnexion();
+                break;
             default:
                 (new blog\controllers\HomepageController())->execute();
         }
