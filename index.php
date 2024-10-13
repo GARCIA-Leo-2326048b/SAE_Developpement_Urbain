@@ -1,10 +1,10 @@
 <?php
 
-//require __DIR__ . '/vendor/autoload.php';
-require 'modules/blog/controllers/AffichageController.php';
-require 'modules/blog/controllers/AuthentificationController.php';
-require 'modules/blog/controllers/HomepageController.php';
-require 'modules/blog/controllers/Upload.php';
+require __DIR__ . '/vendor/autoload.php';
+//require 'modules/blog/controllers/AffichageController.php';
+//require 'modules/blog/controllers/AuthentificationController.php';
+//require 'modules/blog/controllers/HomepageController.php';
+//require 'modules/blog/controllers/Upload.php';
 session_start();
 
 
