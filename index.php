@@ -1,6 +1,5 @@
 <?php
 require 'modules/blog/controllers/HomepageController.php';
-require 'modules/blog/controllers/AuthentificationController.php';
 require  'modules/blog/controllers/Upload.php';
 
 
@@ -17,17 +16,8 @@ try {
                 break;
             case 'affichage':
                 (new blog\controllers\AffichageController())->execute();
-            case 'authentification':
-                (new blog\controllers\AuthentificationController())->execute();
-                break;
-            case 'login':
-                (new blog\controllers\AuthentificationController())->connexion();
-                break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();
-                break;
-            case 'logout':
-                (new blog\controllers\AuthentificationController())->deconnexion();
                 break;
             default:
                 (new blog\controllers\HomepageController())->execute();

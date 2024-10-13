@@ -67,3 +67,31 @@ footer p {
     margin: 0;
     font-size: 0.9rem;
 }
+#import{
+    display:flex;
+}
+section#import button {
+    padding: 1em;
+    margin: 1em;
+    background-color: darkgray;
+    color: white;
+    border-radius: 5em;
+    font-family: cursive;
+}
+section#import button:hover {
+    background-color: white;
+    color: black;
+    box-shadow: 0 0 50px 5px;
+}
+.importform {
+    margin: 1em;
+    align-self: center;
+    align-items: center;
+}
+input[type="submit"] {
+    padding: 1em;
+    border-radius: 5em;
+    font-family: cursive;
+    color: white;
+    background-color: slategray;
+}

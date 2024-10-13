@@ -23,8 +23,7 @@ class HomepageView {
                 }
                 ?>
             </div>
-            <section id="">
-                <h2>Importer un fichier Shapefile ou Raster</h2>
+            <section id="import">
                 <script>
                     // Fonction pour afficher le formulaire correspondant à l'option choisie
                     function showForm(type) {
@@ -40,7 +39,7 @@ class HomepageView {
                 <!-- Boutons pour choisir le type de fichier -->
                 <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
                 <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
-
+            </section>
                 <!-- Formulaire pour les fichiers Shapefile (Vecteur) -->
                 <form id="vectorForm" action="?action=upload" method="POST" enctype="multipart/form-data" style="display: none;">
                     <h2>Téléchargement de Shapefile</h2>
@@ -58,7 +57,6 @@ class HomepageView {
                     <br><br>
                     <input type="submit" value="Télécharger">
                 </form>
-            </section>
         </main>
 <?php
         (new GlobalLayout('Accueil', ob_get_clean()))->show();
