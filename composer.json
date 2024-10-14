@@ -1,5 +1,10 @@
 {
     "require-dev": {
         "phayes/geophp": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "blog\\": ["modules/blog/controllers", "modules/blog/models", "modules/blog/views"]
+        }
     }
 }
