@@ -25,7 +25,7 @@ class GlobalLayout
 
         <header>
             <div class="titre">
-                <h1>Le Titre</h1>
+                <h1>Simulation MAS</h1>
             </div>
             <section id="header">
                 <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a> <a href="">Contact</a>
