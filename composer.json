@@ -4,7 +4,12 @@
     },
     "autoload": {
         "psr-4": {
-            "blog\\": ["modules/blog/controllers", "modules/blog/models", "modules/blog/views"]
+            "blog\\": "modules/blog/"
         }
-    }
+    },
+  "require": {
+    "ext-pdo": "*",
+    "ext-curl": "*",
+    "ext-zip": "*"
+  }
 }
