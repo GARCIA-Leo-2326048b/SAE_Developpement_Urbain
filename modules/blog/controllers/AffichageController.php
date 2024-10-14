@@ -2,8 +2,6 @@
 
 namespace blog\controllers;
 use blog\views\AffichageView;
-require_once 'modules/blog/views/AffichageView.php';
-
 class AffichageController
 {
     private $carte;

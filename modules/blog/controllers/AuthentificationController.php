@@ -2,8 +2,6 @@
 namespace blog\controllers;
 use blog\models\AuthentificationModel;
 use blog\views\AuthentificationView;
-require_once 'modules/blog/models/AuthentificationModel.php';
-require_once 'modules/blog/views/AuthentificationView.php';
 class AuthentificationController {
     private $userModel; // sert à stocker l'instance du modèle
     private $view; // stocke l'instance de la vue
