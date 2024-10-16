@@ -28,7 +28,7 @@ class GlobalLayout
                 <h1>Simulation MAS</h1>
             </div>
             <section id="header">
-                <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a> <a href="?action=affichageTiff">Affichage Tiff</a>
+                <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a><a href="?action=compare">Comparer</a> <a href="?action=affichageTiff">Affichage Tiff</a>
             </section>
         </header>
 
