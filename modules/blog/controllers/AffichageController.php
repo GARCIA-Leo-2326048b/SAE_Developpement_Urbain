@@ -2,23 +2,26 @@
 
 namespace blog\controllers;
 use blog\views\AffichageView;
-require_once 'modules/blog/views/AffichageView.php';
-
+use blog\models\GeoJsonModel;
 class AffichageController
 {
-    private $carte;
 
+    private $view;
+    private $model;
     public function __construct()
     {
-        $this->carte = new AffichageView();
+        $this->view = new AffichageView();
+        $this->model=new GeoJsonModel();
     }
 
     public function execute()
     {
-        $house = '/_assets/utils/Household_3-2019.geojson';
-        $road = '/_assets/utils/Road_3-2019.geojson';
-        $vegetation = '/_assets/utils/Vegetation.geojson';
 
-        $this->carte->show($house,$road,$vegetation);
+        $house = $this->model->fetchGeoJson('1');
+
+        $road = $this->model->fetchGeoJson('2');
+        $vegetation = $this->model->fetchGeoJson('3');
+
+        $this->view->show($house,$road,$vegetation);
     }
 }

@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1094c339e9568d4d0d1b270c9eeefbaa42ab29e1',
+        'reference' => 'f79310e04fa16ed8fb84d8936effdaaeddde4b09',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1094c339e9568d4d0d1b270c9eeefbaa42ab29e1',
+            'reference' => 'f79310e04fa16ed8fb84d8936effdaaeddde4b09',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -26,7 +26,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../phayes/geophp',
             'aliases' => array(),
-            'dev_requirement' => true,
+            'dev_requirement' => false,
         ),
     ),
 );

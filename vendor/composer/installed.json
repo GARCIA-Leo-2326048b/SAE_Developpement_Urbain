@@ -45,7 +45,5 @@
         }
     ],
     "dev": true,
-    "dev-package-names": [
-        "phayes/geophp"
-    ]
+    "dev-package-names": []
 }

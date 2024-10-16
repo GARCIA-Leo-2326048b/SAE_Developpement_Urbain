@@ -1,5 +1,15 @@
 {
     "require-dev": {
         "phayes/geophp": "^1.2"
-    }
+    },
+    "autoload": {
+        "psr-4": {
+            "blog\\": "modules/blog/"
+        }
+    },
+  "require": {
+    "ext-pdo": "*",
+    "ext-curl": "*",
+    "ext-zip": "*"
+  }
 }

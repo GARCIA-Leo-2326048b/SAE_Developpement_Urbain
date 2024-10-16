@@ -4,9 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3759f6c1c073fb9064bf20967b536986",
-    "packages": [],
-    "packages-dev": [
+    "content-hash": "05309a6afd2fe3422264340d7180af8a",
+    "packages": [
         {
             "name": "phayes/geophp",
             "version": "1.2",
@@ -48,6 +47,7 @@
             "time": "2014-12-02T06:11:22+00:00"
         }
     ],
+    "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],

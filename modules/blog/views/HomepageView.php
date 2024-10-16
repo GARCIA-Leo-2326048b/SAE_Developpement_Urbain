@@ -1,6 +1,5 @@
 <?php
 namespace blog\views;
-require_once 'GlobalLayout.php';
 class HomepageView {
 
     function show() : void {
