@@ -32,7 +32,7 @@ class ComparaisonController{
         ]);
     }
 
-
+//a
     private function loadGeoJson($geoJsonData) {
         $geometry = GeoPHP::load($geoJsonData, 'json');
         if (!$geometry) {
