@@ -6,19 +6,16 @@ class HomepageView {
     function show() : void {
         ob_start();?>
         <main>
-            <h3>Ceci est la page d'accueil</h3>
-            <h3>salut</h3>
+            <h3>Début de la Simulation</h3>
             <div>
                 <?php
                 if(isset($_SESSION['suid'])) {
                     ?>
-                    <a href="?action=logout" >
-                        Se déconnecter</a>
+                    <a href="?action=logout">Se déconnecter</a>
                     <?php
                 } else {
                     ?>
-                    <a href="?action=authentification" >
-                        Se connecter</a>
+                    <a href="?action=authentification">Se connecter</a>
                     <?php
                 }
                 ?>

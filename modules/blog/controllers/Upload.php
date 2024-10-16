@@ -4,9 +4,25 @@ namespace blog\controllers;
 
 use \CURLFile;
 use \ZipArchive;
+use _assets\config\Database;
+use blog\models\UploadModel;
 
 class Upload
 {
+   private $db;
+   private $uploadModel;
+
+    public function __construct()
+{
+    // Inclure les fichiers nécessaires
+    require_once __DIR__ . '/../../../_assets/config/Database.php';
+    require_once __DIR__ . '/../models/UploadModel.php';
+
+    // Initialiser la connexion à la base de données
+    $database = new Database();
+    $this->db = $database->getConnection();
+    $this->uploadModel = new UploadModel($this->db);
+}
     public function telechargement()
     {
 
@@ -34,7 +50,7 @@ class Upload
             // Parcourir tous les fichiers téléchargés
             foreach ($files['name'] as $key => $name) {
                 $fileTmpPath = $files['tmp_name'][$key];
-                $fileExtension = pathinfo($name, PATHINFO_EXTENSION);
+                $fileExtension =  strtolower(pathinfo($name, PATHINFO_EXTENSION));
 
                 // Vérifiez si l'extension est dans la liste des fichiers requis
                 if (in_array($fileExtension, $requiredExtensions)) {
