@@ -1,6 +1,8 @@
 {
     "require-dev": {
-        "phayes/geophp": "^1.2"
+        "phayes/geophp": "^1.2",
+        "amenadiel/jpgraph": "^4.1.1"
+
     },
     "autoload": {
         "psr-4": {
@@ -11,7 +13,6 @@
   "require": {
     "ext-pdo": "*",
     "ext-curl": "*",
-    "ext-zip": "*",
-        "amenadiel/jpgraph": "^4.1.1"
+    "ext-zip": "*"
   }
 }
