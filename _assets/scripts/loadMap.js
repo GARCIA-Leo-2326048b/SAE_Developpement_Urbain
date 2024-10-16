@@ -1,39 +1,42 @@
-// loadMap.js
 
-function createMap(house,road,vegetation ){
-    //API JavaScript fetch recupere des ressources
-    fetch(house)
-        // possibilité d'une valeur
-        .then(response => {
-            //false si requete a échoué
-            if (!response.ok) {
-                throw new Error('Erreur réseau');
-            }
-            //lit la reponse et convertit en json
-            return response.json();
-        })
-        .then(data => {
-            console.log(data); // Affichez les données pour vérifier leur structure
-            if (!data["features"] || data["features"].length === 0) {
-                throw new Error('Aucune maison trouvée dans le fichier GeoJSON');
-            }
-            //prend les coordonnees de la premiere maison
-            const firstHouse = data["features"][0]["geometry"]["coordinates"][0][0];
-            const lat = firstHouse[1]; // Latitude
-            const lng = firstHouse[0]; // Longitude
-            // Créer la carte
-            var map = L.map('map').setView([lat, lng], 16);
-            // Ajouter le fond de carte OpenStreetMap
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19,
-            }).addTo(map);
-            // Charge la végétation
-            load_map(vegetation, 'vegetation', map)
-                .then(() => load_map(road, 'road', map))
-                .then(() => load_map(house, 'house', map));
-        })
+function createMap(house=null,road=null,vegetation=null){
+    //prend les coordonnees de la premiere maison
+    const firstHouseCoordinates = house.features[0].geometry.coordinates[0][0];
+    var lat = firstHouseCoordinates[1];
+    var lng = firstHouseCoordinates[0];
+    // Créer la carte
+    var map = L.map('map').setView([lat, lng], 16);
+    // Ajouter le fond de carte OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+    }).addTo(map);
+    // Si des données GeoJSON pour les maisons existent, les ajouter à la carte
+    if (house) {
+        L.geoJSON(house, {
+            style: (feature) => style(feature, 'house') // Appliquer un style aux maisons
+        }).addTo(map);
+    }
+
+    // Si des données GeoJSON pour les routes existent, les ajouter à la carte
+    if (road) {
+        L.geoJSON(road, {
+            style: (feature) => style(feature, 'road') // Appliquer un style aux routes
+        }).addTo(map);
+    }
+
+    // Si des données GeoJSON pour la végétation existent, les ajouter à la carte avec un style spécifique
+    if (vegetation) {
+        L.geoJSON(vegetation, {
+            style: (feature) => style(feature, 'vegetation') // Appliquer un style à la végétation
+        }).addTo(map);
+    }
+    // Optionnel : Ajuster les limites de la carte en fonction des couches chargées
+    var bounds = L.featureGroup([L.geoJSON(house), L.geoJSON(road), L.geoJSON(vegetation)]).getBounds();
+    map.fitBounds(bounds);
+
 }
+
 function style(feature,type) {
     let color;
     if (type === 'vegetation') {
@@ -76,26 +79,4 @@ function style(feature,type) {
         fillColor: color,
         fillOpacity: 1
     };
-}
-
-function load_map(element, type, map) {
-    //API JavaScript fetch recupere des ressources
-    return fetch(element)
-        // possibilité d'une valeur
-        .then(response => {
-            //false si requete a échoué
-            if (!response.ok) {
-                throw new Error('Erreur réseau');
-            }
-            //lit la reponse et convertit en json
-            return response.json();
-        })
-        .then(data => {
-            L.geoJSON(data, {
-                style: (feature) => style(feature,type)
-            }).addTo(map); // Ajouter la couche
-        })
-        .catch(error => {
-            console.error('Erreur lors du chargement du GeoJSON:', error);
-        });
 }
