@@ -17,9 +17,9 @@ class AffichageController
     public function execute()
     {
 
-        $house = $this->model->fetchGeoJson('1');
+        $house = $this->model->fetchGeoJson('Household_3-2019.geojson');
 
-        $road = $this->model->fetchGeoJson('2');
+        $road = $this->model->fetchGeoJson('Road_3-2019.geojson');
         $vegetation = $this->model->fetchGeoJson('3');
 
         $this->view->show($house,$road,$vegetation);
