@@ -4,12 +4,14 @@
     },
     "autoload": {
         "psr-4": {
-            "blog\\": "modules/blog/"
+            "blog\\": "modules/blog/",
+            "_assets\\config\\": "_assets/config/"
         }
     },
   "require": {
     "ext-pdo": "*",
     "ext-curl": "*",
-    "ext-zip": "*"
+    "ext-zip": "*",
+        "amenadiel/jpgraph": "^4.1.1"
   }
 }
