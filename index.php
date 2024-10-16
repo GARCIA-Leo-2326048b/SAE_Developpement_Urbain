@@ -15,6 +15,9 @@ try {
             case 'affichage':
                 (new blog\controllers\AffichageController())->execute();
                 break;
+            case 'compare':
+                (new blog\controllers\ComparaisonController())->compare();
+                break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;

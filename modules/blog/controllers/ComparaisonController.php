@@ -1,63 +1,61 @@
 <?php
 
 namespace blog\controllers;
-use GeoPHP;
+use blog\models\GeoJsonModel;
+use blog\views\ComparaisonView;
+use geoPHP;
 
 class ComparaisonController{
-    public function CompareVec($polygoneSim, $polygoneVer){
 
-        // Charger les GeoJSON
-        $geometrieSim = GeoPHP::load($polygoneSim, 'json');
-        $geometrieVer = GeoPHP::load($polygoneVer, 'json');
-
-
-        // PARTIE SIMULATION
-
-
-        // initialisser l'aire totale et le nombre de maisons de la simulation
-        $airettlSim = 0;
-        $nbmaisonSim = 0;
-
-        // calculer l'aire totale et le nombre de maisons de la simulation
-        foreach ($geometrieSim->getComponents() as $maisonSim) {
-            if ($maisonSim->geometryType() === 'Polygon') {
-                $airettlSim += $maisonSim->area();
-                $nbmaisonSim++;
-            }
-        }
-
-        // Calculer l'aire moyenne des maisons de la simulation
-        if ($nbmaisonSim > 0) {
-            $airemoySim = $airettlSim / $nbmaisonSim;
-            echo "Aire moyenne des maisons dans la simulation: " . $airemoySim;
-        } else {
-            echo "Le fichier GeoJSON n'a pas été détecté ou ne contient pas de polygones";
-        }
+    private $view;
+    private $model;
+    public function __construct()
+    {
+        $this->view = new ComparaisonView();
+        $this->model=new GeoJsonModel();
+    }
+    public function compare(){
 
 
-        // PARTIE VERITE TERRAIN
+        $polygonSim = $this->model->fetchGeoJson(1);
+        $polygonVer = $this->model->fetchGeoJson(3);
 
+        $geometrySim = $this->loadGeoJson($polygonSim);
+        $geometryVer = $this->loadGeoJson($polygonVer);
 
-        // initialisser l'aire totale et le nombre de maisons de la vérité terrain
-        $airettlVer = 0;
-        $nbmaisonVer = 0;
+        $avgAreaSim = $this->getAverageArea($geometrySim);
+        $avgAreaVer = $this->getAverageArea($geometryVer);
 
-        // calculer l'aire totale et le nombre de maisons de la vérité terrain
-        foreach ($geometrieVer->getComponents() as $maisonVer) {
-            if ($maisonVer->geometryType() === 'Polygon') {
-                $airettlVer += $maisonVer->area();
-                $nbmaisonVer++;
-            }
-        }
-
-        // Calculer l'aire moyenne des maisons de la vérité terrain
-        if ($nbmaisonVer > 0) {
-            $airemoyVer = $airettlVer / $nbmaisonVer;
-            echo "Aire moyenne des maisons dans la vérité terrain: " . $airemoyVer;
-        } else {
-            echo "Le fichier GeoJSON n'a pas été détecté ou ne contient pas de polygones";
-        }
-
+        $this->view->showComparison([
+            'avgAreaSim' => $avgAreaSim,
+            'avgAreaVer' => $avgAreaVer
+        ]);
     }
 
+
+    private function loadGeoJson($geoJsonData) {
+        $geometry = GeoPHP::load($geoJsonData, 'json');
+        if (!$geometry) {
+            throw new \Exception("The GeoJSON file could not be loaded.");
+        }
+        return $geometry;
+    }
+
+
+    private function getAverageArea($geometry) {
+        $totalArea = 0;
+        $numHouses = 0;
+        foreach ($geometry->getComponents() as $component) {
+            if ($component->geometryType() === 'Polygon') {
+                $totalArea += $component->area();
+                $numHouses++;
+            }
+        }
+        if ($numHouses > 0) {
+            $averageArea = $totalArea / $numHouses;
+        } else {
+            $averageArea = 0;
+        }
+        return $averageArea;
+    }
 }
