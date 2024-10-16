@@ -17,8 +17,8 @@ class ComparaisonController{
     public function compare(){
 
 
-        $polygonSim = $this->model->fetchGeoJson(1);
-        $polygonVer = $this->model->fetchGeoJson(3);
+        $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
+        $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM');
 
         $geometrySim = $this->loadGeoJson($polygonSim);
         $geometryVer = $this->loadGeoJson($polygonVer);
