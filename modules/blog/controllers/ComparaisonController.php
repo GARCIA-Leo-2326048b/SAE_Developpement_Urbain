@@ -23,12 +23,12 @@ class ComparaisonController{
         $geometrySim = $this->loadGeoJson($polygonSim);
         $geometryVer = $this->loadGeoJson($polygonVer);
 
-        $avgAreaSim = $this->getAverageArea($geometrySim);
-        $avgAreaVer = $this->getAverageArea($geometryVer);
+        $areaStatsSim = $this->getAreaStat($geometrySim);
+        $areaStatsVer = $this->getAreaStat($geometryVer);
 
         $this->view->showComparison([
-            'avgAreaSim' => $avgAreaSim,
-            'avgAreaVer' => $avgAreaVer
+            'sim' => $areaStatsSim,
+            'ver' => $areaStatsVer
         ]);
     }
 
@@ -42,20 +42,36 @@ class ComparaisonController{
     }
 
 
-    private function getAverageArea($geometry) {
-        $totalArea = 0;
-        $numHouses = 0;
+    private function getAreaStat($geometry) {
+        $areas = [];
+        //on rentre les aires de tous les batiments dans un tableau
         foreach ($geometry->getComponents() as $component) {
             if ($component->geometryType() === 'Polygon') {
-                $totalArea += $component->area();
-                $numHouses++;
+                $areas[]=$component->area();
             }
         }
-        if ($numHouses > 0) {
-            $averageArea = $totalArea / $numHouses;
+        if (count($areas) > 0) {
+            $mean = array_sum($areas)/count($areas);//moyenne des aires
+            $min = min($areas);//aire minimum
+            $max = max($areas);//aire maximum
+            $std = $this->calculateStandardDeviation($areas,$mean);//ecart-type
         } else {
-            $averageArea = 0;
+            $mean =$max=$min=$std= 0;
         }
-        return $averageArea;
+        return [
+            'mean' => $mean,
+            'min' => $min,
+            'max' => $max,
+            'std' => $std
+        ];
+    }
+
+    private function calculateStandardDeviation($areas, $mean) {
+        $sum = 0;
+        foreach ($areas as $area) {
+            $sum += pow($area - $mean, 2); // Calcul de l'écart à la moyenne au carré
+        }
+        $variance = $sum / count($areas);  // Calcul de la variance
+        return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
     }
 }
