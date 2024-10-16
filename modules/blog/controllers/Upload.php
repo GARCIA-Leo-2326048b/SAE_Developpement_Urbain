@@ -2,95 +2,144 @@
 
 namespace blog\controllers;
 
-use \CURLFile;
-use \ZipArchive;
+use CURLFile;
+use ZipArchive;
 use _assets\config\Database;
 use blog\models\UploadModel;
 
 class Upload
 {
-   private $db;
-   private $uploadModel;
+    private $db;
+    private $uploadModel;
+    private $currentUserId; // ID de l'utilisateur connecté
 
     public function __construct()
-{
-    // Inclure les fichiers nécessaires
-    require_once __DIR__ . '/../../../_assets/config/Database.php';
-    require_once __DIR__ . '/../models/UploadModel.php';
-
-    // Initialiser la connexion à la base de données
-    $database = new Database();
-    $this->db = $database->getConnection();
-    $this->uploadModel = new UploadModel($this->db);
-}
-    public function telechargement()
     {
+        // Initialiser la connexion à la base de données
+        $database = new Database();
+        $this->db = $database->getConnection();
+        $this->uploadModel = new UploadModel($this->db);
 
-        // Gestion des fichiers Shapefile (Vecteur)
-        if (isset($_FILES['shapefile'])) {
-            $this->handleShapefileUpload();
-        } // Gestion des fichiers Raster
-        elseif (isset($_FILES['rasterfile'])) {
-            $this->handleRasterUpload();
+        // Vérifier l'authentification
+        if (isset($_SESSION['user_id'])) {
+            $this->currentUserId = $_SESSION['user_id'];
         } else {
-            echo "Aucun fichier n'a été téléchargé.";
+            // Rediriger vers la page de connexion
+            header("Location: index.php?action=authentification");
+            exit();
         }
     }
 
-
-        // On telecharge des Shapefile
-        public function handleShapefileUpload()
-        {
-            $files = $_FILES['shapefile'];
-            $requiredExtensions = ['shp', 'shx', 'dbf']; // Extensions requises
-            $uploadedFiles = [];
-
-            $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
-
-            // Parcourir tous les fichiers téléchargés
-            foreach ($files['name'] as $key => $name) {
-                $fileTmpPath = $files['tmp_name'][$key];
-                $fileExtension =  strtolower(pathinfo($name, PATHINFO_EXTENSION));
-
-                // Vérifiez si l'extension est dans la liste des fichiers requis
-                if (in_array($fileExtension, $requiredExtensions)) {
-                    $uploadFilePath = $uploadDir . basename($name);
-
-                    // Déplacez chaque fichier dans le répertoire de destination
-                    if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
-                        echo "Le fichier $name a été téléchargé avec succès.<br>";
-                        $uploadedFiles[$fileExtension] = $uploadFilePath;
-                    } else {
-                        echo "Erreur lors du téléchargement de $name.<br>";
-                    }
-                } else {
-                    echo "Fichier $name non valide. Extensions valides : .shp, .shx, .dbf<br>";
-                }
+    public function telechargement()
+    {
+        try {
+            // Gestion des fichiers Shapefile (Vecteur)
+            if (isset($_FILES['shapefile'])) {
+                $this->handleShapefileUpload();
             }
+            // Gestion des fichiers Raster
+            elseif (isset($_FILES['rasterfile'])) {
+                $this->handleRasterUpload();
+            } else {
+                echo "Aucun fichier n'a été téléchargé.";
+            }
+        } catch (\Exception $e) {
+            echo "Erreur: " . htmlspecialchars($e->getMessage());
+        }
+    }
 
-            // Vérifiez que tous les fichiers requis (.shp, .shx, .dbf) sont présents
-            if (count($uploadedFiles) === count($requiredExtensions)) {
-                // Créer un fichier ZIP avec les fichiers téléchargés
-                $zipFilePath = $this->createZipFile($uploadedFiles);
-                if ($zipFilePath) {
-                    // Envoyer le fichier ZIP à l'API OGRE
-                    $this->convertShapefileToGeoJSON($zipFilePath);
+    // Gérer l'upload des Shapefiles
+    public function handleShapefileUpload()
+    {
+        $files = $_FILES['shapefile'];
+        $requiredExtensions = ['shp', 'shx', 'dbf']; // Extensions requises
+        $uploadedFiles = [];
+        $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
+
+        // Récupérer le nom de fichier personnalisé
+        if (isset($_POST['shapefile_name']) && !empty(trim($_POST['shapefile_name']))) {
+            $customName = trim($_POST['shapefile_name']);
+            // Sanitize the custom name to prevent security issues
+            $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+            if (empty($customName)) {
+                throw new \Exception("Nom de fichier invalide.");
+            }
+        } else {
+            throw new \Exception("Veuillez spécifier un nom de fichier.");
+        }
+
+        // Vérifier si le dossier est accessible en écriture
+        if (!is_writable($uploadDir)) {
+            throw new \Exception("Le dossier de destination n'est pas accessible en écriture.");
+        }
+
+        // Vérifier le nombre de fichiers uploadés
+        if (count($files['name']) > count($requiredExtensions)) {
+            throw new \Exception("Vous ne pouvez pas télécharger plus de " . count($requiredExtensions) . " fichiers shapefile à la fois.");
+        }
+
+        // Parcourir tous les fichiers téléchargés
+        foreach ($files['name'] as $key => $name) {
+            $fileTmpPath = $files['tmp_name'][$key];
+            $fileExtension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+            // Vérifiez si l'extension est dans la liste des fichiers requis
+            if (in_array($fileExtension, $requiredExtensions)) {
+                $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
+
+                // Vérifier si le fichier existe déjà pour éviter les conflits
+                if (file_exists($uploadFilePath)) {
+                    throw new \Exception("Le fichier " . htmlspecialchars($customName . '.' . $fileExtension) . " existe déjà.");
+                }
+
+                // Déplacer chaque fichier dans le répertoire de destination
+                if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
+                    $uploadedFiles[$fileExtension] = $uploadFilePath;
                 } else {
-                    echo "Erreur lors de la création du fichier ZIP.";
+                    throw new \Exception("Erreur lors du téléchargement de " . htmlspecialchars($customName . '.' . $fileExtension) . ".");
                 }
             } else {
-                echo "Tous les fichiers requis (.shp, .shx, .dbf) ne sont pas présents.<br>";
+                throw new \Exception("Fichier " . htmlspecialchars($name) . " non valide. Extensions valides : .shp, .shx, .dbf");
             }
-        } //else {
-         //   echo "Aucun fichier n'a été téléchargé.<br>";
-      //  }
-  //  }
+        }
 
-    // Fonction pour compresser les fichiers shapefiles dans un fichier ZIP
-    private function createZipFile($files)
+        // Vérifier que tous les fichiers requis (.shp, .shx, .dbf) sont présents
+        foreach ($requiredExtensions as $ext) {
+            if (!isset($uploadedFiles[$ext])) {
+                throw new \Exception("Le fichier ." . $ext . " est manquant.");
+            }
+        }
+
+        // Vérifier que les shapefiles ont le même système de référence
+        if (!$this->uploadModel->verifyShapefileReferenceSystems($uploadedFiles)) {
+            throw new \Exception("Les shapefiles ont des systèmes de référence différents.");
+        }
+
+        // Créer un fichier ZIP avec les fichiers téléchargés
+        $zipFilePath = $this->createZipFile($uploadedFiles, $customName);
+        if ($zipFilePath) {
+            // Envoyer le fichier ZIP à l'API OGRE
+            $geojsonFilePath = $this->convertShapefileToGeoJSON($zipFilePath, $customName);
+
+            // Enregistrer le GeoJSON dans la base de données
+            if ($geojsonFilePath) {
+                $geojsonFileName = basename($geojsonFilePath);
+                $geojsonContent = file_get_contents($geojsonFilePath);
+                $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId);
+                header("Location: index.php?action=new_simulation");
+
+            }
+        } else {
+            throw new \Exception("Erreur lors de la création du fichier ZIP.");
+        }
+    }
+
+    // Fonction pour compresser les shapefiles dans un fichier ZIP
+    private function createZipFile($files, $customName)
     {
         $zip = new ZipArchive();
-        $zipFilePath = __DIR__ . '/../../../assets/shapefile/shapefile.zip';
+        $zipFileName = $customName . '_shapefile_' . time() . '.zip';
+        $zipFilePath = __DIR__ . '/../../../assets/shapefile/' . $zipFileName;
 
         if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
             foreach ($files as $file) {
@@ -103,14 +152,15 @@ class Upload
         }
     }
 
-    // Fonction pour appeler l'API OGRE pour convertir le fichier
-    private function convertShapefileToGeoJSON($zipFilePath)
+    // Fonction pour convertir les shapefiles en GeoJSON via l'API OGRE
+    private function convertShapefileToGeoJSON($zipFilePath, $customName)
     {
         // URL de l'API OGRE pour la conversion
         $apiUrl = "https://ogre.adc4gis.com/convert";
 
         // Chemin de sortie pour le fichier GeoJSON
-        $geojsonFilePath = __DIR__ . '/../../../assets/shapefile/' . pathinfo($zipFilePath, PATHINFO_FILENAME) . '.geojson';
+        $geojsonFileName = $customName . '.geojson';
+        $geojsonFilePath = __DIR__ . '/../../../assets/shapefile/' . $geojsonFileName;
 
         // Utiliser curl pour faire une requête POST vers l'API
         $ch = curl_init();
@@ -131,9 +181,7 @@ class Upload
 
         // Gérer les erreurs de curl
         if (curl_errno($ch)) {
-            echo "Erreur API: " . curl_error($ch);
-            curl_close($ch);
-            return;
+            throw new \Exception("Erreur API: " . curl_error($ch));
         }
 
         // Fermer la session curl
@@ -144,61 +192,93 @@ class Upload
 
         // Vérifier si le fichier GeoJSON a bien été créé
         if (file_exists($geojsonFilePath)) {
-            echo "Conversion réussie. <a href='../../../assets/shapefile/" . basename($geojsonFilePath) . "'>Télécharger le fichier GeoJSON</a>";
+            return $geojsonFilePath;
         } else {
-            echo "La conversion a échoué.";
+            throw new \Exception("La conversion a échoué.");
         }
     }
 
+    // Gérer l'upload des fichiers Raster
     public function handleRasterUpload()
     {
         $file = $_FILES['rasterfile'];
+        $uploadDir = __DIR__ . '/../../../assets/raster/'; // Dossier de destination
 
-        // Vérifiez les erreurs
-        if ($file['error'] === UPLOAD_ERR_OK) {
-            // Définissez le chemin de destination temporaire pour le fichier
-            $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier pour stocker temporairement
-
-            // Afficher le chemin du répertoire
-            echo "Upload dir: " . realpath($uploadDir) . "<br>";
-
-            $uploadFile = $uploadDir . basename($file['name']);
-
-            // Vérifiez si le dossier est accessible en écriture
-            if (!is_writable($uploadDir)) {
-                echo "Le dossier de destination n'est pas accessible en écriture.";
-                return;
-            }
-
-
-            // Déplacez le fichier téléchargé
-            if (move_uploaded_file($file['tmp_name'], $uploadFile)) {
-                echo "Le fichier raster a été téléchargé avec succès.<br>";
-
-                // Appeler l'API pour convertir le fichier Raster en GeoTIFF
-                $this->convertRasterToGeoTIFF($uploadFile);
+        try {
+            // Récupérer le nom de fichier personnalisé
+            if (isset($_POST['rasterfile_name']) && !empty(trim($_POST['rasterfile_name']))) {
+                $customName = trim($_POST['rasterfile_name']);
+                // Sanitize the custom name to prevent security issues
+                $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+                if (empty($customName)) {
+                    throw new \Exception("Nom de fichier invalide.");
+                }
             } else {
-                echo "Erreur lors du déplacement du fichier.";
+                throw new \Exception("Veuillez spécifier un nom de fichier.");
             }
-        } else {
-            echo "Erreur lors du téléchargement du fichier : " . $file['error'];
-        }
 
+            // Vérifiez les erreurs
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                throw new \Exception("Erreur lors du téléchargement du fichier : " . $this->codeToMessage($file['error']));
+            }
+
+            // Vérifier si le dossier est accessible en écriture
+            if (!is_writable($uploadDir)) {
+                throw new \Exception("Le dossier de destination n'est pas accessible en écriture.");
+            }
+
+            // Définir un nom de fichier unique avec le nom personnalisé
+            $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowedExtensions = ['tif', 'tiff', 'png', 'jpg', 'jpeg'];
+            if (!in_array($fileExtension, $allowedExtensions)) {
+                throw new \Exception("Extension de fichier non autorisée. Extensions valides : .tif, .tiff, .png, .jpg, .jpeg");
+            }
+
+            $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
+
+            // Vérifier si le fichier existe déjà pour éviter les conflits
+            if (file_exists($uploadFilePath)) {
+                throw new \Exception("Le fichier " . htmlspecialchars($customName . '.' . $fileExtension) . " existe déjà.");
+            }
+
+            // Déplacer le fichier téléchargé
+            if (!move_uploaded_file($file['tmp_name'], $uploadFilePath)) {
+                throw new \Exception("Erreur lors du déplacement du fichier.");
+            }
+
+
+            // Appeler l'API pour convertir le fichier Raster en GeoTIFF
+            $geoTiffFilePath = $this->convertRasterToGeoTIFF($uploadFilePath, $customName);
+
+            // Enregistrer le GeoTIFF dans la base de données
+            if ($geoTiffFilePath) {
+                $geoTiffFileName = basename($geoTiffFilePath);
+                $geoTiffContent = file_get_contents($geoTiffFilePath);
+                $this->uploadModel->saveUploadGT($geoTiffFileName, $geoTiffContent, $this->currentUserId);
+
+                header('Location: https://developpement-urbain.alwaysdata.net/PreparationSimulation.php');;
+            }
+        } catch (\Exception $e) {
+            echo "Erreur: " . htmlspecialchars($e->getMessage());
+        }
     }
-    private function convertRasterToGeoTIFF($rasterFilePath)
+
+    // Fonction pour convertir les fichiers Raster en GeoTIFF via l'API OGRE
+    private function convertRasterToGeoTIFF($rasterFilePath, $customName)
     {
-        // URL de l'API pour la conversion (ou changer par un service local si disponible)
-        $apiUrl = "https://ogre.adc4gis.com/convert";  // Exemple d'API, change si nécessaire
+        // URL de l'API pour la conversion
+        $apiUrl = "https://ogre.adc4gis.com/convert";
 
         // Chemin de sortie pour le fichier GeoTIFF
-        $geoTiffFilePath = __DIR__ . '/../../../assets/shapefile/' . pathinfo($rasterFilePath, PATHINFO_FILENAME) . '.tiff';
+        $geoTiffFileName = $customName . '.tiff';
+        $geoTiffFilePath = __DIR__ . '/../../../assets/raster/' . $geoTiffFileName;
 
         // Utiliser curl pour faire une requête POST vers l'API
         $ch = curl_init();
 
         // Paramètres de la requête POST avec le fichier raster
         $data = array(
-            'upload[]' => new \CURLFile($rasterFilePath, 'application/octet-stream', basename($rasterFilePath))
+            'upload[]' => new CURLFile($rasterFilePath, 'application/octet-stream', basename($rasterFilePath))
         );
 
         // Configuration de curl
@@ -212,9 +292,7 @@ class Upload
 
         // Gérer les erreurs de curl
         if (curl_errno($ch)) {
-            echo "Erreur API: " . curl_error($ch);
-            curl_close($ch);
-            return;
+            throw new \Exception("Erreur API: " . curl_error($ch));
         }
 
         // Fermer la session curl
@@ -225,9 +303,44 @@ class Upload
 
         // Vérifier si le fichier GeoTIFF a bien été créé
         if (file_exists($geoTiffFilePath)) {
-            echo "Conversion réussie. <a href='../../../assets/shapefile/" . basename($geoTiffFilePath) . "'>Télécharger le fichier GeoTIFF</a>";
+            echo "Conversion réussie. <a href='../../../assets/raster/" . htmlspecialchars(basename($geoTiffFilePath)) . "'>Télécharger le fichier GeoTIFF</a><br>";
+            return $geoTiffFilePath;
         } else {
-            echo "La conversion a échoué.";
+            throw new \Exception("La conversion a échoué.");
         }
     }
+
+    // Fonction pour traduire les codes d'erreur d'upload en messages
+    private function codeToMessage($code)
+    {
+        switch ($code) {
+            case UPLOAD_ERR_INI_SIZE:
+                $message = "Le fichier dépasse la directive upload_max_filesize dans php.ini.";
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $message = "Le fichier dépasse la directive MAX_FILE_SIZE spécifiée dans le formulaire HTML.";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $message = "Le fichier n'a été que partiellement téléchargé.";
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $message = "Aucun fichier n'a été téléchargé.";
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $message = "Manque un dossier temporaire.";
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $message = "Échec de l'écriture du fichier sur le disque.";
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $message = "Une extension PHP a arrêté le téléchargement du fichier.";
+                break;
+
+            default:
+                $message = "Erreur inconnue lors du téléchargement du fichier.";
+                break;
+        }
+        return $message;
+    }
 }
+?>

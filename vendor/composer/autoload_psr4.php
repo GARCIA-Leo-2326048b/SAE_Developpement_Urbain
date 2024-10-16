@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'blog\\' => array($baseDir . '/modules/blog'),
+    '_assets\\config\\' => array($baseDir . '/_assets/config'),
 );

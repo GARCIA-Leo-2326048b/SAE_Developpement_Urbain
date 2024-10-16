@@ -11,12 +11,20 @@ class ComposerStaticInit0c6f8a8f1b163c98dc2243c4ea3f9525
         array (
             'blog\\' => 5,
         ),
+        '_' => 
+        array (
+            '_assets\\config\\' => 15,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'blog\\' => 
         array (
             0 => __DIR__ . '/../..' . '/modules/blog',
+        ),
+        '_assets\\config\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/_assets/config',
         ),
     );
 

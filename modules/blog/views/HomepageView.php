@@ -6,53 +6,33 @@ class HomepageView {
         ob_start();?>
         <main>
             <h3>Début de la Simulation</h3>
-            <div>
+            <div  class="container">
                 <?php
                 if(isset($_SESSION['suid'])) {
                     ?>
-                    <a href="?action=logout">Se déconnecter</a>
+                    <div class="welcome-message">
+                        Bienvenue, <?php echo htmlspecialchars($_SESSION['user_id']); ?> !
+                    </div>
+                    <p>
+                        Ce projet de recherche, organisé par plusieurs universités, dont celle de la Nouvelle-Calédonie, utilise le MAS comme moyen d'intelligence artificielle pour le développement urbain. Nous visons à améliorer la planification et la gestion des espaces urbains grâce à des analyses géospatiales avancées.
+                    </p>
+                    <div class="buttons">
+                        <button onclick="location.href='?action=view_simulations'">Voir mes Simulations</button>
+                        <button onclick="location.href='?action=new_simulation'">Démarrer une Nouvelle Simulation</button>
+                    </div>
+                    <button onclick="location.href='?action=logout'">Se déconnecter</button>
                     <?php
                 } else {
                     ?>
-                    <a href="?action=authentification">Se connecter</a>
+                    <div class="container">
+                        <h2>Bienvenue sur notre plateforme de Recherche de Développement Urbain</h2>
+                        <p>Veuillez vous connecter pour accéder aux fonctionnalités de simulation et de comparaison.</p>
+                        <button onclick="location.href='?action=authentification'">Se Connecter</button>
+                    </div>
                     <?php
                 }
                 ?>
             </div>
-            <section id="import">
-                <script>
-                    // Fonction pour afficher le formulaire correspondant à l'option choisie
-                    function showForm(type) {
-                        if (type === 'vector') {
-                            document.getElementById('vectorForm').style.display = 'block';
-                            document.getElementById('rasterForm').style.display = 'none';
-                        } else if (type === 'raster') {
-                            document.getElementById('vectorForm').style.display = 'none';
-                            document.getElementById('rasterForm').style.display = 'block';
-                        }
-                    }
-                </script>
-                <!-- Boutons pour choisir le type de fichier -->
-                <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
-                <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
-            </section>
-                <!-- Formulaire pour les fichiers Shapefile (Vecteur) -->
-                <form id="vectorForm" action="?action=upload" method="POST" enctype="multipart/form-data" style="display: none;">
-                    <h2>Téléchargement de Shapefile</h2>
-                    <label for="shapefile">Sélectionnez un fichier Shapefile (.shp) :</label>
-                    <input type="file" id="shapefile" name="shapefile[]" accept=".shp,.shx,.dbf,.prj" multiple required>
-                    <br><br>
-                    <input type="submit" value="Télécharger">
-                </form>
-
-                <!-- Formulaire pour les fichiers Raster -->
-                <form id="rasterForm" action="?action=upload" method="POST" enctype="multipart/form-data" style="display: none;">
-                    <h2>Téléchargement de Raster</h2>
-                    <label for="rasterfile">Sélectionnez un fichier Raster (TIFF, PNG, etc.) :</label>
-                    <input type="file" id="rasterfile" name="rasterfile" accept=".tif,.tiff,.png,.jpg,.jpeg" required>
-                    <br><br>
-                    <input type="submit" value="Télécharger">
-                </form>
         </main>
 <?php
         (new GlobalLayout('Accueil', ob_get_clean()))->show();

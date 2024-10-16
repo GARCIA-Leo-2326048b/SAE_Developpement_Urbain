@@ -7,8 +7,8 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+    background-color: #e7e5d7;
+    color: #59481d;
     line-height: 1.6;
     padding: 0;
     margin: 0;
@@ -16,7 +16,7 @@ body {
 
 /* Stylisation du header */
 header {
-    background-color: #35424a;
+    background-color: #59481d;
     color: white;
     padding: 20px 0;
     text-align: center;
@@ -40,7 +40,41 @@ header .titre h1 {
 }
 
 #header a:hover {
-    color: #e8491d;
+    color: #957743;
+}
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 20px;
+}
+.logo svg {
+    width: 100%;
+    height: 100%;
+}
+.container {
+    text-align: center;
+    padding: 50px 20px;
+}
+.buttons {
+    margin-top: 30px;
+}
+.buttons button {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 16px;
+    background-color: #957743;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.buttons button:hover {
+    background-color: #59481d;
+}
+.welcome-message {
+    font-size: 24px;
+    margin-bottom: 20px;
 }
 
 /* Contenu principal */
@@ -54,7 +88,7 @@ header .titre h1 {
 
 /* Stylisation du footer */
 footer {
-    background-color: #35424a;
+    background-color: #557002;
     color: white;
     text-align: center;
     padding: 10px 0;
@@ -73,14 +107,14 @@ footer p {
 section#import button {
     padding: 1em;
     margin: 1em;
-    background-color: darkgray;
-    color: white;
+    background-color: #e2eba7;
+    color: #474e23;
     border-radius: 5em;
     font-family: cursive;
 }
 section#import button:hover {
-    background-color: white;
-    color: black;
+    background-color: #474e23;
+    color: #e2eba7;
     box-shadow: 0 0 50px 5px;
 }
 .importform {
@@ -93,5 +127,159 @@ input[type="submit"] {
     border-radius: 5em;
     font-family: cursive;
     color: white;
-    background-color: slategray;
+    background-color: #474e23;
+}
+/* Conteneur principal pour l'historique, les boutons et les formulaires */
+.container-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Barre de défilement pour l'historique */
+#history {
+    width: 30%;
+    background-color: #e2eba7;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    height: 500px;
+    overflow-y: auto;
+}
+
+#history h2 {
+    font-size: 1em;
+    font-family: cursive;
+    margin-bottom: 10px;
+    color: #474e23;
+}
+
+#history-files {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-file {
+    background-color: #59481d;
+    color: white;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.3s ease;
+}
+
+.history-file:hover {
+    background-color: #957743;
+}
+
+/* Section pour les boutons d'upload */
+#import {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+#import button {
+    padding: 1em;
+    margin: 1em;
+    background-color: #e2eba7;
+    color: #474e23;
+    border-radius: 5em;
+    font-family: cursive;
+}
+
+#import button:hover {
+    background-color: #474e23;
+    color: #e2eba7;
+    box-shadow: 0 0 50px 5px;
+}
+
+/* Style des formulaires */
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px 0;
+}
+
+form input[type="text"], form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    padding: 1em;
+    border-radius: 5em;
+    font-family: cursive;
+    color: white;
+    background-color: #474e23;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #957743;
+}
+
+/* Pop-up */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: #e2eba7;
+    padding: 5em;
+    margin: 10em;
+    border-radius: 2em;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.popup h2 {
+    color: #474e23;
+}
+
+.popup-button {
+    background-color: #957743;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-button:hover {
+    background-color: #59481d;
+}
+
+.popup-close {
+    background-color: #474e23;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background-color: #957743;
 }

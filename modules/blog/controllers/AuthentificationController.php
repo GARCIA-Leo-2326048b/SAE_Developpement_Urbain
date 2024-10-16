@@ -27,6 +27,7 @@ class AuthentificationController {
                 // Démarre une session si l'authentification réussit
                 session_start();
                 $_SESSION['suid'] = session_id();
+                $_SESSION['user_id'] = $identifiant;
                 header('Location: https://developpement-urbain.alwaysdata.net/index.php');
                 exit();
             } else {

@@ -21,6 +21,12 @@ try {
             case 'login':
                 (new blog\controllers\AuthentificationController())->connexion();
                 break;
+            case 'view_simulations':
+                (new blog\controllers\Upload())->telechargement();
+                break;
+            case 'new_simulation':
+                (new blog\controllers\SimulationController())->execute();
+                break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();
                 break;
