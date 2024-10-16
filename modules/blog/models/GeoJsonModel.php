@@ -12,10 +12,10 @@ class GeoJsonModel
         $this->db = new \PDO('mysql:host=mysql-developpement-urbain.alwaysdata.net;dbname=developpement-urbain_344', '379003', 'saeflouvat');
 
     }
-    public function fetchGeoJson($id)
+    public function fetchGeoJson($name)
     {
-        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE id = :id");
-        $stmt->bindParam(':id', $id,\PDO::PARAM_INT);
+        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE file_name = :name");
+        $stmt->bindParam(':name', $name);
         $stmt->execute();
 
         // Retourner les données GeoJSON

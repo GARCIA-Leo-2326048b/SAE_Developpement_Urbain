@@ -1,31 +1,77 @@
 <?php
 
 namespace blog\controllers;
-use GeoPHP;
+use blog\models\GeoJsonModel;
+use blog\views\ComparaisonView;
+use geoPHP;
 
 class ComparaisonController{
-    public function CompareVec($polygoneSim, $polygoneVer){
 
-        // Charger les GeoJSON
-        $geometrieSim = GeoPHP::load($polygoneSim, 'json');
-        $geometrieVer = GeoPHP::load($polygoneVer, 'json');
-
-        // Calculer l'aire de la simulation
-        $aireSim = $geometrieSim->area();
-        echo "Aire de la simulation: " . $aireSim;
-        // Calculer l'aire de la vérité terrain
-        $aireVer = $geometrieVer->area();
-        echo "Aire de la vérité terrain: " . $aireVer;
-
-        // Calculer le périmètre de la simulation
-        $perimetreSim = $geometrieSim->length();
-        echo "Périmètre de la simulation: " . $perimetreSim;
-        // Calculer le périmètre de la vérité terrain
-        $perimetreVer = $geometrieVer->length();
-        echo "Périmètre de la vérité terrain: " . $perimetreVer;
+    private $view;
+    private $model;
+    public function __construct()
+    {
+        $this->view = new ComparaisonView();
+        $this->model=new GeoJsonModel();
+    }
+    public function compare(){
 
 
+        $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
+        $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM');
 
+        $geometrySim = $this->loadGeoJson($polygonSim);
+        $geometryVer = $this->loadGeoJson($polygonVer);
+
+        $areaStatsSim = $this->getAreaStat($geometrySim);
+        $areaStatsVer = $this->getAreaStat($geometryVer);
+
+        $this->view->showComparison([
+            'sim' => $areaStatsSim,
+            'ver' => $areaStatsVer
+        ]);
     }
 
+//a
+    private function loadGeoJson($geoJsonData) {
+        $geometry = GeoPHP::load($geoJsonData, 'json');
+        if (!$geometry) {
+            throw new \Exception("The GeoJSON file could not be loaded.");
+        }
+        return $geometry;
+    }
+
+
+    private function getAreaStat($geometry) {
+        $areas = [];
+        //on rentre les aires de tous les batiments dans un tableau
+        foreach ($geometry->getComponents() as $component) {
+            if ($component->geometryType() === 'Polygon') {
+                $areas[]=$component->area();
+            }
+        }
+        if (count($areas) > 0) {
+            $mean = array_sum($areas)/count($areas);//moyenne des aires
+            $min = min($areas);//aire minimum
+            $max = max($areas);//aire maximum
+            $std = $this->calculateStandardDeviation($areas,$mean);//ecart-type
+        } else {
+            $mean =$max=$min=$std= 0;
+        }
+        return [
+            'mean' => $mean,
+            'min' => $min,
+            'max' => $max,
+            'std' => $std
+        ];
+    }
+
+    private function calculateStandardDeviation($areas, $mean) {
+        $sum = 0;
+        foreach ($areas as $area) {
+            $sum += pow($area - $mean, 2); // Calcul de l'écart à la moyenne au carré
+        }
+        $variance = $sum / count($areas);  // Calcul de la variance
+        return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
+    }
 }
