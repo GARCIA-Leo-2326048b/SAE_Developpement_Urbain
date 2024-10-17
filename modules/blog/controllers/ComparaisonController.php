@@ -4,6 +4,9 @@ namespace blog\controllers;
 use blog\models\GeoJsonModel;
 use blog\views\ComparaisonView;
 use geoPHP;
+use Amenadiel\JpGraph\Graph\Graph;
+use Amenadiel\JpGraph\Plot\BarPlot;
+use Amenadiel\JpGraph\Plot\GroupBarPlot;
 
 class ComparaisonController{
 
@@ -73,5 +76,17 @@ class ComparaisonController{
         }
         $variance = $sum / count($areas);  // Calcul de la variance
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
+    }
+
+    function createHistogram($areaStatsSim, $areaStatsVer)
+    {
+        //initialisation des données pour les barres
+        $dataSim = [$areaStatsSim['mean'], $areaStatsSim['min'], $areaStatsSim['max'], $areaStatsSim['std']];
+        $dataVer = [$areaStatsVer['mean'], $areaStatsVer['min'], $areaStatsVer['max'], $areaStatsVer['std']];
+        $labels = ['Mean', 'Min', 'Max', 'Std'];
+
+        //initialisation du graphique
+        $graph = new Graph(800, 600);
+        $graph->SetScale('textlin');
     }
 }
