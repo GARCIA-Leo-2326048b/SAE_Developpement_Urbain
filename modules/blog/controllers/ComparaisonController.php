@@ -94,5 +94,21 @@ class ComparaisonController{
         $graph->xaxis->title->Set('Statistiques');
         $graph->xaxis->SetTickLabels($labels);
         $graph->yaxis->title->Set('Valeurs');
+
+        //mise en forme des barres
+        $barPlotSim = new BarPlot($dataSim);
+        $barPlotSim->SetFillColor('blue');
+        $barPlotSim->SetLegend('Simulation');
+
+        $barPlotVer = new BarPlot($dataVer);
+        $barPlotVer->SetFillColor('green');
+        $barPlotVer->SetLegend('Vérité terrain');
+
+        //groupement des barres
+        $groupBarPlot = new GroupBarPlot([$barPlotSim, $barPlotVer]);
+
+        $graph->Add($groupBarPlot);
+
+        $graph->Stroke();
     }
 }
