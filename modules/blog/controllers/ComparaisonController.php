@@ -88,5 +88,11 @@ class ComparaisonController{
         //initialisation du graphique
         $graph = new Graph(800, 600);
         $graph->SetScale('textlin');
+
+        //titre et légendes
+        $graph->title->Set('Comparaison des données de simulation et de vérité terrain');
+        $graph->xaxis->title->Set('Statistiques');
+        $graph->xaxis->SetTickLabels($labels);
+        $graph->yaxis->title->Set('Valeurs');
     }
 }
