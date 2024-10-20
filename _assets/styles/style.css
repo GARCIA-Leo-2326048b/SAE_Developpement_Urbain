@@ -210,7 +210,7 @@ form {
     margin: 20px 0;
 }
 
-form input[type="text"], form input[type="file"] {
+form input[type="text"], form input[type="file"], form input[type="password"] {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;

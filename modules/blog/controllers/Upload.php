@@ -12,6 +12,7 @@ class Upload
     private $db;
     private $uploadModel;
     private $currentUserId; // ID de l'utilisateur connecté
+    private $errorMessage="";
 
     public function __construct()
     {
@@ -67,7 +68,12 @@ class Upload
         } else {
             throw new \Exception("Veuillez spécifier un nom de fichier.");
         }
-
+        // Vérifier si le fichier existe déjà pour éviter les conflits
+        $nom = $customName . '.geojson';
+        if ($this->uploadModel->file_existGJ($nom)) {
+            $this->errorMessage = "Le fichier " . htmlspecialchars($customName . '.geojson' ) . " existe déjà.";
+            return $this->errorMessage;
+        }
         // Vérifier si le dossier est accessible en écriture
         if (!is_writable($uploadDir)) {
             throw new \Exception("Le dossier de destination n'est pas accessible en écriture.");
@@ -87,10 +93,7 @@ class Upload
             if (in_array($fileExtension, $requiredExtensions)) {
                 $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
 
-                // Vérifier si le fichier existe déjà pour éviter les conflits
-                if (file_exists($uploadFilePath)) {
-                    throw new \Exception("Le fichier " . htmlspecialchars($customName . '.' . $fileExtension) . " existe déjà.");
-                }
+
 
                 // Déplacer chaque fichier dans le répertoire de destination
                 if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
@@ -202,7 +205,7 @@ class Upload
     public function handleRasterUpload()
     {
         $file = $_FILES['rasterfile'];
-        $uploadDir = __DIR__ . '/../../../assets/raster/'; // Dossier de destination
+        $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
 
         try {
             // Récupérer le nom de fichier personnalisé
@@ -256,7 +259,7 @@ class Upload
                 $geoTiffContent = file_get_contents($geoTiffFilePath);
                 $this->uploadModel->saveUploadGT($geoTiffFileName, $geoTiffContent, $this->currentUserId);
 
-                header('Location: https://developpement-urbain.alwaysdata.net/PreparationSimulation.php');;
+                header("Location: index.php?action=new_simulation");
             }
         } catch (\Exception $e) {
             echo "Erreur: " . htmlspecialchars($e->getMessage());
@@ -271,7 +274,7 @@ class Upload
 
         // Chemin de sortie pour le fichier GeoTIFF
         $geoTiffFileName = $customName . '.tiff';
-        $geoTiffFilePath = __DIR__ . '/../../../assets/raster/' . $geoTiffFileName;
+        $geoTiffFilePath = __DIR__ . '/../../../assets/shapefile/' . $geoTiffFileName;
 
         // Utiliser curl pour faire une requête POST vers l'API
         $ch = curl_init();
@@ -303,7 +306,6 @@ class Upload
 
         // Vérifier si le fichier GeoTIFF a bien été créé
         if (file_exists($geoTiffFilePath)) {
-            echo "Conversion réussie. <a href='../../../assets/raster/" . htmlspecialchars(basename($geoTiffFilePath)) . "'>Télécharger le fichier GeoTIFF</a><br>";
             return $geoTiffFilePath;
         } else {
             throw new \Exception("La conversion a échoué.");

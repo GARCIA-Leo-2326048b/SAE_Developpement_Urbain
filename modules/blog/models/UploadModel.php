@@ -5,6 +5,7 @@ use PDO;
 
 class UploadModel {
     private $db;
+    private $errorMessage="";
 
     public function __construct($dbConnection)
     {
@@ -76,7 +77,7 @@ class UploadModel {
     }
 
     // Enregistrer une simulation
-    public function saveSimulation($fileName, $userId, $simulationData = null)
+    public function saveSimulation($fileName, $userId, $simulationData )
     {
         try {
             $query = "INSERT INTO simulations (user_id, file_name, simulation_data) 
@@ -145,5 +146,51 @@ class UploadModel {
         // Implémentez la logique réelle selon vos besoins
         return true;
     }
+
+    public function file_existGJ($customName)
+    {
+        $query = "SELECT COUNT(*) FROM uploadGJ WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $customName);
+        $stmt->execute();
+
+        if( $stmt->fetchColumn() > 0){
+            return true;
+
+        }else{
+            return false;
+        }
+    }
+
+    public function deleteFileGJ($fileName) {
+        $query = "DELETE FROM uploadGJ WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $fileName);
+        return $stmt->execute();
+    }
+
+    public function file_existGT($customName)
+    {
+        $query = "SELECT COUNT(*) FROM uploadGT WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $customName);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function setErrorMessage($errorMessage)
+    {
+        $this->errorMessage = $errorMessage;
+    }
+
+    public function getErrorMessage(){
+        return $this->errorMessage;
+    }
+
 }
 ?>

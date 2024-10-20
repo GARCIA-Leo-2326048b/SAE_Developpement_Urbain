@@ -5,6 +5,7 @@ namespace blog\views;
 class PreparationSimulation
 {
     private $files;
+    private $errorMessage;
 
     public function __construct($files){
         $this->files = $files;
@@ -48,6 +49,25 @@ class PreparationSimulation
                 <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
                 <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
             </section>
+
+            <!-- HTML pour le modal -->
+            <div id="errorModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ccc; padding: 20px; z-index: 1000;">
+                <span onclick="closeModal()" style="cursor: pointer; position: absolute; top: 10px; right: 10px;">&times;</span>
+                <p id="modalMessage"><?php echo htmlspecialchars($errorMessage); ?></p>
+                <button onclick="closeModal()">Non</button>
+            </div>
+
+            <!-- Script JavaScript pour gérer le modal -->
+            <script>
+                function closeModal() {
+                    document.getElementById('errorModal').style.display = 'none';
+                }
+
+                // Affiche le modal si un message d'erreur est présent
+                <?php if (!empty($errorMessage)): ?>
+                document.getElementById('errorModal').style.display = 'block';
+                <?php endif; ?>
+            </script>
 
             <!-- Formulaire pour les fichiers Shapefile (Vecteur) -->
             <form id="vectorForm" action="?action=upload" method="POST" enctype="multipart/form-data" style="display: none;">
@@ -121,6 +141,9 @@ class PreparationSimulation
                 closePopup();
             }
         </script>
+
+
+
         <?php
         (new GlobalLayout('Accueil', ob_get_clean()))->show();
     }

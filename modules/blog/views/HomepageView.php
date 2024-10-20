@@ -20,14 +20,18 @@ class HomepageView {
                         <button onclick="location.href='?action=view_simulations'">Voir mes Simulations</button>
                         <button onclick="location.href='?action=new_simulation'">Démarrer une Nouvelle Simulation</button>
                     </div>
+                    <div class="buttons" >
                     <button onclick="location.href='?action=logout'">Se déconnecter</button>
+                    </div>
                     <?php
                 } else {
                     ?>
                     <div class="container">
                         <h2>Bienvenue sur notre plateforme de Recherche de Développement Urbain</h2>
                         <p>Veuillez vous connecter pour accéder aux fonctionnalités de simulation et de comparaison.</p>
+                        <div class="buttons">
                         <button onclick="location.href='?action=authentification'">Se Connecter</button>
+                        </div>
                     </div>
                     <?php
                 }
