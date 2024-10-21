@@ -24,8 +24,10 @@ class ComparaisonView
             <li>Aire minimum: <?= $results['ver']['min']; ?> m²</li>
             <li>Aire maximum: <?= $results['ver']['max']; ?> m²</li>
         </ul>
+        <ul>
+            <li><img src= "<?= $results['path']; ?>" alt="Graphe comparatif" /></li>
+        </ul>
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
-
 }
