@@ -10,6 +10,11 @@ class AffichageView
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
         <script src="/_assets/scripts/loadMap.js"></script>
         <div id="map" style="width: 100%; height: 500px;"></div>
+        <div>
+            <!-- Ajout de boutons pour changer le fond de carte -->
+            <button onclick="switchToSatellite()">Satellite</button>
+            <button onclick="switchToStreets()">Streets</button>
+        </div>
         <script>
             createMap(<?php echo $house?:null; ?>, <?php echo $road?:null; ?>,<?php echo $vegetation ?: null ; ?>);
         </script><?php

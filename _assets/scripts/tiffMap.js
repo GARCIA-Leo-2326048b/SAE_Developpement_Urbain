@@ -1,38 +1,56 @@
-function displayGeoTIFF(tiffUrl) {
-    //creer la map
-    // var map = L.map('map').setView([51.505, -0.09], 13);
-    // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    // }).addTo(map);
+let map;
+let satelliteLayer, streetsLayer;
+const key = 'phT89U7mj4WtQWinX1ID';
+function initializeMap(tiffUrl) {
+    // Initialisation de la carte
+    map = L.map('map').setView([49.2125578, 16.62662018], 14);
 
-    const key = 'phT89U7mj4WtQWinX1ID';
-    const map = L.map('map').setView([49.2125578, 16.62662018], 14); //starting position
-    L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`,{ //style URL
+    // Création des couches de fond de carte
+    satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
         tileSize: 512,
         zoomOffset: -1,
         minZoom: 1,
         attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
         crossOrigin: true
-    }).addTo(map);
+    });
 
-    //charger le raster
+    streetsLayer = L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${key}`, {
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+    });
+
+    // Ajout de la couche satellite par défaut
+    satelliteLayer.addTo(map);
+
+    // Chargement du GeoTIFF
     fetch(tiffUrl)
         .then(response => response.arrayBuffer())
-        .then(arrayBuffer => {
-            parseGeoraster(arrayBuffer).then(georaster => {
-                console.log("georaster:", georaster);
-
-                var layer = new GeoRasterLayer({
-                    georaster: georaster,
-                    opacity: 1,
-                    // pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
-                    resolution: 64 // optional parameter for adjusting display resolution
-                });
-                layer.addTo(map);
-                map.fitBounds(layer.getBounds());
-
+        .then(arrayBuffer => parseGeoraster(arrayBuffer))
+        .then(georaster => {
+            var layer = new GeoRasterLayer({
+                georaster: georaster,
+                opacity: 1,
+                resolution: 64
             });
+            layer.addTo(map);
+            map.fitBounds(layer.getBounds());
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement du GeoTIFF:', error);
         });
+}
 
+function switchToSatellite() {
+    map.removeLayer(streetsLayer);
+    map.addLayer(satelliteLayer);
+    satelliteLayer.bringToBack();
+}
 
+function switchToStreets() {
+    map.removeLayer(satelliteLayer);
+    map.addLayer(streetsLayer);
+    streetsLayer.bringToBack();
 }

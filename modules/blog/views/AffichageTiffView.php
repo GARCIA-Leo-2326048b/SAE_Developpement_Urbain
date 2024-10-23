@@ -12,9 +12,14 @@ class AffichageTiffView
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/tiffMap.js"></script>
         <div id="map" style="width: 100%; height: 500px;"></div>
+        <div>
+            <!-- Ajout de boutons pour changer le fond de carte -->
+            <button onclick="switchToSatellite()">Satellite</button>
+            <button onclick="switchToStreets()">Streets</button>
+        </div>
         <script>
             // Appeler la fonction 'displayGeoTIFF' avec l'URL du fichier TIFF comme argument
-            displayGeoTIFF("<?php echo $tiffPath; ?>");
+            initializeMap("<?php echo $tiffPath; ?>");
         </script>
         <?php
         (new GlobalLayout('AffichageTiff', ob_get_clean()))->show();
