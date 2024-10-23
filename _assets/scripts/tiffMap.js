@@ -1,14 +1,28 @@
 function displayGeoTIFF(tiffUrl) {
-    // Créez la carte Leaflet
-    var map = L.map('map').setView([45.0, 5.0], 6); // Exemple de coordonnées (modifiez en fonction de votre fichier)
-
-    // Ajouter un fond de carte
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    // Utilisation correcte de la bibliothèque leaflet-geotiff
-    var geotiffLayer = new L.LeafletGeoTIFF({
-        url: tiffUrl,  // L'URL du fichier TIFF passé en paramètre
-        band: 0,       // Choisissez le bon band, si nécessaire
-        opacity: 0.7   // Opacité ajustable
+    //creer la map
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+
+    //charger le raster
+    fetch(tiffUrl)
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => {
+            parseGeoraster(arrayBuffer).then(georaster => {
+                console.log("georaster:", georaster);
+
+                var layer = new GeoRasterLayer({
+                    georaster: georaster,
+                    opacity: 1,
+                    // pixelValuesToColorFn: values => values[0] === 42 ? '#ffffff' : '#000000',
+                    resolution: 64 // optional parameter for adjusting display resolution
+                });
+                layer.addTo(map);
+                map.fitBounds(layer.getBounds());
+
+            });
+        });
+
+
 }
