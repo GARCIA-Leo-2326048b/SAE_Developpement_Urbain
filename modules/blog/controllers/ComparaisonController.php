@@ -34,6 +34,23 @@ class ComparaisonController{
          $areaStatsSim = $this->getStat($valuesSim['areas']);
         $areaStatsVer = $this->getStat($valuesVer['areas']);
 
+        /*// Calculer les Shape Index pour simulation et vérité terrain
+        $shapeIndexesSim = $this->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
+        $shapeIndexesVer = $this->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
+
+        // Calculer les statistiques pour les Shape Index
+        $shapeIndexStatsSim = $this->getStat($shapeIndexesSim);
+        $shapeIndexStatsVer = $this->getStat($shapeIndexesVer);
+
+        $results = [
+            'areaStatsSim' => $areaStatsSim,
+            'areaStatsVer' => $areaStatsVer,
+            'shapeIndexStatsSim' => $shapeIndexStatsSim,
+            'shapeIndexStatsVer' => $shapeIndexStatsVer
+        ];
+        $this->view->showComparison($results);*/
+
+
         $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
 
         $this->view->showComparison([
