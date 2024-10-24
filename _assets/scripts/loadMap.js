@@ -1,16 +1,36 @@
-
+let map;
+let satelliteLayer, streetsLayer;
+const key = 'phT89U7mj4WtQWinX1ID';
 function createMap(house=null,road=null,vegetation=null){
+
     //prend les coordonnees de la premiere maison
     const firstHouseCoordinates = house.features[0].geometry.coordinates[0][0];
     var lat = firstHouseCoordinates[1];
     var lng = firstHouseCoordinates[0];
+
     // Créer la carte
-    var map = L.map('map').setView([lat, lng], 16);
-    // Ajouter le fond de carte OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-    }).addTo(map);
+    map = L.map('map').setView([lat, lng], 16);
+
+    // Création des couches de fond de carte
+    satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+    });
+
+    streetsLayer = L.tileLayer(`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${key}`, {
+        tileSize: 512,
+        zoomOffset: -1,
+        minZoom: 1,
+        attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+        crossOrigin: true
+    });
+
+    // Ajout de la couche satellite par défaut
+    satelliteLayer.addTo(map);
+
     // Si des données GeoJSON pour les maisons existent, les ajouter à la carte
     if (house) {
         L.geoJSON(house, {
@@ -31,6 +51,7 @@ function createMap(house=null,road=null,vegetation=null){
             style: (feature) => style(feature, 'vegetation') // Appliquer un style à la végétation
         }).addTo(map);
     }
+
     // Optionnel : Ajuster les limites de la carte en fonction des couches chargées
     var bounds = L.featureGroup([L.geoJSON(house), L.geoJSON(road), L.geoJSON(vegetation)]).getBounds();
     map.fitBounds(bounds);
@@ -79,4 +100,16 @@ function style(feature,type) {
         fillColor: color,
         fillOpacity: 1
     };
+}
+
+function switchToSatellite() {
+    map.removeLayer(streetsLayer);
+    map.addLayer(satelliteLayer);
+    satelliteLayer.bringToBack();
+}
+
+function switchToStreets() {
+    map.removeLayer(satelliteLayer);
+    map.addLayer(streetsLayer);
+    streetsLayer.bringToBack();
 }

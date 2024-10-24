@@ -29,9 +29,12 @@ class ComparaisonController{
         $areaStatsSim = $this->getAreaStat($geometrySim);
         $areaStatsVer = $this->getAreaStat($geometryVer);
 
+        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
+
         $this->view->showComparison([
             'sim' => $areaStatsSim,
-            'ver' => $areaStatsVer
+            'ver' => $areaStatsVer,
+            'path' => $chemin
         ]);
     }
 
@@ -78,11 +81,11 @@ class ComparaisonController{
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
     }
 
-    function createHistogram($areaStatsSim, $areaStatsVer)
+    private function createHistogram($statsSim, $statsVer)
     {
         //initialisation des données pour les barres
-        $dataSim = [$areaStatsSim['mean'], $areaStatsSim['min'], $areaStatsSim['max'], $areaStatsSim['std']];
-        $dataVer = [$areaStatsVer['mean'], $areaStatsVer['min'], $areaStatsVer['max'], $areaStatsVer['std']];
+        $dataSim = [$statsSim['mean'], $statsSim['min'], $statsSim['max'], $statsSim['std']];
+        $dataVer = [$statsVer['mean'], $statsVer['min'], $statsVer['max'], $statsVer['std']];
         $labels = ['Mean', 'Min', 'Max', 'Std'];
 
         //initialisation du graphique
@@ -109,7 +112,10 @@ class ComparaisonController{
 
         $graph->Add($groupBarPlot);
 
-        $graph->Stroke();
+        $imagePath = 'C:\Users\t22018451\PhpstormProjects\SAE_Developpement_Urbain\_assets\images';
+        $graph->Stroke($imagePath);
+
+        return $imagePath;
     }
 
     // Comparaison de la Distance d'Hausdorff
