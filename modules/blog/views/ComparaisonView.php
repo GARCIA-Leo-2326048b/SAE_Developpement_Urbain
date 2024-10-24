@@ -45,8 +45,10 @@ class ComparaisonView
                 <li>Maximum: <?= $results['shapeIndexStatsVer']['max']; ?></li>
             </ul>
         </ul>
+        <ul>
+            <li><img src= "<?= $results['path']; ?>" alt="Graphe comparatif" /></li>
+        </ul>
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
-
 }

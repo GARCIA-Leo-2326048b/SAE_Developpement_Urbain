@@ -34,21 +34,13 @@ class ComparaisonController{
          $areaStatsSim = $this->getStat($valuesSim['areas']);
         $areaStatsVer = $this->getStat($valuesVer['areas']);
 
-        // Calculer les Shape Index pour simulation et vérité terrain
-        $shapeIndexesSim = $this->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
-        $shapeIndexesVer = $this->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
+        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
 
-        // Calculer les statistiques pour les Shape Index
-        $shapeIndexStatsSim = $this->getStat($shapeIndexesSim);
-        $shapeIndexStatsVer = $this->getStat($shapeIndexesVer);
-
-        $results = [
-            'areaStatsSim' => $areaStatsSim,
-            'areaStatsVer' => $areaStatsVer,
-            'shapeIndexStatsSim' => $shapeIndexStatsSim,
-            'shapeIndexStatsVer' => $shapeIndexStatsVer
-        ];
-        $this->view->showComparison($results);
+        $this->view->showComparison([
+            'sim' => $areaStatsSim,
+            'ver' => $areaStatsVer,
+            'path' => $chemin
+        ]);
     }
 
     private function loadGeoJson($geoJsonData) {
@@ -83,7 +75,6 @@ class ComparaisonController{
                 $shapeIndex = $polygon['perimeters'][$i] / (2 * sqrt(pi() * $area));
                 $shapeIndexes[] = $shapeIndex;
             }
-
         }
         return $shapeIndexes;
     }
@@ -97,8 +88,6 @@ class ComparaisonController{
         } else {
             $mean =$max=$min=$std= 0;
         }
-
-
         return [
             'mean' => $mean,
             'min' => $min,
@@ -116,11 +105,11 @@ class ComparaisonController{
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
     }
 
-    function createHistogram($areaStatsSim, $areaStatsVer)
+    private function createHistogram($statsSim, $statsVer)
     {
         //initialisation des données pour les barres
-        $dataSim = [$areaStatsSim['mean'], $areaStatsSim['min'], $areaStatsSim['max'], $areaStatsSim['std']];
-        $dataVer = [$areaStatsVer['mean'], $areaStatsVer['min'], $areaStatsVer['max'], $areaStatsVer['std']];
+        $dataSim = [$statsSim['mean'], $statsSim['min'], $statsSim['max'], $statsSim['std']];
+        $dataVer = [$statsVer['mean'], $statsVer['min'], $statsVer['max'], $statsVer['std']];
         $labels = ['Mean', 'Min', 'Max', 'Std'];
 
         //initialisation du graphique
@@ -147,6 +136,9 @@ class ComparaisonController{
 
         $graph->Add($groupBarPlot);
 
-        $graph->Stroke();
+        $imagePath = 'C:\Users\t22018451\PhpstormProjects\SAE_Developpement_Urbain\_assets\images';
+        $graph->Stroke($imagePath);
+
+        return $imagePath;
     }
 }

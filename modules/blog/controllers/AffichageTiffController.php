@@ -13,7 +13,7 @@ class AffichageTiffController
 
     public function execute() {
         // Affiche la vue avec l'URL du fichier TIFF
-        $tiffPath = '/_assets/utils/valenicina_17_08_19_dtm.tiff';
+        $tiffPath = '/_assets/utils/valenicina_17_08_19_dtm.tif';
         $this->view->show($tiffPath);
     }
 }
