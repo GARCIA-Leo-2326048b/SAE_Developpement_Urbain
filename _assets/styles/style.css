@@ -79,6 +79,8 @@ header .titre h1 {
 
 /* Contenu principal */
 .content {
+    display: flex;
+    flex-direction: column;
     padding: 20px;
     margin: 20px auto;
     max-width: 1000px;
@@ -131,7 +133,6 @@ input[type="submit"] {
 }
 /* Conteneur principal pour l'historique, les boutons et les formulaires */
 .container-content {
-    display: flex;
     justify-content: space-between;
     padding: 20px;
     max-width: 1200px;
@@ -140,7 +141,7 @@ input[type="submit"] {
 
 /* Barre de défilement pour l'historique */
 #history {
-    width: 30%;
+    width: 40%;
     background-color: #e2eba7;
     padding: 10px;
     border-radius: 10px;
@@ -185,7 +186,7 @@ input[type="submit"] {
     align-items: center;
 }
 
-#import button {
+#import button ,#compareButton{
     padding: 1em;
     margin: 1em;
     background-color: #e2eba7;
@@ -194,7 +195,7 @@ input[type="submit"] {
     font-family: cursive;
 }
 
-#import button:hover {
+#import button:hover ,#compareButton.enabled{
     background-color: #474e23;
     color: #e2eba7;
     box-shadow: 0 0 50px 5px;

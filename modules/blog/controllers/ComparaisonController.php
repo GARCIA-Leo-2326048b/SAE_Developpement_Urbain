@@ -111,4 +111,63 @@ class ComparaisonController{
 
         $graph->Stroke();
     }
+
+    // Comparaison de la Distance d'Hausdorff
+    public function compareHausdorff() {
+        // Charger les fichiers GeoJSON
+        $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
+        $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM.geojson');
+
+        // Charger les géométries
+        $geometrySim = $this->loadGeoJson($polygonSim);
+        $geometryVer = $this->loadGeoJson($polygonVer);
+
+        // Calcul de la distance d'Hausdorff
+        $hausdorffDistance = $this->calculateHausdorffDistance($geometrySim, $geometryVer);
+
+        // Afficher la distance d'Hausdorff
+        $this->view->showHausdorffDistance($hausdorffDistance);
+    }
+
+    // Méthode pour calculer la distance d'Hausdorff entre deux géométries
+    private function calculateHausdorffDistance($geometryA, $geometryB) {
+        $maxDistAtoB = $this->calculateDirectedHausdorffDistance($geometryA, $geometryB);
+        $maxDistBtoA = $this->calculateDirectedHausdorffDistance($geometryB, $geometryA);
+
+        // La distance d'Hausdorff est le maximum des deux directions
+        return max($maxDistAtoB, $maxDistBtoA);
+    }
+
+    // Calcul de la distance dirigée (de A vers B)
+    private function calculateDirectedHausdorffDistance($geometryA, $geometryB) {
+        $maxDist = 0;
+
+        foreach ($geometryA->getComponents() as $componentA) {
+            foreach ($componentA->getPoints() as $pointA) {
+                // Calcul de la distance minimale entre un point de A et tous les points de B
+                $minDist = INF;
+                foreach ($geometryB->getComponents() as $componentB) {
+                    foreach ($componentB->getPoints() as $pointB) {
+                        $dist = $this->calculateDistanceBetweenPoints($pointA, $pointB);
+                        if ($dist < $minDist) {
+                            $minDist = $dist;
+                        }
+                    }
+                }
+                // Met à jour la distance maximale pour ce point
+                if ($minDist > $maxDist) {
+                    $maxDist = $minDist;
+                }
+            }
+        }
+
+        return $maxDist;
+    }
+
+    // Méthode pour calculer la distance entre deux points
+    private function calculateDistanceBetweenPoints($pointA, $pointB) {
+        $dx = $pointA->x() - $pointB->x();
+        $dy = $pointA->y() - $pointB->y();
+        return sqrt($dx * $dx + $dy * $dy); // Distance euclidienne
+    }
 }
