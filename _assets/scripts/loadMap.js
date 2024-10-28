@@ -1,17 +1,16 @@
 let map;
 let satelliteLayer, streetsLayer;
 const key = 'phT89U7mj4WtQWinX1ID';
-function createMap(house=null,road=null,vegetation=null){
+let currentLayer = null; // Variable pour la couche sélectionnée
+let houseLayer, roadLayer, vegetationLayer; // Pour accéder facilement aux couches
 
-    //prend les coordonnees de la premiere maison
+function createMap(house = null, road = null, vegetation = null) {
     const firstHouseCoordinates = house.features[0].geometry.coordinates[0][0];
-    var lat = firstHouseCoordinates[1];
-    var lng = firstHouseCoordinates[0];
+    const lat = firstHouseCoordinates[1];
+    const lng = firstHouseCoordinates[0];
 
-    // Créer la carte
     map = L.map('map').setView([lat, lng], 16);
 
-    // Création des couches de fond de carte
     satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
         tileSize: 512,
         zoomOffset: -1,
@@ -28,40 +27,29 @@ function createMap(house=null,road=null,vegetation=null){
         crossOrigin: true
     });
 
-    // Ajout de la couche satellite par défaut
     satelliteLayer.addTo(map);
 
-    // Si des données GeoJSON pour les maisons existent, les ajouter à la carte
-    if (house) {
-        L.geoJSON(house, {
-            style: (feature) => style(feature, 'house') // Appliquer un style aux maisons
-        }).addTo(map);
-    }
+    // Créer les couches
+    houseLayer = L.geoJSON(house, { style: (feature) => style(feature, 'house') }).addTo(map);
+    roadLayer = L.geoJSON(road, { style: (feature) => style(feature, 'road') }).addTo(map);
+    vegetationLayer = L.geoJSON(vegetation, { style: (feature) => style(feature, 'vegetation') }).addTo(map);
 
-    // Si des données GeoJSON pour les routes existent, les ajouter à la carte
-    if (road) {
-        L.geoJSON(road, {
-            style: (feature) => style(feature, 'road') // Appliquer un style aux routes
-        }).addTo(map);
-    }
+    // Ajouter les couches au contrôle des couches (affichage/cachage)
+    const overlayMaps = {
+        "Maisons": houseLayer,
+        "Routes": roadLayer,
+        "Végétation": vegetationLayer
+    };
+    L.control.layers(null, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
 
-    // Si des données GeoJSON pour la végétation existent, les ajouter à la carte avec un style spécifique
-    if (vegetation) {
-        L.geoJSON(vegetation, {
-            style: (feature) => style(feature, 'vegetation') // Appliquer un style à la végétation
-        }).addTo(map);
-    }
-
-    // Optionnel : Ajuster les limites de la carte en fonction des couches chargées
-    var bounds = L.featureGroup([L.geoJSON(house), L.geoJSON(road), L.geoJSON(vegetation)]).getBounds();
-    map.fitBounds(bounds);
-
+    // Ajuster les limites de la carte
+    map.fitBounds(L.featureGroup([houseLayer, roadLayer, vegetationLayer]).getBounds());
 }
 
-function style(feature,type) {
+// Fonction pour définir les styles des couches
+function style(feature, type) {
     let color;
     if (type === 'vegetation') {
-        // Coloration en fonction du type de végétation
         switch (feature.properties.Type) {
             case "Sol nu":
                 color = '#efb974';
@@ -96,12 +84,38 @@ function style(feature,type) {
     return {
         color: color,
         weight: 2,
-
         fillColor: color,
-        fillOpacity: 1
+        fillOpacity: 1 // Opacité de remplissage par défaut
     };
 }
 
+// Fonction pour sélectionner la couche à ajuster
+function selectLayer(layerType) {
+    if (layerType === 'house') {
+        currentLayer = houseLayer;
+    } else if (layerType === 'road') {
+        currentLayer = roadLayer;
+    } else if (layerType === 'vegetation') {
+        currentLayer = vegetationLayer;
+    }
+    document.getElementById('opacitySlider').value = 1; // Réinitialiser le curseur d’opacité à 1
+}
+
+// Fonction pour mettre à jour l'opacité de la couche sélectionnée
+function updateLayerOpacity() {
+    const opacity = document.getElementById('opacitySlider').value;
+    if (currentLayer) {
+        currentLayer.eachLayer((layer) => {
+            // Mettre à jour le style pour le remplissage et les bordures
+            layer.setStyle({
+                fillOpacity: opacity, // Opacité de l'intérieur
+                opacity: opacity // Opacité des bordures
+            });
+        });
+    }
+}
+
+// Fonctions pour basculer entre les couches satellite et rues
 function switchToSatellite() {
     map.removeLayer(streetsLayer);
     map.addLayer(satelliteLayer);

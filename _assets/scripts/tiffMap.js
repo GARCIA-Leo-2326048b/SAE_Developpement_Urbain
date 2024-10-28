@@ -1,6 +1,7 @@
 let map;
-let satelliteLayer, streetsLayer;
+let satelliteLayer, streetsLayer, tiffLayer;
 const key = 'phT89U7mj4WtQWinX1ID';
+
 function initializeMap(tiffUrl) {
     // Initialisation de la carte
     map = L.map('map').setView([49.2125578, 16.62662018], 14);
@@ -30,13 +31,13 @@ function initializeMap(tiffUrl) {
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => parseGeoraster(arrayBuffer))
         .then(georaster => {
-            var layer = new GeoRasterLayer({
+            tiffLayer = new GeoRasterLayer({
                 georaster: georaster,
                 opacity: 1,
                 resolution: 64
             });
-            layer.addTo(map);
-            map.fitBounds(layer.getBounds());
+            tiffLayer.addTo(map);
+            map.fitBounds(tiffLayer.getBounds());
         })
         .catch(error => {
             console.error('Erreur lors du chargement du GeoTIFF:', error);
@@ -53,4 +54,27 @@ function switchToStreets() {
     map.removeLayer(satelliteLayer);
     map.addLayer(streetsLayer);
     streetsLayer.bringToBack();
+}
+
+function updateLayerOpacity() {
+    const opacityValue = document.getElementById('opacitySlider').value;
+    if (tiffLayer) {
+        tiffLayer.setOpacity(opacityValue);
+    }
+}
+
+function selectLayer(layerType) {
+    // Retirer toutes les couches
+    map.eachLayer((layer) => {
+        if (layer !== satelliteLayer && layer !== streetsLayer) {
+            map.removeLayer(layer);
+        }
+    });
+
+    // Ajouter la couche sélectionnée
+    if (layerType === 'tiff') {
+        if (tiffLayer) {
+            map.addLayer(tiffLayer);
+        }
+    }
 }
