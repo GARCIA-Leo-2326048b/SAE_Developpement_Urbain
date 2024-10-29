@@ -128,8 +128,8 @@ class ComparaisonController{
 
         $graph->Add($groupBarPlot);
 
-        $imagePath = 'C:\Users\t22018451\PhpstormProjects\SAE_Developpement_Urbain\_assets\images';
-        $graph->Stroke($imagePath);
+        $imagePath = '_assets/images/graphe.png';
+        $graph->StrokeStore($imagePath);
 
         return $imagePath;
     }
