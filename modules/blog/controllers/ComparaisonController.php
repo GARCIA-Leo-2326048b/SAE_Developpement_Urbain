@@ -31,10 +31,25 @@ class ComparaisonController{
 
         $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
 
+        // Calculer la distribution des surfaces pour la simulation et la vérité terrain
+        $distributionSim = $this->calculateAreaDistribution($areaStatsSim['areas']);
+        $distributionVer = $this->calculateAreaDistribution($areaStatsVer['areas']);
+
+        // Générer les histogrammes basés sur les distributions
+        $distributionSimPath = $this->createHistogramFromDistribution($distributionSim, 'Distribution des surfaces - Simulation');
+        $distributionVerPath = $this->createHistogramFromDistribution($distributionVer, 'Distribution des surfaces - Vérité terrain');
+
+        // Calcul de la distance de Hausdorff
+        $hausdorffDistance = $this->calculateHausdorffDistance($geometrySim, $geometryVer);
+
+        // Affichage des résultats via la vue
         $this->view->showComparison([
             'sim' => $areaStatsSim,
             'ver' => $areaStatsVer,
-            'path' => $chemin
+            'path' => $chemin,
+            'distributionSimPath' => $distributionSimPath,
+            'distributionVerPath' => $distributionVerPath,
+            'hausdorff' => $hausdorffDistance,
         ]);
     }
 
@@ -65,6 +80,7 @@ class ComparaisonController{
             $mean =$max=$min=$std= 0;
         }
         return [
+            'areas' => $areas,
             'mean' => $mean,
             'min' => $min,
             'max' => $max,
@@ -118,22 +134,7 @@ class ComparaisonController{
         return $imagePath;
     }
 
-    // Comparaison de la Distance d'Hausdorff
-    public function compareHausdorff() {
-        // Charger les fichiers GeoJSON
-        $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
-        $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM.geojson');
 
-        // Charger les géométries
-        $geometrySim = $this->loadGeoJson($polygonSim);
-        $geometryVer = $this->loadGeoJson($polygonVer);
-
-        // Calcul de la distance d'Hausdorff
-        $hausdorffDistance = $this->calculateHausdorffDistance($geometrySim, $geometryVer);
-
-        // Afficher la distance d'Hausdorff
-        $this->view->showHausdorffDistance($hausdorffDistance);
-    }
 
     // Méthode pour calculer la distance d'Hausdorff entre deux géométries
     private function calculateHausdorffDistance($geometryA, $geometryB) {
@@ -176,4 +177,72 @@ class ComparaisonController{
         $dy = $pointA->y() - $pointB->y();
         return sqrt($dx * $dx + $dy * $dy); // Distance euclidienne
     }
+
+    private function calculateAreaDistribution($areas, $numBins = null) {
+        // Déterminer le nombre de bins en fonction de la règle de Sturges
+        if ($numBins === null) {
+            $numBins = (int) (1 + 3.322 * log10(count($areas)));  // Règle de Sturges
+        }
+
+        // Calcul des bornes des classes (bin) basées sur les données
+        $minArea = min($areas);
+        $maxArea = max($areas);
+        $binWidth = ($maxArea - $minArea) / $numBins;
+
+        // Initialisation des classes
+        $distribution = array_fill(0, $numBins, 0);
+
+        // Répartition des bâtiments dans les classes
+        foreach ($areas as $area) {
+            $binIndex = min((int)(($area - $minArea) / $binWidth), $numBins - 1); // Assigner chaque surface à une classe
+            $distribution[$binIndex]++;
+        }
+
+        return [
+            'distribution' => $distribution,
+            'minArea' => $minArea,
+            'maxArea' => $maxArea,
+            'binWidth' => $binWidth,
+            'numBins' => $numBins
+        ];
+    }
+
+    private function createHistogramFromDistribution($distributionData, $title) {
+        $distribution = $distributionData['distribution'];
+        $minArea = $distributionData['minArea'];
+        $maxArea = $distributionData['maxArea'];
+        $binWidth = $distributionData['binWidth'];
+        $numBins = count($distribution);
+
+        // Labels pour les classes de surface
+        $labels = [];
+        for ($i = 0; $i < $numBins; $i++) {
+            $rangeStart = $minArea + $i * $binWidth;
+            $rangeEnd = $rangeStart + $binWidth;
+            $labels[] = sprintf("%.0f - %.0f m²", $rangeStart, $rangeEnd);
+        }
+
+        // Création du graphique
+        $graph = new Graph(800, 600);
+        $graph->SetScale('textlin');
+
+        $graph->title->Set($title);
+        $graph->xaxis->title->Set('Classes de surfaces (m²)');
+        $graph->xaxis->SetTickLabels($labels);
+        $graph->yaxis->title->Set('Nombre de bâtiments');
+
+        // Création des barres
+        $barPlot = new BarPlot($distribution);
+        $barPlot->SetFillColor('blue');
+        $graph->Add($barPlot);
+
+        // Sauvegarde de l'image
+        $imagePath = 'C:\Users\t22018451\PhpstormProjects\SAE_Developpement_Urbain\_assets\images';
+        $graph->StrokeStore($imagePath);
+
+        return $imagePath;
+    }
+
+
+
 }

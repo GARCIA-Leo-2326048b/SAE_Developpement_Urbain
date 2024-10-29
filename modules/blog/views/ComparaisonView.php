@@ -27,7 +27,20 @@ class ComparaisonView
         <ul>
             <li><img src= "<?= $results['path']; ?>" alt="Graphe comparatif" /></li>
         </ul>
+
+        <h3>Distribution des surfaces (Simulation)</h3>
+        <ul>
+            <li><img src="<?= $results['distributionSimPath']; ?>" alt="Distribution des surfaces - Simulation" /></li>
+        </ul>
+
+        <h3>Distribution des surfaces (Vérité terrain)</h3>
+        <ul>
+            <li><img src="<?= $results['distributionVerPath']; ?>" alt="Distribution des surfaces - Vérité terrain" /></li>
+        </ul>
+
+        <p>La Distance d'Haustroff: <?= $results['hausdorff']; ?></p>
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
+
 }
