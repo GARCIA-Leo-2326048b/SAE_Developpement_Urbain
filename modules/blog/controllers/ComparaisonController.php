@@ -23,12 +23,12 @@ class ComparaisonController{
         $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
         $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM');
 
-        $geometrySim = $this->loadGeoJson($polygonSim);
-        $geometryVer = $this->loadGeoJson($polygonVer);
+        $geometrySimProjected = $this->model->projectGeoJson( $polygonSim);
+        $geometryVerProjected = $this->model->projectGeoJson($polygonVer);
 
         // Récupérer les aires et périmètres pour simulation et vérité terrain
-        $valuesSim = $this->getAreasAndPerimeters($geometrySim);
-        $valuesVer = $this->getAreasAndPerimeters($geometryVer);
+        $valuesSim = $this->getAreasAndPerimeters(geoPHP::load($geometrySimProjected));
+        $valuesVer = $this->getAreasAndPerimeters(geoPHP::load($geometryVerProjected));
 
         // Calculer les statistiques pour les aires
          $areaStatsSim = $this->getStat($valuesSim['areas']);
@@ -58,14 +58,6 @@ class ComparaisonController{
             'ver' => $areaStatsVer,
             'path' => $chemin
         ]);
-    }
-
-    private function loadGeoJson($geoJsonData) {
-        $geometry = GeoPHP::load($geoJsonData, 'json');
-        if (!$geometry) {
-            throw new \Exception("The GeoJSON file could not be loaded.");
-        }
-        return $geometry;
     }
 
     private function getAreasAndPerimeters($geometry){
