@@ -60,20 +60,37 @@ class ComparaisonController{
         ]);
     }
 
-    private function getAreasAndPerimeters($geometry){
-        $areas = [];
-        $perimeters = [];
+    private function getAreasAndPerimeters($geometry,&$areas = [], &$perimeters = []){
         //on rentre les aires de tous les batiments dans un tableau
-        foreach ($geometry->getComponents() as $component) {
-            if ($component->geometryType() === 'Polygon') {
-                $areas[] = $component->area();
-                $perimeters[] = $component->length();
-            }
+        $geometryType = $geometry->geometryType();
+        switch ($geometryType){
+            case 'MultiPolygon':
+                foreach ($geometry->getComponents() as $component) {
+                    $this->getAreasAndPerimeters($component,$areas,$perimeters);
+                }
+                break;
+            case 'LineString':
+                $perimeters[] = $geometry->length();
+                break;
+            case 'Polygon':
+                $areas[] = $geometry->area();
+                // Parcours des composants pour les contours et les trous (LineString)
+                foreach ($geometry->getComponents() as $subComponent) {
+                    if ($subComponent->geometryType() === 'LineString') {
+                        // Calcul du périmètre de chaque contour
+                        $perimeters[] = $subComponent->length();
+                    }
+                }
+                break;
+            default:
+                echo "Type de géométrie non pris en charge : " . $geometryType . "\n";
+                break;
+
         }
         return [
             'areas'=>$areas,
             'perimeters'=>$perimeters];
-        }
+    }
 
 
     private function getShapeIndexStats($polygon)
