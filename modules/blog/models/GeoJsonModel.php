@@ -60,8 +60,10 @@ class GeoJsonModel
         $geoJsonArray = json_decode($geoJson,true);
 
         foreach ($geoJsonArray['features'] as &$feature) {
+            if (isset($feature['geometry']['bbox'])) {
+                $this->transformBbox($feature['geometry']['bbox'], $projSource, $projTarget, $proj4);
+            }
             if (isset($feature['geometry']['coordinates'])) {
-
                 $this->transformCoordinates($feature['geometry']['coordinates'],$projSource, $projTarget, $proj4);
             }
         }
@@ -86,6 +88,14 @@ class GeoJsonModel
         }
     }
 
+    private function transformBbox(&$bbox, $projSource, $projTarget, $proj4) {
+        for ($i = 0; $i < count($bbox); $i += 2) {
+            $srcPoint = new Point($bbox[$i], $bbox[$i + 1], $projSource);
+            $destPoint = $proj4->transform($projSource, $projTarget, $srcPoint);
 
+            $bbox[$i] = (float) $destPoint->x;
+            $bbox[$i + 1] = (float) $destPoint->y;
+        }
+    }
 
 }
