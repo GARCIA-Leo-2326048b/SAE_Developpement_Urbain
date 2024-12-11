@@ -169,6 +169,120 @@ class UploadModel {
         return $stmt->execute();
     }
 
+
+    public function createFolder($userId, $parentFolder, $folderName): void {
+        // Vérifier si le dossier existe déjà sous ce parent
+        $query = "SELECT COUNT(*) FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':folderName', $folderName);
+        $stmt->bindParam(':parentFolder', $parentFolder);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            echo "Ce répertoire existe déjà.";
+            return;
+        }
+
+        // Insérer le dossier dans la table dossier
+        $insertFolder = "INSERT INTO dossier (nom, dossierParent) VALUES (:folderName, :parentFolder)";
+        $stmtFolder = $this->db->prepare($insertFolder);
+        $stmtFolder->bindParam(':folderName', $folderName);
+        $stmtFolder->bindParam(':parentFolder', $parentFolder);
+        $stmtFolder->execute();
+
+        // Insérer l'association du dossier avec l'utilisateur dans organisation
+        $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderName, :userId)";
+        $stmtOrg = $this->db->prepare($insertOrg);
+        $stmtOrg->bindParam(':folderId', $folderName);
+        $stmtOrg->bindParam(':userId', $userId);
+        $stmtOrg->execute();
+    }
+
+    public function getUserFilesWithFolders($userId) {
+
+
+        //Récupération du root :
+        $queryFolderRoot = "
+        SELECT d.nom
+        FROM dossier d
+        INNER JOIN organisation o ON d.nom = o.id_dossier
+        WHERE o.id_utilisateur = :userId";
+        $stmtFolders = $this->db->prepare($queryFolderRoot);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        $root = $stmtFolders->fetchAll();
+
+
+
+
+        // Récupérer les dossiers de l'utilisateur
+        $queryFolders = "
+        SELECT d.nom, d.dossierParent
+        FROM dossier d
+        INNER JOIN organisation o ON d.nom = o.id_dossier
+        WHERE o.id_utilisateur = :userId 
+        AND d.dossierParent <> NULL
+        ORDER BY d.dossierParent, d.nom";
+        $stmtFolders = $this->db->prepare($queryFolders);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        $folders = $stmtFolders->fetchAll();
+
+        // Récupérer les fichiers de l'utilisateur
+        $queryFiles = "
+        SELECT f.file_name, o.id_dossier AS dossier_id
+        FROM uploadGJ f
+        INNER JOIN organisation o ON f.file_name = o.id_fichier
+        WHERE o.id_utilisateur = :userId";
+        $stmtFiles = $this->db->prepare($queryFiles);
+        $stmtFiles->bindParam(':userId', $userId);
+        $stmtFiles->execute();
+        $files = $stmtFiles->fetchAll();
+
+        // Organiser les dossiers et fichiers en structure hiérarchique
+        $folderTree = [];
+        $folderIndex = [];
+
+        $folderIndex[$root] = [
+            'name' => 'Root', // Nom du dossier racine
+            'parent_id' => null,
+            'children' => [],
+            'files' => []
+        ];
+        // Construire l'arbre des dossiers
+        foreach ($folders as $folder) {
+            $folderIndex[$folder['dossier_id']] = [
+                'name' => $folder['nom'],
+                'parent_id' => $folder['dossierParent'],
+                'children' => [],
+                'files' => []
+            ];
+        }
+
+        // Ajouter les fichiers dans leur dossier respectif
+        foreach ($files as $file) {
+            if (isset($folderIndex[$file['dossier_id']])) {
+                $folderIndex[$file['dossier_id']]['files'][] = $file['file_name'];
+            } else {
+                // Ajouter les fichiers sans dossier dans le dossier racine
+                $folderIndex[$root]['files'][] = $file['file_name'];
+            }
+        }
+
+        // Créer la structure en arbre des dossiers et sous-dossiers
+        foreach ($folderIndex as $id => &$folder) {
+            if ($folder['parent_id'] === null) {
+                $folderIndex[$folder[$root]]['children'][] = &$folder;
+            } else {
+                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
+            }
+        }
+
+        return $root ;
+    }
+
+
+
     public function file_existGT($customName)
     {
         $query = "SELECT COUNT(*) FROM uploadGT WHERE file_name = :file_name";

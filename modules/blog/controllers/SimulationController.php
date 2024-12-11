@@ -22,7 +22,8 @@ class SimulationController
     }
     public function execute() : void {
         $this->files = $this->uploadModel->getAllUploadsByUser($this->utilisateur);
-        (new PreparationSimulation($this->files))->show();
+        $repertoires = $this->uploadModel->getUserFilesWithFolders($this->utilisateur);
+        (new PreparationSimulation($repertoires))->show();
     }
 
 }

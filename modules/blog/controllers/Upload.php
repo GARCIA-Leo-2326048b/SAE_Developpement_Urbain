@@ -49,6 +49,26 @@ class Upload
         }
     }
 
+    public function folder($data)
+    {
+
+// Vérifier que folderName est défini
+        if (isset($data['folderName'])) {
+            $folderName = $data['folderName'];
+            $dossierParent = isset($data['dossierParent']) ? $data['dossierParent'] : null;
+
+            // Appeler la méthode pour créer le dossier
+            try {
+                $this->uploadModel->createFolder( $this->currentUserId,$dossierParent,$folderName);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Nom du dossier non fourni']);
+        }
+    }
+
     // Gérer l'upload des Shapefiles
     public function handleShapefileUpload()
     {
@@ -344,5 +364,7 @@ class Upload
         }
         return $message;
     }
+
+
 }
 ?>
