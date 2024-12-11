@@ -1,13 +1,16 @@
 <?php
-
 namespace blog\views;
 
 class ComparaisonView
 {
     public function showComparison($results)
     {
+
         ob_start();
         ?>
+        <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+        <script src="/_assets/scripts/chart.js"></script>
+
         <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
 
         <h2>Statistiques des surfaces (en m²)</h2>
@@ -45,9 +48,16 @@ class ComparaisonView
                 <li>Maximum: <?= $results['shapeIndexStatsVer']['max']; ?></li>
             </ul>
         </ul>
+
+        <script>
+            // Passer les données PHP au fichier JS via des variables JavaScript
+            var DonneesSimulees = <?php echo json_encode($results['graph']['graphSim'], JSON_NUMERIC_CHECK); ?>;
+            var DonneesVerite = <?php echo json_encode($results['graph']['graphVer'], JSON_NUMERIC_CHECK); ?>;
+        </script>
         <ul>
-            <li><img src= "<?= $results['path']; ?>" alt="Graphe comparatif" /></li>
+            <div id="chartContainer" style="height: 370px; width: 100%;"></div>
         </ul>
+
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }

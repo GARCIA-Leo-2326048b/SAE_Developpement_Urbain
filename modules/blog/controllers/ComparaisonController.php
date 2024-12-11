@@ -31,7 +31,7 @@ class ComparaisonController{
         $valuesVer = $this->getAreasAndPerimeters(geoPHP::load($geometryVerProjected));
 
         // Calculer les statistiques pour les aires
-         $areaStatsSim = $this->getStat($valuesSim['areas']);
+        $areaStatsSim = $this->getStat($valuesSim['areas']);
         $areaStatsVer = $this->getStat($valuesVer['areas']);
 
         /*// Calculer les Shape Index pour simulation et vérité terrain
@@ -51,12 +51,13 @@ class ComparaisonController{
         $this->view->showComparison($results);*/
 
 
-        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
+//        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
+        $graph = $this->graphe($areaStatsSim,$areaStatsVer);
 
         $this->view->showComparison([
-            'sim' => $areaStatsSim,
-            'ver' => $areaStatsVer,
-            'path' => $chemin
+            'areaStatsSim' => $areaStatsSim,
+            'areaStatsVer' => $areaStatsVer,
+            'graph' => $graph
         ]);
     }
 
@@ -166,5 +167,23 @@ class ComparaisonController{
         $graph->StrokeStore($imagePath);
 
         return $imagePath;
+    }
+
+    private function graphe($statsSim,$statsVer) {
+        $graphSim = array(
+            array("label"=> "Moyenne", "y"=> $statsSim['mean']),
+            array("label"=> "Minimum", "y"=> $statsSim['min']),
+            array("label"=> "Maximum", "y"=> $statsSim['max']),
+            array("label"=> "Écart-type", "y"=> $statsSim['std'])
+        );
+        $graphVer = array(
+            array("label"=> "Moyenne", "y"=> $statsVer['mean']),
+            array("label"=> "Minimum", "y"=> $statsVer['min']),
+            array("label"=> "Maximum", "y"=> $statsVer['max']),
+            array("label"=> "Écart-type", "y"=> $statsVer['std'])
+        );
+
+        return ['graphSim' => $graphSim,
+                'graphVer' => $graphVer];
     }
 }
