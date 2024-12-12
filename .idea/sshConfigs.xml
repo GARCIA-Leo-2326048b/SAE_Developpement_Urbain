@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig authType="PASSWORD" host="ssh-developpement-urbain.alwaysdata.net" id="a5113454-9102-45df-899a-43f2b745622b" port="22" nameFormat="DESCRIPTIVE" username="developpement-urbain" useOpenSSHConfig="true" />
+      <sshConfig authType="PASSWORD" host="ssh-developpement-urbain.alwaysdata.net" id="a5113454-9102-45df-899a-43f2b745622b" port="22" nameFormat="DESCRIPTIVE" username="developpement-urbain" useOpenSSHConfig="false" />
     </configs>
   </component>
 </project>
