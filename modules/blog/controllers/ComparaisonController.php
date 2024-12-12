@@ -131,6 +131,23 @@ class ComparaisonController{
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
     }
 
+    private function getHausdorffDistance($geometry1, $geometry2)
+    {
+        if (!$geometry1 || !$geometry2) {
+            throw new InvalidArgumentException("Les géométries fournies sont invalides ou nulles.");
+        }
+
+        // Convertir les géométries en collections de points
+        $points1 = $this->extractPoints($geometry1);
+        $points2 = $this->extractPoints($geometry2);
+
+        // Calculer la distance maximale minimale (Hausdorff)
+        $maxMinDistance1 = $this->calculateMaxMinDistance($points1, $points2);
+        $maxMinDistance2 = $this->calculateMaxMinDistance($points2, $points1);
+
+        return max($maxMinDistance1, $maxMinDistance2);
+    }
+
     private function createHistogram($statsSim, $statsVer)
     {
         //initialisation des données pour les barres
