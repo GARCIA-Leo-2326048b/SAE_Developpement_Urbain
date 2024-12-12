@@ -210,75 +210,76 @@ class UploadModel {
         $stmtFolders = $this->db->prepare($queryFolderRoot);
         $stmtFolders->bindParam(':userId', $userId);
         $stmtFolders->execute();
-        $root = $stmtFolders->fetchAll();
+        $root = $stmtFolders->fetchColumn();
 
 
 
-
-        // Récupérer les dossiers de l'utilisateur
+        // Récupérer les dossiers
         $queryFolders = "
-        SELECT d.nom, d.dossierParent
-        FROM dossier d
-        INNER JOIN organisation o ON d.nom = o.id_dossier
-        WHERE o.id_utilisateur = :userId 
-        AND d.dossierParent <> NULL
-        ORDER BY d.dossierParent, d.nom";
+    SELECT d.nom AS folder_name, d.nom AS dossier_id, d.dossierParent
+    FROM dossier d
+    INNER JOIN organisation o ON d.nom = o.id_dossier
+    WHERE o.id_utilisateur = :userId
+    AND d.dossierParent IS NOT NULL
+    ORDER BY d.dossierParent, d.nom";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
         $stmtFolders->execute();
-        $folders = $stmtFolders->fetchAll();
+        $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
 
-        // Récupérer les fichiers de l'utilisateur
+        // Récupérer les fichiers
         $queryFiles = "
-        SELECT f.file_name, o.id_dossier AS dossier_id
-        FROM uploadGJ f
-        INNER JOIN organisation o ON f.file_name = o.id_fichier
-        WHERE o.id_utilisateur = :userId";
+    SELECT f.file_name, o.id_dossier AS dossier_id
+    FROM uploadGJ f
+    INNER JOIN organisation o ON f.file_name = o.id_fichier
+    WHERE o.id_utilisateur = :userId";
         $stmtFiles = $this->db->prepare($queryFiles);
         $stmtFiles->bindParam(':userId', $userId);
         $stmtFiles->execute();
-        $files = $stmtFiles->fetchAll();
+        $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
+        var_dump($files);
 
-        // Organiser les dossiers et fichiers en structure hiérarchique
+        // Construire la hiérarchie
         $folderTree = [];
         $folderIndex = [];
 
+        // Initialisation du dossier racine
         $folderIndex[$root] = [
-            'name' => 'Root', // Nom du dossier racine
+            'name' => 'Root',
             'parent_id' => null,
             'children' => [],
             'files' => []
         ];
-        // Construire l'arbre des dossiers
+
+        // Ajout des dossiers à l'index
         foreach ($folders as $folder) {
             $folderIndex[$folder['dossier_id']] = [
-                'name' => $folder['nom'],
+                'name' => $folder['folder_name'],
                 'parent_id' => $folder['dossierParent'],
                 'children' => [],
                 'files' => []
             ];
         }
 
-        // Ajouter les fichiers dans leur dossier respectif
+        // Ajout des fichiers aux dossiers
         foreach ($files as $file) {
+            var_dump($file);
             if (isset($folderIndex[$file['dossier_id']])) {
                 $folderIndex[$file['dossier_id']]['files'][] = $file['file_name'];
             } else {
-                // Ajouter les fichiers sans dossier dans le dossier racine
-                $folderIndex[$root]['files'][] = $file['file_name'];
+                $folderIndex[$root]['files'][] = $file['file_name']; // Si le dossier est manquant
             }
         }
 
-        // Créer la structure en arbre des dossiers et sous-dossiers
+        // Création de la structure hiérarchique
         foreach ($folderIndex as $id => &$folder) {
             if ($folder['parent_id'] === null) {
-                $folderIndex[$folder[$root]]['children'][] = &$folder;
+                $folderTree[] = &$folder;
             } else {
                 $folderIndex[$folder['parent_id']]['children'][] = &$folder;
             }
         }
-
-        return $root ;
+        return $folderTree; // Retourne l'arborescence
     }
 
 

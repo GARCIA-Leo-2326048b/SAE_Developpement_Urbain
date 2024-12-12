@@ -18,12 +18,14 @@ class PreparationSimulation
 // Fonction récursive pour afficher les dossiers et fichiers dans une structure imbriquée
 private function displayFolderTree($folders)
 {
+    // On suppose que $folders contient déjà les enfants du root.
+    var_dump($folders);
     echo '<ul>';
     foreach ($folders as $folder) {
         echo "<li>";
         echo "<button onclick=\"toggleFolder(this)\">" . htmlspecialchars($folder['name']) . "</button>";
 
-        // Afficher les fichiers de ce dossier
+        // Afficher les fichiers du dossier courant
         if (!empty($folder['files'])) {
             echo '<ul>';
             foreach ($folder['files'] as $file) {
@@ -32,7 +34,7 @@ private function displayFolderTree($folders)
             echo '</ul>';
         }
 
-        // Afficher les sous-dossiers de manière récursive
+        // Afficher les sous-dossiers récursivement
         if (!empty($folder['children'])) {
             $this->displayFolderTree($folder['children']);
         }
@@ -41,6 +43,7 @@ private function displayFolderTree($folders)
     }
     echo '</ul>';
 }
+
 
 private function generateFolderOptions($folders, $prefix = '')
 {
@@ -108,7 +111,7 @@ private function generateFolderOptions($folders, $prefix = '')
                                 // Récupérer les données JSON
                                     $data = json_decode(file_get_contents("php://input"), true);
                                     $this->upload->folder($data);
-                                ?>A
+                                ?>
 
                             }
                         }
