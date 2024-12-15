@@ -49,7 +49,7 @@ class Upload
         }
     }
 
-    public function folder($data)
+    public function folder()
     {
 
 // Vérifier que folderName est défini

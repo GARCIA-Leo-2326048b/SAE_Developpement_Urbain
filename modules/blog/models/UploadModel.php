@@ -229,10 +229,9 @@ class UploadModel {
 
         // Récupérer les fichiers
         $queryFiles = "
-    SELECT f.file_name, o.id_dossier AS dossier_id
+    SELECT f.file_name,f.dossier as dossier_id
     FROM uploadGJ f
-    INNER JOIN organisation o ON f.file_name = o.id_fichier
-    WHERE o.id_utilisateur = :userId";
+    WHERE user = :userId";
         $stmtFiles = $this->db->prepare($queryFiles);
         $stmtFiles->bindParam(':userId', $userId);
         $stmtFiles->execute();

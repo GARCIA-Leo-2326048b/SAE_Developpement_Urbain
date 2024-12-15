@@ -30,7 +30,7 @@ class SimulationController
         } else {
             $folders = []; // Structure invalide ou vide
         }
-        (new PreparationSimulation($folders))->show();
+        (new PreparationSimulation($repertoires))->show();
     }
 
 }

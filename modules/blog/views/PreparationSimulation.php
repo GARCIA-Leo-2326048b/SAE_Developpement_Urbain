@@ -18,14 +18,12 @@ class PreparationSimulation
 // Fonction récursive pour afficher les dossiers et fichiers dans une structure imbriquée
 private function displayFolderTree($folders)
 {
-    // On suppose que $folders contient déjà les enfants du root.
-    var_dump($folders);
+
     echo '<ul>';
     foreach ($folders as $folder) {
-        echo "<li>";
-        echo "<button onclick=\"toggleFolder(this)\">" . htmlspecialchars($folder['name']) . "</button>";
+        echo '<li>';
 
-        // Afficher les fichiers du dossier courant
+        // Affiche les fichiers du dossier courant
         if (!empty($folder['files'])) {
             echo '<ul>';
             foreach ($folder['files'] as $file) {
@@ -34,15 +32,21 @@ private function displayFolderTree($folders)
             echo '</ul>';
         }
 
-        // Afficher les sous-dossiers récursivement
-        if (!empty($folder['children'])) {
-            $this->displayFolderTree($folder['children']);
-        }
 
-        echo "</li>";
+        // Affiche les sous-dossiers
+        if (!empty($folder['children'])) {
+            // Affiche le nom du dossier
+            echo "<button onclick='toggleFolder(this)' data-folder-id='" . htmlspecialchars($folder['name']) . "'>";
+            echo "<i class='icon-folder'></i> " . htmlspecialchars($folder['name']) . "</button>";
+            echo "<ul style='display: none;'>";
+            $this->displayFolderTree($folder['children']);
+            echo "</ul>";
+        }
+        echo '</li>';
     }
     echo '</ul>';
 }
+
 
 
 private function generateFolderOptions($folders, $prefix = '')
@@ -70,6 +74,18 @@ private function generateFolderOptions($folders, $prefix = '')
                 <aside id="history" >
 
                     <script>
+
+                        function toggleFolder(button) {
+                            const nextElement = button.nextElementSibling;
+                            if (nextElement && nextElement.tagName === 'UL') {
+                                const isHidden = nextElement.style.display === 'none';
+                                nextElement.style.display = isHidden ? 'block' : 'none';
+                                button.querySelector('.icon-folder').textContent = isHidden ? '📂' : '📁';
+                            }
+                        }
+
+
+
                         document.getElementById("history").addEventListener("click", function(event) {
                             // Vérifie si l'élément cliqué est #history lui-même et non un fichier
                             if (event.target === this) {
@@ -233,8 +249,6 @@ private function generateFolderOptions($folders, $prefix = '')
                             </select>
                             <button onclick="createNewFolder()">Créer un nouveau dossier</button>
                         </div>
-
-
                     </form>
                 </section>
 
