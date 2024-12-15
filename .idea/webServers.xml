@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8422716c-a6bb-477d-b507-45a92068f9b3" name="developpement-urbain">
+        <fileTransfer rootFolder="/home/developpement-urbain" accessType="SFTP" host="ssh-developpement-urbain.alwaysdata.net" port="22" sshConfigId="66247d25-553c-4812-acd4-3ca5ed4879d2" sshConfig="developpement-urbain@ssh-developpement-urbain.alwaysdata.net:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

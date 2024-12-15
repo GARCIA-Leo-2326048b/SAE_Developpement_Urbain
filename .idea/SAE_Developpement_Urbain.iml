@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/_assets/config" isTestSource="false" packagePrefix="_assets\config\" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/blog" isTestSource="false" packagePrefix="blog\" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/amenadiel/jpgraph" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/phayes/geophp" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
