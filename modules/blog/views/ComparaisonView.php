@@ -6,41 +6,60 @@ class ComparaisonView
 {
     public function showComparison($results)
     {
+
         ob_start();
         ?>
+        <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+        <script src="/_assets/scripts/chart.js"></script>
+
         <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
-        <h2>Simulation</h2>
+
+        <h2>Statistiques des surfaces (en m²)</h2>
         <ul>
-            <li>Aire moyenne: <?= $results['sim']['mean']; ?> m²</li>
-            <li>Écart-type: <?= $results['sim']['std']; ?> m²</li>
-            <li>Aire minimum: <?= $results['sim']['min']; ?> m²</li>
-            <li>Aire maximum: <?= $results['sim']['max']; ?> m²</li>
+            <li><strong>Simulation :</strong></li>
+            <ul>
+                <li>Moyenne: <?= $results['areaStatsSim']['mean']; ?> m²</li>
+                <li>Écart-type: <?= $results['areaStatsSim']['std']; ?> m²</li>
+                <li>Minimum: <?= $results['areaStatsSim']['min']; ?> m²</li>
+                <li>Maximum: <?= $results['areaStatsSim']['max']; ?> m²</li>
+            </ul>
+            <li><strong>Vérité terrain :</strong></li>
+            <ul>
+                <li>Moyenne: <?= $results['areaStatsVer']['mean']; ?> m²</li>
+                <li>Écart-type: <?= $results['areaStatsVer']['std']; ?> m²</li>
+                <li>Minimum: <?= $results['areaStatsVer']['min']; ?> m²</li>
+                <li>Maximum: <?= $results['areaStatsVer']['max']; ?> m²</li>
+            </ul>
         </ul>
 
-        <h2>Vérité terrain</h2>
+        <h2>Statistiques des indices de forme (Shape Index)</h2>
         <ul>
-            <li>Aire moyenne: <?= $results['ver']['mean']; ?> m²</li>
-            <li>Écart-type: <?= $results['ver']['std']; ?> m²</li>
-            <li>Aire minimum: <?= $results['ver']['min']; ?> m²</li>
-            <li>Aire maximum: <?= $results['ver']['max']; ?> m²</li>
-        </ul>
-        <ul>
-            <li><img src= "<?= $results['path']; ?>" alt="Graphe comparatif" /></li>
-        </ul>
-
-        <h3>Distribution des surfaces (Simulation)</h3>
-        <ul>
-            <li><img src="<?= $results['distributionSimPath']; ?>" alt="Distribution des surfaces - Simulation" /></li>
-        </ul>
-
-        <h3>Distribution des surfaces (Vérité terrain)</h3>
-        <ul>
-            <li><img src="<?= $results['distributionVerPath']; ?>" alt="Distribution des surfaces - Vérité terrain" /></li>
+            <li><strong>Simulation :</strong></li>
+            <ul>
+                <li>Moyenne: <?= $results['shapeIndexStatsSim']['mean']; ?></li>
+                <li>Écart-type: <?= $results['shapeIndexStatsSim']['std']; ?></li>
+                <li>Minimum: <?= $results['shapeIndexStatsSim']['min']; ?></li>
+                <li>Maximum: <?= $results['shapeIndexStatsSim']['max']; ?></li>
+            </ul>
+            <li><strong>Vérité terrain :</strong></li>
+            <ul>
+                <li>Moyenne: <?= $results['shapeIndexStatsVer']['mean']; ?></li>
+                <li>Écart-type: <?= $results['shapeIndexStatsVer']['std']; ?></li>
+                <li>Minimum: <?= $results['shapeIndexStatsVer']['min']; ?></li>
+                <li>Maximum: <?= $results['shapeIndexStatsVer']['max']; ?></li>
+            </ul>
         </ul>
 
-        <p>La Distance d'Haustroff: <?= $results['hausdorff']; ?></p>
+        <script>
+            // Passer les données PHP au fichier JS via des variables JavaScript
+            var DonneesSimulees = <?php echo json_encode($results['graph']['graphSim'], JSON_NUMERIC_CHECK); ?>;
+            var DonneesVerite = <?php echo json_encode($results['graph']['graphVer'], JSON_NUMERIC_CHECK); ?>;
+        </script>
+        <ul>
+            <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+        </ul>
+
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
-
 }

@@ -23,64 +23,99 @@ class ComparaisonController{
         $polygonSim = $this->model->fetchGeoJson('Household_3-2019.geojson');
         $polygonVer = $this->model->fetchGeoJson('Buildings2019_ABM');
 
-        $geometrySim = $this->loadGeoJson($polygonSim);
-        $geometryVer = $this->loadGeoJson($polygonVer);
+        $geometrySimProjected = $this->model->projectGeoJson( $polygonSim);
+        $geometryVerProjected = $this->model->projectGeoJson($polygonVer);
 
-        $areaStatsSim = $this->getAreaStat($geometrySim);
-        $areaStatsVer = $this->getAreaStat($geometryVer);
+        // Récupérer les aires et périmètres pour simulation et vérité terrain
+        $valuesSim = $this->getAreasAndPerimeters(geoPHP::load($geometrySimProjected));
+        $valuesVer = $this->getAreasAndPerimeters(geoPHP::load($geometryVerProjected));
 
-        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
+        // Calculer les statistiques pour les aires
+        $areaStatsSim = $this->getStat($valuesSim['areas']);
+        $areaStatsVer = $this->getStat($valuesVer['areas']);
 
-        // Calculer la distribution des surfaces pour la simulation et la vérité terrain
-        $distributionSim = $this->calculateAreaDistribution($areaStatsSim['areas']);
-        $distributionVer = $this->calculateAreaDistribution($areaStatsVer['areas']);
+        /*// Calculer les Shape Index pour simulation et vérité terrain
+        $shapeIndexesSim = $this->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
+        $shapeIndexesVer = $this->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
 
-        // Générer les histogrammes basés sur les distributions
-        $distributionSimPath = $this->createHistogramFromDistribution($distributionSim, 'Distribution des surfaces - Simulation');
-        $distributionVerPath = $this->createHistogramFromDistribution($distributionVer, 'Distribution des surfaces - Vérité terrain');
+        // Calculer les statistiques pour les Shape Index
+        $shapeIndexStatsSim = $this->getStat($shapeIndexesSim);
+        $shapeIndexStatsVer = $this->getStat($shapeIndexesVer);
 
-        // Calcul de la distance de Hausdorff
-        $hausdorffDistance = $this->calculateHausdorffDistance($geometrySim, $geometryVer);
+        $results = [
+            'areaStatsSim' => $areaStatsSim,
+            'areaStatsVer' => $areaStatsVer,
+            'shapeIndexStatsSim' => $shapeIndexStatsSim,
+            'shapeIndexStatsVer' => $shapeIndexStatsVer
+        ];
+        $this->view->showComparison($results);*/
 
-        // Affichage des résultats via la vue
+
+//        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
+        $graph = $this->graphe($areaStatsSim,$areaStatsVer);
+
         $this->view->showComparison([
-            'sim' => $areaStatsSim,
-            'ver' => $areaStatsVer,
-            'path' => $chemin,
-            'distributionSimPath' => $distributionSimPath,
-            'distributionVerPath' => $distributionVerPath,
-            'hausdorff' => $hausdorffDistance,
+            'areaStatsSim' => $areaStatsSim,
+            'areaStatsVer' => $areaStatsVer,
+            'graph' => $graph
         ]);
     }
 
-//a
-    private function loadGeoJson($geoJsonData) {
-        $geometry = GeoPHP::load($geoJsonData, 'json');
-        if (!$geometry) {
-            throw new \Exception("The GeoJSON file could not be loaded.");
+    private function getAreasAndPerimeters($geometry,&$areas = [], &$perimeters = []){
+        //on rentre les aires de tous les batiments dans un tableau
+        $geometryType = $geometry->geometryType();
+        switch ($geometryType){
+            case 'MultiPolygon':
+                foreach ($geometry->getComponents() as $component) {
+                    $this->getAreasAndPerimeters($component,$areas,$perimeters);
+                }
+                break;
+            case 'LineString':
+                $perimeters[] = $geometry->length();
+                break;
+            case 'Polygon':
+                $areas[] = $geometry->area();
+                // Parcours des composants pour les contours et les trous (LineString)
+                foreach ($geometry->getComponents() as $subComponent) {
+                    if ($subComponent->geometryType() === 'LineString') {
+                        // Calcul du périmètre de chaque contour
+                        $perimeters[] = $subComponent->length();
+                    }
+                }
+                break;
+            default:
+                echo "Type de géométrie non pris en charge : " . $geometryType . "\n";
+                break;
+
         }
-        return $geometry;
+        return [
+            'areas'=>$areas,
+            'perimeters'=>$perimeters];
     }
 
 
-    private function getAreaStat($geometry) {
-        $areas = [];
-        //on rentre les aires de tous les batiments dans un tableau
-        foreach ($geometry->getComponents() as $component) {
-            if ($component->geometryType() === 'Polygon') {
-                $areas[]=$component->area();
+    private function getShapeIndexStats($polygon)
+    {
+        $shapeIndexes = [];
+        foreach ($polygon['areas'] as $i => $area) {
+            if ($area > 0) {
+                $shapeIndex = $polygon['perimeters'][$i] / (2 * sqrt(pi() * $area));
+                $shapeIndexes[] = $shapeIndex;
             }
         }
-        if (count($areas) > 0) {
-            $mean = array_sum($areas)/count($areas);//moyenne des aires
-            $min = min($areas);//aire minimum
-            $max = max($areas);//aire maximum
-            $std = $this->calculateStandardDeviation($areas,$mean);//ecart-type
+        return $shapeIndexes;
+    }
+    private function getStat($values) {
+
+        if (count($values) > 0) {
+            $mean = array_sum($values)/count($values);//moyenne des aires
+            $min = min($values);//aire minimum
+            $max = max($values);//aire maximum
+            $std = $this->calculateStandardDeviation($values,$mean);//ecart-type
         } else {
             $mean =$max=$min=$std= 0;
         }
         return [
-            'areas' => $areas,
             'mean' => $mean,
             'min' => $min,
             'max' => $max,
@@ -95,6 +130,23 @@ class ComparaisonController{
         }
         $variance = $sum / count($areas);  // Calcul de la variance
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
+    }
+
+    private function getHausdorffDistance($geometry1, $geometry2)
+    {
+        if (!$geometry1 || !$geometry2) {
+            throw new InvalidArgumentException("Les géométries fournies sont invalides ou nulles.");
+        }
+
+        // Convertir les géométries en collections de points
+        $points1 = $this->extractPoints($geometry1);
+        $points2 = $this->extractPoints($geometry2);
+
+        // Calculer la distance maximale minimale (Hausdorff)
+        $maxMinDistance1 = $this->calculateMaxMinDistance($points1, $points2);
+        $maxMinDistance2 = $this->calculateMaxMinDistance($points2, $points1);
+
+        return max($maxMinDistance1, $maxMinDistance2);
     }
 
     private function createHistogram($statsSim, $statsVer)
@@ -134,115 +186,21 @@ class ComparaisonController{
         return $imagePath;
     }
 
+    private function graphe($statsSim,$statsVer) {
+        $graphSim = array(
+            array("label"=> "Moyenne", "y"=> $statsSim['mean']),
+            array("label"=> "Minimum", "y"=> $statsSim['min']),
+            array("label"=> "Maximum", "y"=> $statsSim['max']),
+            array("label"=> "Écart-type", "y"=> $statsSim['std'])
+        );
+        $graphVer = array(
+            array("label"=> "Moyenne", "y"=> $statsVer['mean']),
+            array("label"=> "Minimum", "y"=> $statsVer['min']),
+            array("label"=> "Maximum", "y"=> $statsVer['max']),
+            array("label"=> "Écart-type", "y"=> $statsVer['std'])
+        );
 
-
-    // Méthode pour calculer la distance d'Hausdorff entre deux géométries
-    private function calculateHausdorffDistance($geometryA, $geometryB) {
-        $maxDistAtoB = $this->calculateDirectedHausdorffDistance($geometryA, $geometryB);
-        $maxDistBtoA = $this->calculateDirectedHausdorffDistance($geometryB, $geometryA);
-
-        // La distance d'Hausdorff est le maximum des deux directions
-        return max($maxDistAtoB, $maxDistBtoA);
+        return ['graphSim' => $graphSim,
+                'graphVer' => $graphVer];
     }
-
-    // Calcul de la distance dirigée (de A vers B)
-    private function calculateDirectedHausdorffDistance($geometryA, $geometryB) {
-        $maxDist = 0;
-
-        foreach ($geometryA->getComponents() as $componentA) {
-            foreach ($componentA->getPoints() as $pointA) {
-                // Calcul de la distance minimale entre un point de A et tous les points de B
-                $minDist = INF;
-                foreach ($geometryB->getComponents() as $componentB) {
-                    foreach ($componentB->getPoints() as $pointB) {
-                        $dist = $this->calculateDistanceBetweenPoints($pointA, $pointB);
-                        if ($dist < $minDist) {
-                            $minDist = $dist;
-                        }
-                    }
-                }
-                // Met à jour la distance maximale pour ce point
-                if ($minDist > $maxDist) {
-                    $maxDist = $minDist;
-                }
-            }
-        }
-
-        return $maxDist;
-    }
-
-    // Méthode pour calculer la distance entre deux points
-    private function calculateDistanceBetweenPoints($pointA, $pointB) {
-        $dx = $pointA->x() - $pointB->x();
-        $dy = $pointA->y() - $pointB->y();
-        return sqrt($dx * $dx + $dy * $dy); // Distance euclidienne
-    }
-
-    private function calculateAreaDistribution($areas, $numBins = null) {
-        // Déterminer le nombre de bins en fonction de la règle de Sturges
-        if ($numBins === null) {
-            $numBins = (int) (1 + 3.322 * log10(count($areas)));  // Règle de Sturges
-        }
-
-        // Calcul des bornes des classes (bin) basées sur les données
-        $minArea = min($areas);
-        $maxArea = max($areas);
-        $binWidth = ($maxArea - $minArea) / $numBins;
-
-        // Initialisation des classes
-        $distribution = array_fill(0, $numBins, 0);
-
-        // Répartition des bâtiments dans les classes
-        foreach ($areas as $area) {
-            $binIndex = min((int)(($area - $minArea) / $binWidth), $numBins - 1); // Assigner chaque surface à une classe
-            $distribution[$binIndex]++;
-        }
-
-        return [
-            'distribution' => $distribution,
-            'minArea' => $minArea,
-            'maxArea' => $maxArea,
-            'binWidth' => $binWidth,
-            'numBins' => $numBins
-        ];
-    }
-
-    private function createHistogramFromDistribution($distributionData, $title) {
-        $distribution = $distributionData['distribution'];
-        $minArea = $distributionData['minArea'];
-        $maxArea = $distributionData['maxArea'];
-        $binWidth = $distributionData['binWidth'];
-        $numBins = count($distribution);
-
-        // Labels pour les classes de surface
-        $labels = [];
-        for ($i = 0; $i < $numBins; $i++) {
-            $rangeStart = $minArea + $i * $binWidth;
-            $rangeEnd = $rangeStart + $binWidth;
-            $labels[] = sprintf("%.0f - %.0f m²", $rangeStart, $rangeEnd);
-        }
-
-        // Création du graphique
-        $graph = new Graph(800, 600);
-        $graph->SetScale('textlin');
-
-        $graph->title->Set($title);
-        $graph->xaxis->title->Set('Classes de surfaces (m²)');
-        $graph->xaxis->SetTickLabels($labels);
-        $graph->yaxis->title->Set('Nombre de bâtiments');
-
-        // Création des barres
-        $barPlot = new BarPlot($distribution);
-        $barPlot->SetFillColor('blue');
-        $graph->Add($barPlot);
-
-        // Sauvegarde de l'image
-        $imagePath = 'C:\Users\t22018451\PhpstormProjects\SAE_Developpement_Urbain\_assets\images';
-        $graph->StrokeStore($imagePath);
-
-        return $imagePath;
-    }
-
-
-
 }

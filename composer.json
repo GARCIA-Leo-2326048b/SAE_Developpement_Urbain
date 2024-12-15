@@ -7,12 +7,14 @@
     "autoload": {
         "psr-4": {
             "blog\\": "modules/blog/",
-            "_assets\\config\\": "_assets/config/"
+            "_assets\\config\\": "_assets/config/",
+          "proj4php\\": "vendor/proj4php/proj4php/src/"
         }
     },
   "require": {
     "ext-pdo": "*",
     "ext-curl": "*",
-    "ext-zip": "*"
+    "ext-zip": "*",
+    "proj4php/proj4php": "^2.0"
   }
 }
