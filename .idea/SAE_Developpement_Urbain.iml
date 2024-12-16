@@ -8,10 +8,8 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/amenadiel/jpgraph" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phayes/geophp" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/proj4php/proj4php" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="canvasjs" level="application" />
   </component>
 </module>

@@ -1,15 +1,17 @@
 <?php
+
 namespace blog\views;
 
 class ComparaisonView
 {
-    public function showComparison($results)
+    public function showComparison($results): void
     {
 
         ob_start();
         ?>
         <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
-        <script src="/_assets/scripts/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/_assets/scripts/graphiques.js"></script>
 
         <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
 
@@ -49,14 +51,40 @@ class ComparaisonView
             </ul>
         </ul>
 
-        <script>
-            // Passer les données PHP au fichier JS via des variables JavaScript
-            var DonneesSimulees = <?php echo json_encode($results['graph']['graphSim'], JSON_NUMERIC_CHECK); ?>;
-            var DonneesVerite = <?php echo json_encode($results['graph']['graphVer'], JSON_NUMERIC_CHECK); ?>;
-        </script>
         <ul>
-            <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+            <div id="diagrammeBarre" style="height: 370px; width: 100%;"></div>
         </ul>
+
+        <ul>
+            <div>
+                <canvas id="diagrammeBarre2"></canvas>
+            </div>
+        </ul>
+
+        <ul>
+            <div>
+                <canvas id="spiderChart"></canvas>
+            </div>
+        </ul>
+
+        <script>
+            // Appel de la fonction JavaScript pour le diagramme de barre
+            diagrammeBarre(
+                <?php echo json_encode($results['graph']['graphSim'])?>,
+                <?php echo json_encode($results['graph']['graphVer'])?>
+            );
+
+            // Appel de la fonction graph() avec les labels et les données passées
+            diagrammeBarre2(
+                ['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
+                <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
+                <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
+            );
+            spiderChart(['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
+                <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
+                <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
+            );
+        </script>
 
         <?php
         (new GlobalLayout('comparer', ob_get_clean()))->show();

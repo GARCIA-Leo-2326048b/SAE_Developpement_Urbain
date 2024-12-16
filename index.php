@@ -18,9 +18,6 @@ try {
             case 'compare':
                 (new blog\controllers\ComparaisonController())->compare();
                 break;
-            case 'affichageTiff':
-                (new blog\controllers\AffichageTiffController())->execute();
-                break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;
@@ -36,6 +33,8 @@ try {
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();
                 break;
+            case 'create_folder':
+                (new blog\controllers\Upload())->folder();
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;

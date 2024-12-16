@@ -52,7 +52,7 @@ class ComparaisonController{
 
 
 //        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
-        $graph = $this->graphe($areaStatsSim,$areaStatsVer);
+        $graph = $this->grapheDonnees($areaStatsSim,$areaStatsVer);
 
         $this->view->showComparison([
             'areaStatsSim' => $areaStatsSim,
@@ -198,7 +198,8 @@ class ComparaisonController{
         return $imagePath;
     }
 
-    private function graphe($statsSim,$statsVer) {
+    private function grapheDonnees($statsSim,$statsVer): array
+    {
         $graphSim = array(
             array("label"=> "Moyenne", "y"=> $statsSim['mean']),
             array("label"=> "Minimum", "y"=> $statsSim['min']),
