@@ -76,16 +76,33 @@ function diagrammeBarre2(labels, dataSim, dataVer){
     });
 }
 
-function spiderChart(labels, dataSim, dataVer){
+function normalizeData(dataSim, dataVer) {
+    const normalizedSim = [];
+    const normalizedVer = [];
+
+    // Normalisation par label
+    for (let i = 0; i < dataSim.length; i++) {
+        const maxVal = Math.max(dataSim[i], dataVer[i]); // Trouver la valeur maximale entre les deux
+        normalizedSim.push(dataSim[i] / maxVal); // Normaliser la valeur de simulation
+        normalizedVer.push(dataVer[i] / maxVal); // Normaliser la valeur de vérité terrain
+    }
+
+    return { normalizedSim, normalizedVer };
+}
+
+function spiderChart(labels, dataSim, dataVer) {
+    // Normaliser les données
+    const { normalizedSim, normalizedVer } = normalizeData(dataSim, dataVer);
+
     const ctx = document.getElementById('spiderChart');
 
     new Chart(ctx, {
         type: 'radar',
         data: {
-            labels: labels,  // Utilisation des labels passés en paramètre
+            labels: labels, // Utilisation des labels passés en paramètre
             datasets: [{
                 label: 'Simulation',
-                data: dataSim,  // Utilisation des données de simulation passées en paramètre
+                data: normalizedSim, // Données normalisées pour Simulation
                 fill: true,
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
                 borderColor: 'rgb(255, 99, 132)',
@@ -95,7 +112,7 @@ function spiderChart(labels, dataSim, dataVer){
                 pointHoverBorderColor: 'rgb(255, 99, 132)'
             }, {
                 label: 'Vérité terrain',
-                data: dataVer,  // Utilisation des données de vérité terrain passées en paramètre
+                data: normalizedVer, // Données normalisées pour Vérité terrain
                 fill: true,
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgb(54, 162, 235)',
@@ -110,8 +127,10 @@ function spiderChart(labels, dataSim, dataVer){
             scales: {
                 r: {
                     beginAtZero: true,
+                    min: 0,
+                    max: 1, // Fixer l'échelle à 0-1
                     ticks: {
-                        callback: value => `${value} m²`
+                        stepSize: 0.2 // Graduation tous les 0.2
                     }
                 }
             }

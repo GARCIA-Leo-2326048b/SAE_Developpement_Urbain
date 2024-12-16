@@ -76,11 +76,11 @@ class ComparaisonView
 
             // Appel de la fonction graph() avec les labels et les données passées
             diagrammeBarre2(
-                ['Moyenne', 'Minimum', 'Maximum', 'Écart-type'],  // Les labels que tu veux afficher
+                ['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
                 <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
                 <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
             );
-            spiderChart(['Moyenne', 'Minimum', 'Maximum', 'Écart-type'],  // Les labels que tu veux afficher
+            spiderChart(['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
                 <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
                 <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
             );
