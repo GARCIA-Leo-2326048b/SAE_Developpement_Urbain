@@ -36,6 +36,8 @@ try {
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();
                 break;
+            case 'create_folder':
+                (new blog\controllers\Upload())->folder();
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;

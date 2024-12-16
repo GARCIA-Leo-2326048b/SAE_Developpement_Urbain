@@ -1,4 +1,5 @@
 <?php
+
 namespace blog\views;
 
 class ComparaisonView

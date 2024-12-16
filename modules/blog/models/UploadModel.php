@@ -5,6 +5,7 @@ use PDO;
 
 class UploadModel {
     private $db;
+    private $errorMessage="";
 
     public function __construct($dbConnection)
     {
@@ -76,7 +77,7 @@ class UploadModel {
     }
 
     // Enregistrer une simulation
-    public function saveSimulation($fileName, $userId, $simulationData = null)
+    public function saveSimulation($fileName, $userId, $simulationData )
     {
         try {
             $query = "INSERT INTO simulations (user_id, file_name, simulation_data) 
@@ -145,5 +146,165 @@ class UploadModel {
         // Implémentez la logique réelle selon vos besoins
         return true;
     }
+
+    public function file_existGJ($customName)
+    {
+        $query = "SELECT COUNT(*) FROM uploadGJ WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $customName);
+        $stmt->execute();
+
+        if( $stmt->fetchColumn() > 0){
+            return true;
+
+        }else{
+            return false;
+        }
+    }
+
+    public function deleteFileGJ($fileName) {
+        $query = "DELETE FROM uploadGJ WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $fileName);
+        return $stmt->execute();
+    }
+
+
+    public function createFolder($userId, $parentFolder, $folderName): void {
+        // Vérifier si le dossier existe déjà sous ce parent
+        $query = "SELECT COUNT(*) FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':folderName', $folderName);
+        $stmt->bindParam(':parentFolder', $parentFolder);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            echo "Ce répertoire existe déjà.";
+            return;
+        }
+
+        // Insérer le dossier dans la table dossier
+        $insertFolder = "INSERT INTO dossier (nom, dossierParent) VALUES (:folderName, :parentFolder)";
+        $stmtFolder = $this->db->prepare($insertFolder);
+        $stmtFolder->bindParam(':folderName', $folderName);
+        $stmtFolder->bindParam(':parentFolder', $parentFolder);
+        $stmtFolder->execute();
+
+        // Insérer l'association du dossier avec l'utilisateur dans organisation
+        $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderName, :userId)";
+        $stmtOrg = $this->db->prepare($insertOrg);
+        $stmtOrg->bindParam(':folderId', $folderName);
+        $stmtOrg->bindParam(':userId', $userId);
+        $stmtOrg->execute();
+    }
+
+    public function getUserFilesWithFolders($userId) {
+
+
+        //Récupération du root :
+        $queryFolderRoot = "
+        SELECT d.nom
+        FROM dossier d
+        INNER JOIN organisation o ON d.nom = o.id_dossier
+        WHERE o.id_utilisateur = :userId";
+        $stmtFolders = $this->db->prepare($queryFolderRoot);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        $root = $stmtFolders->fetchColumn();
+
+
+
+        // Récupérer les dossiers
+        $queryFolders = "
+    SELECT d.nom AS folder_name, d.nom AS dossier_id, d.dossierParent
+    FROM dossier d
+    INNER JOIN organisation o ON d.nom = o.id_dossier
+    WHERE o.id_utilisateur = :userId
+    AND d.dossierParent IS NOT NULL
+    ORDER BY d.dossierParent, d.nom";
+        $stmtFolders = $this->db->prepare($queryFolders);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
+
+        // Récupérer les fichiers
+        $queryFiles = "
+    SELECT f.file_name,f.dossier as dossier_id
+    FROM uploadGJ f
+    WHERE user = :userId";
+        $stmtFiles = $this->db->prepare($queryFiles);
+        $stmtFiles->bindParam(':userId', $userId);
+        $stmtFiles->execute();
+        $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
+        var_dump($files);
+
+        // Construire la hiérarchie
+        $folderTree = [];
+        $folderIndex = [];
+
+        // Initialisation du dossier racine
+        $folderIndex[$root] = [
+            'name' => 'Root',
+            'parent_id' => null,
+            'children' => [],
+            'files' => []
+        ];
+
+        // Ajout des dossiers à l'index
+        foreach ($folders as $folder) {
+            $folderIndex[$folder['dossier_id']] = [
+                'name' => $folder['folder_name'],
+                'parent_id' => $folder['dossierParent'],
+                'children' => [],
+                'files' => []
+            ];
+        }
+
+        // Ajout des fichiers aux dossiers
+        foreach ($files as $file) {
+            var_dump($file);
+            if (isset($folderIndex[$file['dossier_id']])) {
+                $folderIndex[$file['dossier_id']]['files'][] = $file['file_name'];
+            } else {
+                $folderIndex[$root]['files'][] = $file['file_name']; // Si le dossier est manquant
+            }
+        }
+
+        // Création de la structure hiérarchique
+        foreach ($folderIndex as $id => &$folder) {
+            if ($folder['parent_id'] === null) {
+                $folderTree[] = &$folder;
+            } else {
+                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
+            }
+        }
+        return $folderTree; // Retourne l'arborescence
+    }
+
+
+
+    public function file_existGT($customName)
+    {
+        $query = "SELECT COUNT(*) FROM uploadGT WHERE file_name = :file_name";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $customName);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function setErrorMessage($errorMessage)
+    {
+        $this->errorMessage = $errorMessage;
+    }
+
+    public function getErrorMessage(){
+        return $this->errorMessage;
+    }
+
 }
 ?>
