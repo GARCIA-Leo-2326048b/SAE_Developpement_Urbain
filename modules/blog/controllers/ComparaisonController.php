@@ -64,35 +64,22 @@ class ComparaisonController{
     private function getAreasAndPerimeters($geometry,&$areas = [], &$perimeters = []){
         //on rentre les aires de tous les batiments dans un tableau
         $geometryType = $geometry->geometryType();
-        switch ($geometryType){
-            case 'MultiPolygon':
-                foreach ($geometry->getComponents() as $component) {
-                    $this->getAreasAndPerimeters($component,$areas,$perimeters);
-                }
-                break;
-            case 'LineString':
-                $perimeters[] = $geometry->length();
-                break;
-            case 'Polygon':
-                $areas[] = $geometry->area();
-                // Parcours des composants pour les contours et les trous (LineString)
-                foreach ($geometry->getComponents() as $subComponent) {
-                    if ($subComponent->geometryType() === 'LineString') {
-                        // Calcul du périmètre de chaque contour
-                        $perimeters[] = $subComponent->length();
-                    }
-                }
-                break;
-            default:
-                echo "Type de géométrie non pris en charge : " . $geometryType . "\n";
-                break;
 
+        if($geometryType == 'Polygon'){
+            $areas[] = $geometry->area();
+        }
+        if($geometryType == 'LineString'){
+            $perimeters[] = $geometry->length();
+        }
+        else{
+            foreach ($geometry->getComponents() as $component) {
+                $this->getAreasAndPerimeters($component,$areas,$perimeters);
+            }
         }
         return [
             'areas'=>$areas,
             'perimeters'=>$perimeters];
     }
-
 
     private function getShapeIndexStats($polygon)
     {
@@ -132,22 +119,47 @@ class ComparaisonController{
         return sqrt($variance);            // Retourne l'écart-type (racine carrée de la variance)
     }
 
-    private function getHausdorffDistance($geometry1, $geometry2)
-    {
-        if (!$geometry1 || !$geometry2) {
-            throw new InvalidArgumentException("Les géométries fournies sont invalides ou nulles.");
+    private function calculateDirectedHausdorffDistance($geometryA, $geometryB) {
+        // Vérification des géométries vides
+        if (empty($geometryA->getComponents()) || empty($geometryB->getComponents())) {
+            throw new Exception("Une des géométries est vide.");
         }
 
-        // Convertir les géométries en collections de points
-        $points1 = $this->extractPoints($geometry1);
-        $points2 = $this->extractPoints($geometry2);
+        $maxDist = 0;
+        $pointsA = $this->normalizeGeometry($geometryA);
+        $pointsB = $this->normalizeGeometry($geometryB);
 
-        // Calculer la distance maximale minimale (Hausdorff)
-        $maxMinDistance1 = $this->calculateMaxMinDistance($points1, $points2);
-        $maxMinDistance2 = $this->calculateMaxMinDistance($points2, $points1);
+        foreach ($pointsA as $pointA) {
+            $minDist = $this->findMinimumDistance($pointA, $pointsB);
+            $maxDist = max($maxDist, $minDist);
+        }
 
-        return max($maxMinDistance1, $maxMinDistance2);
+        return $maxDist;
     }
+
+    private function findMinimumDistance($point, $points) {
+        $minDist = INF;
+        foreach ($points as $pointB) {
+            $dist = $this->calculateDistanceBetweenPoints($point, $pointB);
+            $minDist = min($minDist, $dist);
+        }
+        return $minDist;
+    }
+
+    private function normalizeGeometry($geometry) {
+        $points = [];
+        foreach ($geometry->getComponents() as $component) {
+            $points = array_merge($points, $component->getPoints());
+        }
+        return $points;
+    }
+
+    private function calculateDistanceBetweenPoints($pointA, $pointB) {
+        $dx = $pointA->x() - $pointB->x();
+        $dy = $pointA->y() - $pointB->y();
+        return sqrt($dx * $dx + $dy * $dy);
+    }
+
 
     private function createHistogram($statsSim, $statsVer)
     {
