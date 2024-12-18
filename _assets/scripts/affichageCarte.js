@@ -3,8 +3,11 @@ let satelliteLayer, streetsLayer;
 let houseLayer, roadLayer, vegetationLayer, tiffLayer;
 const key = 'phT89U7mj4WtQWinX1ID';
 let currentLayer = null; // Variable pour la couche sélectionnée
+let overlayMaps = {}; // Couches superposées
+let layerControl = null; // Référence au contrôle des couches
+let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, road, vegetation, tiffUrl) {
+function initializeMap(house, tiffUrl) {
     const firstHouseCoordinates = house && house.features && house.features[0] ? house.features[0].geometry.coordinates[0][0] : null;
     const lat = firstHouseCoordinates ? firstHouseCoordinates[1] : 0;
     const lng = firstHouseCoordinates ? firstHouseCoordinates[0] : 0;
@@ -31,120 +34,59 @@ function initializeMap(house, road, vegetation, tiffUrl) {
     // Ajout de la couche satellite par défaut
     satelliteLayer.addTo(map);
 
-    // Création des couches GeoJSON et ajout uniquement si les données existent
-    const overlayMaps = {};
-
     if (house) {
-        houseLayer = L.geoJSON(house, { style: (feature) => style(feature, 'house') }).addTo(map);
+        houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);
         overlayMaps["Maisons"] = houseLayer;
     }
 
-    if (road) {
-        roadLayer = L.geoJSON(road, { style: (feature) => style(feature, 'road') }).addTo(map);
-        overlayMaps["Routes"] = roadLayer;
-    }
-
-    if (vegetation) {
-        vegetationLayer = L.geoJSON(vegetation, { style: (feature) => style(feature, 'vegetation') }).addTo(map);
-        overlayMaps["Végétation"] = vegetationLayer;
-    }
-
     // Chargement du GeoTIFF uniquement si l'URL est fournie
+    // Chargement du GeoTIFF
     if (tiffUrl) {
         fetch(tiffUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('GeoTIFF non trouvé');
-                }
-                return response.arrayBuffer();
-            })
+            .then(response => response.arrayBuffer())
             .then(arrayBuffer => parseGeoraster(arrayBuffer))
             .then(georaster => {
                 tiffLayer = new GeoRasterLayer({
                     georaster: georaster,
                     opacity: 1,
                     resolution: 64
-                });
+                }).addTo(map);
 
-                // Ajouter la couche GeoTIFF après son chargement
-                tiffLayer.addTo(map);
                 overlayMaps["GeoTIFF"] = tiffLayer;
-
-                // Ajouter le contrôle des couches
-                L.control.layers(null, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
+                updateLayerControl();
             })
-            .catch(error => {
-                console.error('Erreur lors du chargement du GeoTIFF:', error);
-                // Si le GeoTIFF échoue, ne pas l'ajouter au contrôle des couches
-                L.control.layers(null, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
-            });
-    } else {
-        // Si aucun GeoTIFF n'est fourni, ajouter les autres couches
-        L.control.layers(null, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
+            .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
     }
+
+    updateLayerControl();
+    updateLayerButtons();
 
     // Ajuster les limites de la carte si des couches sont présentes
     if (house || road || vegetation) {
-        map.fitBounds(L.featureGroup([houseLayer, roadLayer, vegetationLayer]).getBounds());
+        map.fitBounds(L.featureGroup([houseLayer]).getBounds());
     }
-}
-
-// Fonction pour définir les styles des couches GeoJSON
-function style(feature, type) {
-    let color;
-    if (type === 'vegetation') {
-        switch (feature.properties.Type) {
-            case "Sol nu":
-                color = '#efb974';
-                break;
-            case "Herbe":
-                color = '#52cd20';
-                break;
-            case "Végétation basse":
-                color = '#f0ede7';
-                break;
-            case "Végétation haute":
-                color = '#accf9d';
-                break;
-            case "Culture":
-                color = '#e2e900';
-                break;
-            case "Habitation":
-                color = '#f7b19b';
-                break;
-            case "Eau":
-                color = '#a9d1dd';
-                break;
-            default:
-                color = '#dedddd';
-        }
-    } else if (type === 'house') {
-        color = '#e4a0b5';
-    } else if (type === 'road') {
-        color = '#614105';
-    }
-
-    return {
-        color: color,
-        weight: 2,
-        fillColor: color,
-        fillOpacity: 1 // Opacité de remplissage par défaut
-    };
 }
 
 // Fonction pour sélectionner la couche à ajuster
-function selectLayer(layerType) {
-    if (layerType === 'house') {
-        currentLayer = houseLayer;
-    } else if (layerType === 'road') {
-        currentLayer = roadLayer;
-    } else if (layerType === 'vegetation') {
-        currentLayer = vegetationLayer;
-    } else if (layerType === 'tiff') {
-        currentLayer = tiffLayer;
+function selectLayer(layerName) {
+    // Vérifie si la couche existe dans overlayMaps
+    if (overlayMaps[layerName]) {
+        currentLayer = overlayMaps[layerName];  // Sélectionne la couche correspondante
+    } else {
+        console.error("La couche spécifiée n'existe pas : ", layerName);
+        return;
     }
-    document.getElementById('opacitySlider').value = 1; // Réinitialiser le curseur d’opacité à 1
+
+    // Réinitialiser le curseur d'opacité
+    document.getElementById('opacitySlider').value = 1;
+
+    // Mettre à jour l'opacité de la couche sélectionnée
+    updateLayerOpacity();
 }
+
+
+
+
 
 // Fonction pour mettre à jour l'opacité de la couche sélectionnée
 function updateLayerOpacity() {
@@ -175,4 +117,70 @@ function switchToStreets() {
     map.removeLayer(satelliteLayer);
     map.addLayer(streetsLayer);
     streetsLayer.bringToBack();
+}
+
+function getRandomColor() {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+// Fonction pour mettre à jour le contrôle des couches
+function updateLayerControl() {
+    // Supprimer l'ancien contrôle s'il existe
+    if (layerControl) {
+        map.removeControl(layerControl);
+    }
+
+    // Créer un nouveau contrôle avec les couches mises à jour
+    layerControl = L.control.layers(null, overlayMaps, { position: 'topright', collapsed: false });
+    layerControl.addTo(map);
+}
+
+function updateLayerButtons() {
+    const layerButtonsDiv = document.getElementById('layerButtons');
+    layerButtonsDiv.innerHTML = ''; // Efface tous les boutons existants pour éviter les doublons
+
+    // Titre
+    const title = document.createElement('h4');
+    title.innerText = "Sélectionnez la couche :";
+    layerButtonsDiv.appendChild(title);
+
+    // Parcours des couches dans overlayMaps
+    Object.keys(overlayMaps).forEach(layerName => {
+        const button = document.createElement('button');
+        button.id = `btn-${layerName}`;
+        button.innerText = layerName;
+
+        // Ajoute l'événement onclick pour sélectionner la couche
+        button.onclick = () => selectLayer(layerName);
+
+        // Ajoute le bouton au conteneur
+        layerButtonsDiv.appendChild(button);
+    });
+}
+
+function ajouterGeoJson(fileName, genericGeoJson) {
+    if (genericGeoJson) {
+        // Supprime l'ancienne couche si elle existe
+        if (genericLayer) {
+            map.removeLayer(genericLayer);
+        }
+
+        const randomColor = getRandomColor();
+        // Crée et ajoute la nouvelle couche GeoJSON générique
+        genericLayer = L.geoJSON(genericGeoJson, {color: randomColor, weight: 2, fillColor: randomColor, fillOpacity: 1}).addTo(map);
+
+        // Utilise le nom du fichier (sans l'extension .geojson) comme nom de la couche
+        const layerName = fileName.replace('.geojson', '');
+
+        // Ajoute la couche générique à overlayMaps avec le nom du fichier
+        overlayMaps[layerName] = genericLayer;
+
+        // Met à jour le contrôle des couches
+        updateLayerControl();
+
+        // Met à jour les boutons dynamiquement
+        updateLayerButtons();
+    } else {
+        console.error("Aucune donnée GeoJSON générique.");
+    }
 }

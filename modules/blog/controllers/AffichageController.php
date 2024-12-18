@@ -22,6 +22,6 @@ class AffichageController
         $vegetation = $this->model->fetchGeoJson('3');
         $tiffPath = '/_assets/utils/valenicina_17_08_19_dtm.tif';
 
-        $this->view->show($house,$road,$vegetation,$tiffPath);
+        $this->view->show($house,$road, $vegetation,$tiffPath);
     }
 }
