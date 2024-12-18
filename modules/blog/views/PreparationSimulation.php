@@ -16,32 +16,36 @@ class PreparationSimulation
     }
 
 // Fonction récursive pour afficher les dossiers et fichiers dans une structure imbriquée
-private function displayFolderTree($folders)
-{
-
+private function displayFolderTree($folders) {
     echo '<ul>';
     foreach ($folders as $folder) {
         echo '<li>';
 
-        // Affiche les fichiers du dossier courant
-        if (!empty($folder['files'])) {
-            echo '<ul>';
-            foreach ($folder['files'] as $file) {
-                echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">" . htmlspecialchars($file) . "</button></li>";
-            }
-            echo '</ul>';
-        }
-
-
-        // Affiche les sous-dossiers
-        if (!empty($folder['children'])) {
-            // Affiche le nom du dossier
+        // Affiche le nom du dossier
+        if (isset($folder['type']) && $folder['type'] === 'file') {
+            // Affiche les fichiers sans dossier
+            echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">" . htmlspecialchars($folder['name']) . "</button>";
+        } else {
             echo "<button onclick='toggleFolder(this)' data-folder-id='" . htmlspecialchars($folder['name']) . "'>";
             echo "<i class='icon-folder'></i> " . htmlspecialchars($folder['name']) . "</button>";
-            echo "<ul style='display: none;'>";
-            $this->displayFolderTree($folder['children']);
-            echo "</ul>";
+
+            // Affiche les fichiers du dossier courant
+            if (!empty($folder['files'])) {
+                echo '<ul>';
+                foreach ($folder['files'] as $file) {
+                    echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">" . htmlspecialchars($file) . "</button></li>";
+                }
+                echo '</ul>';
+            }
+
+            // Affiche les sous-dossiers
+            if (!empty($folder['children'])) {
+                echo "<ul style='display: none;'>";
+                $this->displayFolderTree($folder['children']);
+                echo "</ul>";
+            }
         }
+
         echo '</li>';
     }
     echo '</ul>';
@@ -94,42 +98,49 @@ private function generateFolderOptions($folders, $prefix = '')
                         });
 
                         function createNewFolder(dossierParent = null) {
-                            const folderName = prompt("Entrez le nom du nouveau répertoire :");
-                            if (folderName) {
-                                // Crée un nouvel élément div pour l'affichage
-                                const folderDiv = document.createElement("div");
-                                folderDiv.className = "history-folder";
-                                folderDiv.addEventListener("click", () => createNewFolder(folderName));  // Le dossier parent est défini
-                                folderDiv.textContent = folderName;
-                                document.getElementById("history-files").appendChild(folderDiv);
 
-                                // Envoyer folderName et dossierParent au serveur via AJAX
-                                fetch('create_folder.php', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({ folderName: folderName, dossierParent: dossierParent })
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            console.log("Dossier créé avec succès.");
-                                        } else {
-                                            console.error("Erreur lors de la création du dossier :", data.error);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error("Erreur réseau :", error);
+                            document.getElementById('createFolder').style.display = 'block';
+
+                            document.getElementById('createFolder').addEventListener('submit', async function(event) {
+                                event.preventDefault(); // Empêche la soumission normale du formulaire
+
+                                const folderName = document.getElementById('dossier_name').value;
+                                const dossierParent = document.getElementById('folderSelect').value;
+
+                                try {
+                                    const response = await fetch('?action=create_folder', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ folderName: folderName, dossierParent: dossierParent })
                                     });
+                                    const data = await response.json();
+                                    if (data.success) {
+                                        console.log("Dossier créé avec succès.");
+                                        // Mettre à jour l'historique ici
+                                        updateHistory();
+                                    } else {
+                                        console.error("Erreur lors de la création du dossier :", data.error);
+                                    }
+                                } catch (error) {
+                                    console.error("Erreur réseau :", error);
+                                }
+                            });
+                        }
 
-                                <?php
-                                // Récupérer les données JSON
-                                    $data = json_decode(file_get_contents("php://input"), true);
-                                    $this->upload->folder($data);
-                                ?>
-
-                            }
+                        function updateHistory() {
+                            // Logique pour mettre à jour l'historique sans recharger la page
+                            // Par exemple, vous pouvez refaire une requête pour récupérer les dossiers et fichiers mis à jour
+                            fetch('get_history.php')
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Mettre à jour l'affichage avec les nouvelles données
+                                    displayFolderTree(data);
+                                })
+                                .catch(error => {
+                                    console.error("Erreur lors de la mise à jour de l'historique :", error);
+                                });
                         }
 
                         // Fonction pour charger les dossiers principaux au chargement de la page
@@ -222,10 +233,25 @@ private function generateFolderOptions($folders, $prefix = '')
                             <select id="folderSelect" name="selectedFolder">
                                 <?php $this->generateFolderOptions($this->files); ?>
                             </select>
-                            <button onclick="createNewFolder()">Créer un nouveau dossier</button>
-                        </div>
+
+                    </form>
 
 
+                        <button onclick="createNewFolder()">Créer un nouveau dossier</button>
+                    </div>
+
+                    <!-- Formulaire pour Cree un Dossier -->
+                    <form id="createFolder" action="?action=create_folder" method="POST" style="display: none;">
+                        <h3>Téléchargement de Raster</h3>
+                        <label for="dossier_name">Nom du dossier  :</label>
+                        <input type="text" id="dossier_name" name="dossier_name" required>
+                        <br><br>
+                        <label for="dossier_parent">Sélectionnez le dossier parent :</label>
+                        <select id="folderSelect" name="selectedFolder">
+                            <?php $this->generateFolderOptions($this->files); ?>
+                        </select>
+                        <br><br>
+                        <input type="submit" value="Crée">
                     </form>
 
                     <!-- Formulaire pour les fichiers Raster -->

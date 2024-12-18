@@ -171,31 +171,58 @@ class UploadModel {
 
 
     public function createFolder($userId, $parentFolder, $folderName): void {
-        // Vérifier si le dossier existe déjà sous ce parent
-        $query = "SELECT COUNT(*) FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':folderName', $folderName);
-        $stmt->bindParam(':parentFolder', $parentFolder);
-        $stmt->execute();
+        try {
 
-        if ($stmt->fetchColumn() > 0) {
-            echo "Ce répertoire existe déjà.";
-            return;
+            // Vérifier si cette combinaison existe déjà chez l'utilisateur
+            $query2 = "SELECT d.id
+                   FROM organisation o
+                   INNER JOIN dossier d ON d.nom = o.id_dossier
+                   WHERE d.nom = :folderName
+                   AND d.dossierParent = :parentFolder
+                   AND o.id_utilisateur = :userId";
+            $stmt2 = $this->db->prepare($query2);
+            $stmt2->bindParam(':folderName', $folderName);
+            $stmt2->bindParam(':parentFolder', $parentFolder);
+            $stmt2->bindParam(':userId', $userId);
+            $stmt2->execute();
+
+            $folderId = $stmt2->fetchColumn();
+
+            if ($folderId) {
+                throw new \Exception("Ce répertoire existe déjà.");
+            }
+
+            // Vérifier si la combinaison de dossier existe déjà
+            $query = "SELECT id FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':folderName', $folderName);
+            $stmt->bindParam(':parentFolder', $parentFolder);
+            $stmt->execute();
+
+            $folderId = $stmt->fetchColumn();
+
+            if (!$folderId) {
+                // Insérer le dossier dans la table 'dossier'
+                $insertFolder = "INSERT INTO dossier (nom, dossierParent) VALUES (:folderName, :parentFolder)";
+                $stmtFolder = $this->db->prepare($insertFolder);
+                $stmtFolder->bindParam(':folderName', $folderName);
+                $stmtFolder->bindParam(':parentFolder', $parentFolder);
+                $stmtFolder->execute();
+
+                // Récupérer l'ID du dossier nouvellement créé
+                $folderId = $this->db->lastInsertId();
+            }
+
+            // Insérer l'association du dossier avec l'utilisateur dans 'organisation'
+            $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderId, :userId)";
+            $stmtOrg = $this->db->prepare($insertOrg);
+            $stmtOrg->bindParam(':folderId', $folderId, PDO::PARAM_INT);
+            $stmtOrg->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmtOrg->execute();
+
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
         }
-
-        // Insérer le dossier dans la table dossier
-        $insertFolder = "INSERT INTO dossier (nom, dossierParent) VALUES (:folderName, :parentFolder)";
-        $stmtFolder = $this->db->prepare($insertFolder);
-        $stmtFolder->bindParam(':folderName', $folderName);
-        $stmtFolder->bindParam(':parentFolder', $parentFolder);
-        $stmtFolder->execute();
-
-        // Insérer l'association du dossier avec l'utilisateur dans organisation
-        $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderName, :userId)";
-        $stmtOrg = $this->db->prepare($insertOrg);
-        $stmtOrg->bindParam(':folderId', $folderName);
-        $stmtOrg->bindParam(':userId', $userId);
-        $stmtOrg->execute();
     }
 
     public function getUserFilesWithFolders($userId) {
@@ -217,11 +244,11 @@ class UploadModel {
         // Récupérer les dossiers
         $queryFolders = "
     SELECT d.nom AS folder_name, d.nom AS dossier_id, d.dossierParent
-    FROM dossier d
-    INNER JOIN organisation o ON d.nom = o.id_dossier
-    WHERE o.id_utilisateur = :userId
-    AND d.dossierParent IS NOT NULL
-    ORDER BY d.dossierParent, d.nom";
+FROM dossier d
+INNER JOIN organisation o ON d.nom = o.id_dossier
+WHERE o.id_utilisateur = :userId
+AND d.dossierParent IS NOT NULL
+ORDER BY d.dossierParent, d.nom ";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
         $stmtFolders->execute();
@@ -236,7 +263,6 @@ class UploadModel {
         $stmtFiles->bindParam(':userId', $userId);
         $stmtFiles->execute();
         $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
-        var_dump($files);
 
         // Construire la hiérarchie
         $folderTree = [];
@@ -250,8 +276,10 @@ class UploadModel {
             'files' => []
         ];
 
-        // Ajout des dossiers à l'index
+        var_dump($root);
+        var_dump("---------------------------------------------------- PT 2 ----------------------");
         foreach ($folders as $folder) {
+
             $folderIndex[$folder['dossier_id']] = [
                 'name' => $folder['folder_name'],
                 'parent_id' => $folder['dossierParent'],
@@ -259,26 +287,39 @@ class UploadModel {
                 'files' => []
             ];
         }
+        var_dump($root);
+        var_dump("----------------------------------------------------");
 
-        // Ajout des fichiers aux dossiers
+
+
         foreach ($files as $file) {
-            var_dump($file);
-            if (isset($folderIndex[$file['dossier_id']])) {
-                $folderIndex[$file['dossier_id']]['files'][] = $file['file_name'];
+            $dossierId = $file['dossier_id'] ?? null;
+            if ($dossierId && isset($folderIndex[$dossierId])) {
+                $folderIndex[$dossierId]['files'][] = $file['file_name'];
             } else {
-                $folderIndex[$root]['files'][] = $file['file_name']; // Si le dossier est manquant
+                // Ajouter les fichiers sans dossier directement dans l'arborescence
+                $folderTree[] = [
+                    'name' => $file['file_name'],
+                    'type' => 'file'
+                ];
             }
         }
 
         // Création de la structure hiérarchique
-        foreach ($folderIndex as $id => &$folder) {
-            if ($folder['parent_id'] === null) {
-                $folderTree[] = &$folder;
+        foreach ($folderIndex as $folderId => $folder) {
+            if ($folder['parent_id'] === null || $folder['parent_id'] === 'root') {
+                $folderTree[] = $folder;
+            } elseif (isset($folderIndex[$folder['parent_id']])) {
+                $folderIndex[$folder['parent_id']]['children'][] = $folder;
             } else {
-                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
+                error_log("Parent ID non trouvé pour le dossier : " . $folder['name']);
             }
         }
-        return $folderTree; // Retourne l'arborescence
+
+        var_dump($folderIndex);
+        var_dump("----------------------------------------------------");
+        var_dump($folderTree);
+        return $folderTree;// Retourne l'arborescence
     }
 
 

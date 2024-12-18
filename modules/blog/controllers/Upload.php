@@ -49,25 +49,33 @@ class Upload
         }
     }
 
-    public function folder()
-    {
+    public function folder() {
+        try {
+            // Vérifier que les données nécessaires sont présentes
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (empty($input['folderName'])) {
+                throw new \Exception("Le nom du dossier est requis.");
+            }
 
-// Vérifier que folderName est défini
-        if (isset($data['folderName'])) {
-            $folderName = $data['folderName'];
-            $dossierParent = isset($data['dossierParent']) ? $data['dossierParent'] : null;
+            $folderName = trim($input['folderName']);
+            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
+            if (empty($folderName)) {
+                throw new \Exception("Nom de dossier invalide.");
+            }
+
+            $dossierParent = isset($input['dossierParent']) ? (int) $input['dossierParent'] : null;
 
             // Appeler la méthode pour créer le dossier
-            try {
-                $this->uploadModel->createFolder( $this->currentUserId,$dossierParent,$folderName);
-                echo json_encode(['success' => true]);
-            } catch (Exception $e) {
-                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-            }
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Nom du dossier non fourni']);
+            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
+
+            // Envoyer une réponse JSON de succès
+            echo json_encode(['success' => true, 'message' => "Dossier créé avec succès."]);
+        } catch (\Exception $e) {
+            // Envoyer une réponse JSON en cas d'erreur
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
 
     // Gérer l'upload des Shapefiles
     public function handleShapefileUpload()
