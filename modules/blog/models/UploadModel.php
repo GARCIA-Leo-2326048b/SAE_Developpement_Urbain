@@ -173,8 +173,9 @@ class UploadModel {
     public function createFolder($userId, $parentFolder, $folderName): void {
         try {
 
+
             // Vérifier si cette combinaison existe déjà chez l'utilisateur
-            $query2 = "SELECT d.id
+            $query2 = "SELECT d.nom
                    FROM organisation o
                    INNER JOIN dossier d ON d.nom = o.id_dossier
                    WHERE d.nom = :folderName
@@ -188,12 +189,13 @@ class UploadModel {
 
             $folderId = $stmt2->fetchColumn();
 
+
             if ($folderId) {
                 throw new \Exception("Ce répertoire existe déjà.");
             }
 
             // Vérifier si la combinaison de dossier existe déjà
-            $query = "SELECT id FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
+            $query = "SELECT nom FROM dossier WHERE nom = :folderName AND dossierParent = :parentFolder";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':folderName', $folderName);
             $stmt->bindParam(':parentFolder', $parentFolder);
@@ -211,12 +213,14 @@ class UploadModel {
 
                 // Récupérer l'ID du dossier nouvellement créé
                 $folderId = $this->db->lastInsertId();
+
             }
 
+
             // Insérer l'association du dossier avec l'utilisateur dans 'organisation'
-            $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderId, :userId)";
+            $insertOrg = "INSERT INTO organisation (id_dossier, id_utilisateur) VALUES (:folderName, :userId)";
             $stmtOrg = $this->db->prepare($insertOrg);
-            $stmtOrg->bindParam(':folderId', $folderId, PDO::PARAM_INT);
+            $stmtOrg->bindParam(':folderName', $folderName, PDO::PARAM_INT);
             $stmtOrg->bindParam(':userId', $userId, PDO::PARAM_INT);
             $stmtOrg->execute();
 
@@ -247,7 +251,6 @@ class UploadModel {
 FROM dossier d
 INNER JOIN organisation o ON d.nom = o.id_dossier
 WHERE o.id_utilisateur = :userId
-AND d.dossierParent IS NOT NULL
 ORDER BY d.dossierParent, d.nom ";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
@@ -276,8 +279,7 @@ ORDER BY d.dossierParent, d.nom ";
             'files' => []
         ];
 
-        var_dump($root);
-        var_dump("---------------------------------------------------- PT 2 ----------------------");
+
         foreach ($folders as $folder) {
 
             $folderIndex[$folder['dossier_id']] = [
@@ -287,8 +289,7 @@ ORDER BY d.dossierParent, d.nom ";
                 'files' => []
             ];
         }
-        var_dump($root);
-        var_dump("----------------------------------------------------");
+
 
 
 
@@ -316,9 +317,6 @@ ORDER BY d.dossierParent, d.nom ";
             }
         }
 
-        var_dump($folderIndex);
-        var_dump("----------------------------------------------------");
-        var_dump($folderTree);
         return $folderTree;// Retourne l'arborescence
     }
 

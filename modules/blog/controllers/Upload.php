@@ -49,10 +49,20 @@ class Upload
         }
     }
 
-    public function folder() {
+    public function folder1(): void
+    {
+        echo "blabal " ;
+        var_dump("fgvhjklmù oui ");
         try {
+
+            var_dump("-----------------------------------------------");
             // Vérifier que les données nécessaires sont présentes
             $input = json_decode(file_get_contents('php://input'), true);
+            echo " BALALALALA ";
+            var_dump("-----------------------------------------------");
+            var_dump($input);
+
+
             if (empty($input['folderName'])) {
                 throw new \Exception("Le nom du dossier est requis.");
             }
@@ -73,6 +83,39 @@ class Upload
         } catch (\Exception $e) {
             // Envoyer une réponse JSON en cas d'erreur
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function folder() {
+        try {
+            // Vérifier que les données nécessaires sont présentes
+            if (empty($_POST['dossier_name'])) {
+                throw new \Exception("Le nom du dossier est requis.");
+            }
+
+            $folderName = trim($_POST['dossier_name']);
+            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
+            if (empty($folderName)) {
+                throw new \Exception("Nom de dossier invalide.");
+            }
+
+            if (isset($_POST['dossier_parent'])){
+                $dossierParent = $_POST['dossier_parent'];
+            } else {
+                $dossierParent = null;
+            }
+            var_dump($dossierParent);
+
+            // Appeler la méthode pour créer le dossier
+            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
+
+            // Rediriger vers une page de succès ou afficher un message de succès
+           // header("Location: index.php?action=new_simulation");
+           // exit();
+        } catch (\Exception $e) {
+            // Rediriger vers une page d'erreur ou afficher un message d'erreur
+            header("Location: ?action=new_simulation&error=" . urlencode($e->getMessage()));
+            exit();
         }
     }
 
@@ -99,7 +142,7 @@ class Upload
         // Vérifier si le fichier existe déjà pour éviter les conflits
         $nom = $customName . '.geojson';
         if ($this->uploadModel->file_existGJ($nom)) {
-            $this->errorMessage = "Le fichier " . htmlspecialchars($customName . '.geojson' ) . " existe déjà.";
+            $this->errorMessage = "Le fichier " . htmlspecialchars($customName . '.geojson') . " existe déjà.";
             return $this->errorMessage;
         }
         // Vérifier si le dossier est accessible en écriture
@@ -120,7 +163,6 @@ class Upload
             // Vérifiez si l'extension est dans la liste des fichiers requis
             if (in_array($fileExtension, $requiredExtensions)) {
                 $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
-
 
 
                 // Déplacer chaque fichier dans le répertoire de destination

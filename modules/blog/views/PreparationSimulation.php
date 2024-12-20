@@ -56,10 +56,13 @@ private function displayFolderTree($folders) {
 private function generateFolderOptions($folders, $prefix = '')
 {
     foreach ($folders as $folder) {
-        echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
-        if (!empty($folder['children'])) {
-            $this->generateFolderOptions($folder['children'], $prefix . '--');
+        if(!($folder['type'] === 'file')) {
+            echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
+            if (!empty($folder['children'])) {
+                $this->generateFolderOptions($folder['children'], $prefix . '--');
+            }
         }
+
     }
 }
 
@@ -76,131 +79,6 @@ private function generateFolderOptions($folders, $prefix = '')
             <div class="main-content">
                 <!-- Barre de défilement pour l'historique -->
                 <aside id="history" >
-
-                    <script>
-
-                        function toggleFolder(button) {
-                            const nextElement = button.nextElementSibling;
-                            if (nextElement && nextElement.tagName === 'UL') {
-                                const isHidden = nextElement.style.display === 'none';
-                                nextElement.style.display = isHidden ? 'block' : 'none';
-                                button.querySelector('.icon-folder').textContent = isHidden ? '📂' : '📁';
-                            }
-                        }
-
-
-
-                        document.getElementById("history").addEventListener("click", function(event) {
-                            // Vérifie si l'élément cliqué est #history lui-même et non un fichier
-                            if (event.target === this) {
-                                createNewFolder();
-                            }
-                        });
-
-                        function createNewFolder(dossierParent = null) {
-
-                            document.getElementById('createFolder').style.display = 'block';
-
-                            document.getElementById('createFolder').addEventListener('submit', async function(event) {
-                                event.preventDefault(); // Empêche la soumission normale du formulaire
-
-                                const folderName = document.getElementById('dossier_name').value;
-                                const dossierParent = document.getElementById('folderSelect').value;
-
-                                try {
-                                    const response = await fetch('?action=create_folder', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({ folderName: folderName, dossierParent: dossierParent })
-                                    });
-                                    const data = await response.json();
-                                    if (data.success) {
-                                        console.log("Dossier créé avec succès.");
-                                        // Mettre à jour l'historique ici
-                                        updateHistory();
-                                    } else {
-                                        console.error("Erreur lors de la création du dossier :", data.error);
-                                    }
-                                } catch (error) {
-                                    console.error("Erreur réseau :", error);
-                                }
-                            });
-                        }
-
-                        function updateHistory() {
-                            // Logique pour mettre à jour l'historique sans recharger la page
-                            // Par exemple, vous pouvez refaire une requête pour récupérer les dossiers et fichiers mis à jour
-                            fetch('get_history.php')
-                                .then(response => response.json())
-                                .then(data => {
-                                    // Mettre à jour l'affichage avec les nouvelles données
-                                    displayFolderTree(data);
-                                })
-                                .catch(error => {
-                                    console.error("Erreur lors de la mise à jour de l'historique :", error);
-                                });
-                        }
-
-                        // Fonction pour charger les dossiers principaux au chargement de la page
-                        window.onload = function() {
-                            loadFolders();
-                        };
-
-                        // Charger les dossiers principaux
-                        function loadFolders(parentId = null) {
-                            // Requête AJAX pour récupérer les dossiers principaux (ou sous-dossiers si parentId est défini)
-                            fetch(`getFolders.php?parent_id=${parentId || ''}`)
-                                .then(response => response.json())
-                                .then(folders => {
-                                    const folderSelect = document.getElementById("folderSelect");
-                                    folderSelect.innerHTML = '<option value="">-- Sélectionner un dossier principal --</option>';
-
-                                    folders.forEach(folder => {
-                                        const option = document.createElement("option");
-                                        option.value = folder.id;
-                                        option.textContent = folder.name;
-                                        folderSelect.appendChild(option);
-                                    });
-                                });
-                        }
-
-                        // Charger les sous-dossiers lorsque le dossier est sélectionné
-                        function loadSubFolders(parentId) {
-                            if (!parentId) return;
-
-                            fetch(`getFolders.php?parent_id=${parentId}`)
-                                .then(response => response.json())
-                                .then(folders => {
-                                    // Créer une nouvelle liste déroulante pour les sous-dossiers
-                                    const subFolderSelect = document.createElement("select");
-                                    subFolderSelect.onchange = () => loadSubFolders(subFolderSelect.value);
-
-                                    // Ajouter une option par défaut
-                                    subFolderSelect.innerHTML = '<option value="">-- Sélectionner un sous-dossier --</option>';
-
-                                    // Ajouter les sous-dossiers récupérés
-                                    folders.forEach(folder => {
-                                        const option = document.createElement("option");
-                                        option.value = folder.id;
-                                        option.textContent = folder.name;
-                                        subFolderSelect.appendChild(option);
-                                    });
-
-                                    // Ajouter le nouveau select après le select actuel
-                                    document.getElementById("folder-selection").appendChild(subFolderSelect);
-                                });
-                        }
-
-                        // Définir le dossier sélectionné dans le formulaire
-                        function setSelectedFolder(folderId) {
-                            document.getElementById("selectedFolder").value = folderId;
-                            document.getElementById("selectedFolderRaster").value = folderId;
-                        }
-
-
-                    </script>
 
                     <h2>Historique des fichiers</h2>
                     <div id="history-files"  >
@@ -227,32 +105,74 @@ private function generateFolderOptions($folders, $prefix = '')
                         <input type="hidden" id="selectedFolder" name="selectedFolder">
                         <input type="submit" value="Télécharger">
 
-                        <!-- Sélection du dossier -->
-                        <div id="folder-selection">
-                            <label for="folderSelect">Sélectionnez un dossier :</label>
-                            <select id="folderSelect" name="selectedFolder">
-                                <?php $this->generateFolderOptions($this->files); ?>
-                            </select>
-
                     </form>
 
-
+                    <!-- Sélection du dossier -->
+                    <div id="folder-selection">
+                        <label for="folderSelect">Sélectionnez un dossier :</label>
+                        <select id="folderSelect" name="folderSelect">
+                            <?php $this->generateFolderOptions($this->files); ?>
+                        </select>
                         <button onclick="createNewFolder()">Créer un nouveau dossier</button>
                     </div>
 
-                    <!-- Formulaire pour Cree un Dossier -->
-                    <form id="createFolder" action="?action=create_folder" method="POST" style="display: none;">
-                        <h3>Téléchargement de Raster</h3>
-                        <label for="dossier_name">Nom du dossier  :</label>
+
+                    <!-- Formulaire pour Créer un Dossier -->
+                    <form id="createFolderForm" action="?action=create_folder" method="POST" style="display: none;">
+                        <h3>Créer un Dossier</h3>
+                        <label for="dossier_name">Nom du dossier :</label>
                         <input type="text" id="dossier_name" name="dossier_name" required>
                         <br><br>
                         <label for="dossier_parent">Sélectionnez le dossier parent :</label>
-                        <select id="folderSelect" name="selectedFolder">
+                        <select id="dossier_parent" name="dossier_parent">
                             <?php $this->generateFolderOptions($this->files); ?>
                         </select>
                         <br><br>
-                        <input type="submit" value="Crée">
+                        <input type="submit" value="Créer">
                     </form>
+
+                    <script>
+
+                        function createNewFolder() {
+
+                            document.getElementById('createFolderForm').style.display = 'block';
+                            }
+
+
+                        function toggleFolder(button) {
+                            const nextElement = button.nextElementSibling;
+                            if (nextElement && nextElement.tagName === 'UL') {
+                                const isHidden = nextElement.style.display === 'none';
+                                nextElement.style.display = isHidden ? 'block' : 'none';
+                                button.querySelector('.icon-folder').textContent = isHidden ? '📂' : '📁';
+                            }
+                        }
+
+
+
+                        document.getElementById("history").addEventListener("click", function(event) {
+                            // Vérifie si l'élément cliqué est #history lui-même et non un fichier
+                            if (event.target === this) {
+                                createNewFolder();
+                            }
+                        });
+
+                        function updateHistory() {
+                            // Logique pour mettre à jour l'historique sans recharger la page
+                            // Par exemple, vous pouvez refaire une requête pour récupérer les dossiers et fichiers mis à jour
+                            fetch('get_history.php')
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Mettre à jour l'affichage avec les nouvelles données
+                                    displayFolderTree(data);
+                                })
+                                .catch(error => {
+                                    console.error("Erreur lors de la mise à jour de l'historique :", error);
+                                });
+                        }
+
+                    </script>
+
 
                     <!-- Formulaire pour les fichiers Raster -->
                     <form id="rasterForm" action="?action=upload" method="POST" enctype="multipart/form-data" style="display: none;">
