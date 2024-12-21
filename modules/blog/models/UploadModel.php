@@ -232,26 +232,13 @@ class UploadModel {
     public function getUserFilesWithFolders($userId) {
 
 
-        //Récupération du root :
-        $queryFolderRoot = "
-        SELECT d.nom
-        FROM dossier d
-        INNER JOIN organisation o ON d.nom = o.id_dossier
-        WHERE o.id_utilisateur = :userId";
-        $stmtFolders = $this->db->prepare($queryFolderRoot);
-        $stmtFolders->bindParam(':userId', $userId);
-        $stmtFolders->execute();
-        $root = $stmtFolders->fetchColumn();
-
-
-
         // Récupérer les dossiers
         $queryFolders = "
     SELECT d.nom AS folder_name, d.nom AS dossier_id, d.dossierParent
-FROM dossier d
-INNER JOIN organisation o ON d.nom = o.id_dossier
-WHERE o.id_utilisateur = :userId
-ORDER BY d.dossierParent, d.nom ";
+    FROM dossier d
+    INNER JOIN organisation o ON d.nom = o.id_dossier
+    WHERE o.id_utilisateur = :userId
+    ORDER BY d.dossierParent, d.nom";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
         $stmtFolders->execute();
@@ -259,7 +246,7 @@ ORDER BY d.dossierParent, d.nom ";
 
         // Récupérer les fichiers
         $queryFiles = "
-    SELECT f.file_name,f.dossier as dossier_id
+    SELECT f.file_name, f.dossier as dossier_id
     FROM uploadGJ f
     WHERE user = :userId";
         $stmtFiles = $this->db->prepare($queryFiles);
@@ -271,17 +258,8 @@ ORDER BY d.dossierParent, d.nom ";
         $folderTree = [];
         $folderIndex = [];
 
-        // Initialisation du dossier racine
-        $folderIndex[$root] = [
-            'name' => 'Root',
-            'parent_id' => null,
-            'children' => [],
-            'files' => []
-        ];
-
-
+        // Ajouter les dossiers au tableau d'index
         foreach ($folders as $folder) {
-
             $folderIndex[$folder['dossier_id']] = [
                 'name' => $folder['folder_name'],
                 'parent_id' => $folder['dossierParent'],
@@ -290,9 +268,7 @@ ORDER BY d.dossierParent, d.nom ";
             ];
         }
 
-
-
-
+        // Ajouter les fichiers dans les dossiers correspondants
         foreach ($files as $file) {
             $dossierId = $file['dossier_id'] ?? null;
             if ($dossierId && isset($folderIndex[$dossierId])) {
@@ -306,19 +282,24 @@ ORDER BY d.dossierParent, d.nom ";
             }
         }
 
-        // Création de la structure hiérarchique
-        foreach ($folderIndex as $folderId => $folder) {
-            if ($folder['parent_id'] === null || $folder['parent_id'] === 'root') {
+        // Construire l'arborescence hiérarchique
+        foreach ($folderIndex as $folderId => &$folder) {
+            if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
+                // Ajouter à la racine
                 $folderTree[] = $folder;
             } elseif (isset($folderIndex[$folder['parent_id']])) {
+                // Ajouter comme enfant du parent
                 $folderIndex[$folder['parent_id']]['children'][] = $folder;
+
+
             } else {
-                error_log("Parent ID non trouvé pour le dossier : " . $folder['name']);
+                error_log("Parent ID introuvable pour : " . $folder['name']);
             }
         }
 
-        return $folderTree;// Retourne l'arborescence
+        return $folderTree; // Retourne l'arborescence
     }
+
 
 
 

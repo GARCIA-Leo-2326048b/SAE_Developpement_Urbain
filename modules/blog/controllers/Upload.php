@@ -104,14 +104,13 @@ class Upload
             } else {
                 $dossierParent = null;
             }
-            var_dump($dossierParent);
 
             // Appeler la méthode pour créer le dossier
             $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
 
             // Rediriger vers une page de succès ou afficher un message de succès
-           // header("Location: index.php?action=new_simulation");
-           // exit();
+            header("Location: index.php?action=new_simulation");
+            exit();
         } catch (\Exception $e) {
             // Rediriger vers une page d'erreur ou afficher un message d'erreur
             header("Location: ?action=new_simulation&error=" . urlencode($e->getMessage()));

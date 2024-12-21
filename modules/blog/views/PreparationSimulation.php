@@ -16,33 +16,35 @@ class PreparationSimulation
     }
 
 // Fonction récursive pour afficher les dossiers et fichiers dans une structure imbriquée
-private function displayFolderTree($folders) {
+private function displayFolderTree($folders, $parentId = '') {
     echo '<ul>';
     foreach ($folders as $folder) {
         echo '<li>';
 
-        // Affiche le nom du dossier
         if (isset($folder['type']) && $folder['type'] === 'file') {
-            // Affiche les fichiers sans dossier
-            echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">" . htmlspecialchars($folder['name']) . "</button>";
+            // Affichage des fichiers
+            echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                . htmlspecialchars($folder['name']) . "</button>";
         } else {
-            echo "<button onclick='toggleFolder(this)' data-folder-id='" . htmlspecialchars($folder['name']) . "'>";
-            echo "<i class='icon-folder'></i> " . htmlspecialchars($folder['name']) . "</button>";
+            // Affichage des dossiers
+            echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+            echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
 
-            // Affiche les fichiers du dossier courant
+            // Vérifie si le dossier a des fichiers
             if (!empty($folder['files'])) {
-                echo '<ul>';
+                echo "<ul id='" . htmlspecialchars($folder['name']) . "-files' style='display: none;'>";
                 foreach ($folder['files'] as $file) {
-                    echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">" . htmlspecialchars($file) . "</button></li>";
+                    echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">"
+                        . htmlspecialchars($file) . "</button></li>";
                 }
                 echo '</ul>';
             }
 
-            // Affiche les sous-dossiers
+            // Vérifie si le dossier a des sous-dossiers
             if (!empty($folder['children'])) {
-                echo "<ul style='display: none;'>";
-                $this->displayFolderTree($folder['children']);
-                echo "</ul>";
+                echo "<ul id='" . htmlspecialchars($folder['name']) . "-children' style='display: none;'>";
+                $this->displayFolderTree($folder['children'], $folder['name']);
+                echo '</ul>';
             }
         }
 
@@ -51,10 +53,9 @@ private function displayFolderTree($folders) {
     echo '</ul>';
 }
 
-
-
 private function generateFolderOptions($folders, $prefix = '')
 {
+    echo "<option value='" . htmlspecialchars("root") . "'>" . $prefix . htmlspecialchars(" ") . "</option>";
     foreach ($folders as $folder) {
         if(!($folder['type'] === 'file')) {
             echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
@@ -139,12 +140,27 @@ private function generateFolderOptions($folders, $prefix = '')
                             }
 
 
-                        function toggleFolder(button) {
-                            const nextElement = button.nextElementSibling;
-                            if (nextElement && nextElement.tagName === 'UL') {
-                                const isHidden = nextElement.style.display === 'none';
-                                nextElement.style.display = isHidden ? 'block' : 'none';
-                                button.querySelector('.icon-folder').textContent = isHidden ? '📂' : '📁';
+                        function toggleFolder(folderId) {
+                            const filesElement = document.getElementById(`${folderId}-files`);
+                            const childrenElement = document.getElementById(`${folderId}-children`);
+
+                            // Basculer l'affichage des fichiers
+                            if (filesElement) {
+                                filesElement.style.display = filesElement.style.display === 'none' ? 'block' : 'none';
+                            }
+
+                            // Basculer l'affichage des enfants
+                            if (childrenElement) {
+                                childrenElement.style.display = childrenElement.style.display === 'none' ? 'block' : 'none';
+                            }
+
+                            // Basculer l'icône de dossier
+                            const button = document.querySelector(`[data-folder-id="${folderId}"]`);
+                            if (button) {
+                                const icon = button.querySelector('.icon-folder');
+                                if (icon) {
+                                    icon.textContent = icon.textContent === '📁' ? '📂' : '📁';
+                                }
                             }
                         }
 
@@ -294,13 +310,6 @@ private function generateFolderOptions($folders, $prefix = '')
                     // Ajouter la logique de comparaison ici
                 } else {
                     alert("Veuillez sélectionner exactement deux fichiers.");
-                }
-            }
-
-            function toggleFolder(button) {
-                const nextElement = button.nextElementSibling;
-                if (nextElement && nextElement.tagName === 'UL') {
-                    nextElement.style.display = nextElement.style.display === 'none' ? 'block' : 'none';
                 }
             }
 
