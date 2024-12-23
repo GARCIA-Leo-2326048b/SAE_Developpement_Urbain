@@ -343,3 +343,73 @@ ul ul {
     transition: transform 0.3s;
 }
 
+/* Ajout d'une ligne sous les boutons de mode actif */
+#mode-switch {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#mode-switch button {
+    position: relative;
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 16px;
+    background-color: #957743;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#mode-switch button.active {
+    position: relative;
+    border-bottom: 3px solid #e2eba7; /* Ligne en dessous du bouton actif */
+    box-shadow: 0 0 10px #e2eba7; /* Effet lumineux */
+    background-color: #59481d; /* Optionnel : changer la couleur de fond */
+}
+
+#mode-switch button:hover {
+    background-color: #59481d;
+}
+
+#mode-switch button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #e2eba7; /* Couleur lumineuse */
+    box-shadow: 0 0 10px #e2eba7;
+}
+
+/* Rendre l'historique plus large */
+#history {
+    width: 50%; /* Augmenté de 40% à 50% */
+    margin-right: 20px;
+}
+
+/* Ajustement pour éviter que le contenu déborde */
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px; /* Espacement entre les sections */
+}
+
+/* Centrage du footer */
+footer {
+    background-color: #557002;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+}
+
+

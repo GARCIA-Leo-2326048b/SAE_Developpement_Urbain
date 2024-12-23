@@ -49,6 +49,57 @@ class Upload
         }
     }
 
+    public function deleteFile() {
+        $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
+
+        if ($this->uploadModel->deleteFileGJ($fileName)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+    }
+
+    public function getArbre() {
+        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
+        return $this->displayFolderTree($files);
+    }
+
+    private function displayFolderTree($folders, $parentId = '') {
+        echo '<ul>';
+        foreach ($folders as $folder) {
+            echo '<li>';
+
+            if (isset($folder['type']) && $folder['type'] === 'file') {
+                // Affichage des fichiers
+                echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                    . htmlspecialchars($folder['name']) . "</button>";
+            } else {
+                // Affichage des dossiers
+                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+                echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
+
+                // Vérifie si le dossier a des fichiers
+                if (!empty($folder['files'])) {
+                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-files' style='display: none;'>";
+                    foreach ($folder['files'] as $file) {
+                        echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">"
+                            . htmlspecialchars($file) . "</button></li>";
+                    }
+                    echo '</ul>';
+                }
+
+                // Vérifie si le dossier a des sous-dossiers
+                if (!empty($folder['children'])) {
+                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-children' style='display: none;'>";
+                    $this->displayFolderTree($folder['children'], $folder['name']);
+                    echo '</ul>';
+                }
+            }
+
+            echo '</li>';
+        }
+        echo '</ul>';
+    }
     public function folder1(): void
     {
 

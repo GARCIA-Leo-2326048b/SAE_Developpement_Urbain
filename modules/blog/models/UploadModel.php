@@ -164,6 +164,7 @@ class UploadModel {
     }
 
     public function deleteFileGJ($fileName) {
+
         $query = "DELETE FROM uploadGJ WHERE file_name = :file_name";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':file_name', $fileName);

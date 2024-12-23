@@ -42,6 +42,12 @@ try {
             case 'get_subfolders':
                 (new blog\controllers\Upload())->getSubFolders();
                 break;
+            case 'deletFile':
+                (new blog\controllers\Upload())->deleteFile();
+                break;
+            case 'reloading':
+                (new blog\controllers\Upload())->getArbre();
+                break;
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;

@@ -7,12 +7,10 @@ use blog\controllers\Upload;
 class PreparationSimulation
 {
     private $files;
-    private $upload;
-    private $errorMessage;
+
 
     public function __construct($files){
         $this->files = $files;
-        $this->upload = new Upload();
     }
 
 // Fonction récursive pour afficher les dossiers et fichiers dans une structure imbriquée
@@ -135,33 +133,6 @@ private function generateFolderOptions($folders, $prefix = '')
                     </form>
 
                     <script>
-                       /* $('#dossier_parent').on('change', function(e) {
-                            let selector = $('#folder');
-                            $("#dossier_parent > option").hide();
-                            $("#dossier_parent > option").filter(function() {
-                                return $(this).data('parent') == selector;
-                            }).show();
-                        });
-                        async function loadSubFolders(folderName){
-                            // Logique pour charger les sous-dossiers dynamiquement
-                            fetch(`get_subfolders.php?folderName=${folderName}`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    const subFolderSelect = document.getElementById('subFolder');
-                                    subFolderSelect.innerHTML = '<option value="">-- Sélectionner un sous-dossier --</option>'; // Réinitialiser les options
-
-                                    data.forEach(folder => {
-                                        const option = document.createElement('option');
-                                        option.value = folder.name;
-                                        option.textContent = folder.name;
-                                        subFolderSelect.appendChild(option);
-                                    });
-                                })
-                                .catch(error => {
-                                    console.error("Erreur lors du chargement des sous-dossiers :", error);
-                                });
-                        }*/
-
 
                         function createNewFolder() {
 
@@ -203,19 +174,18 @@ private function generateFolderOptions($folders, $prefix = '')
                             }
                         });
 
-                        function updateHistory() {
-                            // Logique pour mettre à jour l'historique sans recharger la page
-                            // Par exemple, vous pouvez refaire une requête pour récupérer les dossiers et fichiers mis à jour
-                            fetch('get_history.php')
-                                .then(response => response.json())
-                                .then(data => {
-                                    // Mettre à jour l'affichage avec les nouvelles données
-                                    displayFolderTree(data);
-                                })
-                                .catch(error => {
-                                    console.error("Erreur lors de la mise à jour de l'historique :", error);
-                                });
-                        }
+                       function updateHistory() {
+                           fetch('index.php?action=reloading')
+                               .then(response => response.text()) // Change to .text() to handle HTML response
+                               .then(data => {
+                                   const historyFiles = document.getElementById('history-files');
+                                   historyFiles.innerHTML = data; // Update the history with the new HTML
+                               })
+                               .catch(error => {
+                                   console.error("Erreur lors de la mise à jour de l'historique :", error);
+                               });
+                       }
+
 
                     </script>
 
@@ -260,17 +230,35 @@ private function generateFolderOptions($folders, $prefix = '')
             </div>
         </div>
 
-        <script>
+        <script defer>
             let selectedFiles = [];
             let currentMode = 'simulation';
 
             function switchMode(mode) {
+                // Met à jour le mode courant
                 currentMode = mode;
+
+                // Affiche ou masque la section de comparaison
                 document.getElementById('compare-section').style.display = (mode === 'comparaison') ? 'block' : 'none';
+
+                // Change le texte du bouton d'action
                 document.getElementById('actionButton').textContent = (mode === 'simulation') ? 'Simuler' : 'Sélectionner';
+
+                // Réinitialise les fichiers sélectionnés
                 selectedFiles = [];
                 updateCompareButtonState();
+
+                // Gère la classe active pour les boutons
+                const buttons = document.querySelectorAll('#mode-switch button');
+                buttons.forEach(button => {
+                    if (button.textContent.includes(mode.charAt(0).toUpperCase() + mode.slice(1))) {
+                        button.classList.add('active');
+                    } else {
+                        button.classList.remove('active');
+                    }
+                });
             }
+
 
             function showForm(type) {
                 if (type === 'vector') {
@@ -315,10 +303,44 @@ private function generateFolderOptions($folders, $prefix = '')
 
             function deleteFile() {
                 const fileName = document.getElementById('popup-file-name').textContent;
-                if (confirm("Voulez-vous vraiment supprimer " + fileName + " ?")) {
-                    alert(fileName + " a été supprimé.");
-                    // Ajouter la logique de suppression ici
-                }
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`index.php?action=deletFile&fileName=${fileName}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({fileName: fileName})
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: "Deleted!",
+                                        text: "Your file has been deleted.",
+                                        icon: "success"
+                                    });
+                                    updateHistory();
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Erreur lors de la suppression de " + fileName,
+                                        footer: '<a href="#">Why do I have this issue?</a>'
+                                    });
+
+                                }
+                            });
+                    }
+                });
                 closePopup();
             }
 
