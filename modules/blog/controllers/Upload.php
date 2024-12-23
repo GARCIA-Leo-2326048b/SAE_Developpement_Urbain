@@ -51,29 +51,23 @@ class Upload
 
     public function folder1(): void
     {
-        echo "blabal " ;
-        var_dump("fgvhjklmù oui ");
+
         try {
 
-            var_dump("-----------------------------------------------");
-            // Vérifier que les données nécessaires sont présentes
-            $input = json_decode(file_get_contents('php://input'), true);
-            echo " BALALALALA ";
-            var_dump("-----------------------------------------------");
-            var_dump($input);
-
-
-            if (empty($input['folderName'])) {
+           extract($_POST);
+            if (empty($dossier_name)) {
                 throw new \Exception("Le nom du dossier est requis.");
             }
 
-            $folderName = trim($input['folderName']);
+            $folderName = trim($dossier_name);
             $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
             if (empty($folderName)) {
                 throw new \Exception("Nom de dossier invalide.");
             }
 
-            $dossierParent = isset($input['dossierParent']) ? (int) $input['dossierParent'] : null;
+            if (!(isset($dossierParent))){
+                $dossierParent = null;
+            }
 
             // Appeler la méthode pour créer le dossier
             $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
@@ -84,6 +78,14 @@ class Upload
             // Envoyer une réponse JSON en cas d'erreur
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
+    }
+
+    public function getSubFolders()
+    {
+        $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
+        $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName);
+        header('Content-Type: application/json');
+        echo json_encode($subFolders);
     }
 
     public function folder() {
@@ -126,6 +128,12 @@ class Upload
         $requiredExtensions = ['shp', 'shx', 'dbf']; // Extensions requises
         $uploadedFiles = [];
         $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
+
+        if (isset($_POST['dossier_parent'])){
+            $dossierParent = $_POST['dossier_parent'];
+        } else {
+            $dossierParent = null;
+        }
 
         // Récupérer le nom de fichier personnalisé
         if (isset($_POST['shapefile_name']) && !empty(trim($_POST['shapefile_name']))) {
@@ -197,7 +205,7 @@ class Upload
             if ($geojsonFilePath) {
                 $geojsonFileName = basename($geojsonFilePath);
                 $geojsonContent = file_get_contents($geojsonFilePath);
-                $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId);
+                $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId,$dossierParent);
                 header("Location: index.php?action=new_simulation");
 
             }

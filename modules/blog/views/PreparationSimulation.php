@@ -58,10 +58,10 @@ private function generateFolderOptions($folders, $prefix = '')
     echo "<option value='" . htmlspecialchars("root") . "'>" . $prefix . htmlspecialchars(" ") . "</option>";
     foreach ($folders as $folder) {
         if(!($folder['type'] === 'file')) {
-            echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
-            if (!empty($folder['children'])) {
-                $this->generateFolderOptions($folder['children'], $prefix . '--');
-            }
+            echo "<option value='" . htmlspecialchars($folder['name']) . "' data-parent='" . htmlspecialchars($folder['parent_id']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
+//            if (!empty($folder['children'])) {
+//                $this->generateFolderOptions($folder['children'], $prefix . '--');
+//            }
         }
 
     }
@@ -106,16 +106,18 @@ private function generateFolderOptions($folders, $prefix = '')
                         <input type="hidden" id="selectedFolder" name="selectedFolder">
                         <input type="submit" value="Télécharger">
 
+                        <!-- Sélection du dossier -->
+                        <div id="folder-selection">
+                            <label for="dossier_parent">Sélectionnez un dossier :</label>
+                            <select id="dossier_parent" name="dossier_parent">
+                                <?php $this->generateFolderOptions($this->files); ?>
+                            </select>
+                            <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
+                        </div>
+
                     </form>
 
-                    <!-- Sélection du dossier -->
-                    <div id="folder-selection">
-                        <label for="folderSelect">Sélectionnez un dossier :</label>
-                        <select id="folderSelect" name="folderSelect">
-                            <?php $this->generateFolderOptions($this->files); ?>
-                        </select>
-                        <button onclick="createNewFolder()">Créer un nouveau dossier</button>
-                    </div>
+
 
 
                     <!-- Formulaire pour Créer un Dossier -->
@@ -125,19 +127,47 @@ private function generateFolderOptions($folders, $prefix = '')
                         <input type="text" id="dossier_name" name="dossier_name" required>
                         <br><br>
                         <label for="dossier_parent">Sélectionnez le dossier parent :</label>
-                        <select id="dossier_parent" name="dossier_parent">
+                        <select id="dossier_parent" name="dossier_parent" ">
                             <?php $this->generateFolderOptions($this->files); ?>
                         </select>
                         <br><br>
-                        <input type="submit" value="Créer">
+                        <input type="submit" value="Créer" id="create">
                     </form>
 
                     <script>
+                       /* $('#dossier_parent').on('change', function(e) {
+                            let selector = $('#folder');
+                            $("#dossier_parent > option").hide();
+                            $("#dossier_parent > option").filter(function() {
+                                return $(this).data('parent') == selector;
+                            }).show();
+                        });
+                        async function loadSubFolders(folderName){
+                            // Logique pour charger les sous-dossiers dynamiquement
+                            fetch(`get_subfolders.php?folderName=${folderName}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    const subFolderSelect = document.getElementById('subFolder');
+                                    subFolderSelect.innerHTML = '<option value="">-- Sélectionner un sous-dossier --</option>'; // Réinitialiser les options
+
+                                    data.forEach(folder => {
+                                        const option = document.createElement('option');
+                                        option.value = folder.name;
+                                        option.textContent = folder.name;
+                                        subFolderSelect.appendChild(option);
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error("Erreur lors du chargement des sous-dossiers :", error);
+                                });
+                        }*/
+
 
                         function createNewFolder() {
 
                             document.getElementById('createFolderForm').style.display = 'block';
-                            }
+
+                        }
 
 
                         function toggleFolder(folderId) {
@@ -219,8 +249,8 @@ private function generateFolderOptions($folders, $prefix = '')
                 <div class="popup-content">
                     <h2 id="popup-file-name"></h2>
                     <button class="popup-button" id="actionButton" onclick="performAction()">Simuler</button>
-                    <button class="popup-button" onclick="deleteFile()">Supprimer</button>
-                    <button class="popup-close" onclick="closePopup()">Fermer</button>
+                    <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
+                    <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
                 </div>
             </div>
 

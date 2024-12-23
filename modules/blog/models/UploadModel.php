@@ -13,16 +13,17 @@ class UploadModel {
     }
 
     // Enregistrer un upload GeoJSON
-    public function saveUploadGJ($fileName, $fileContent, $userId)
+    public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent)
     {
         try {
-            $query = "INSERT INTO uploadGJ (file_name, file_data, user) 
-                      VALUES (:file_name, :file_data, :user)";
+            $query = "INSERT INTO uploadGJ (file_name, file_data, user,dossier) 
+                      VALUES (:file_name, :file_data, :user, :dossier)";
 
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':file_name', $fileName);
             $stmt->bindParam(':file_data', $fileContent, PDO::PARAM_STR);
             $stmt->bindParam(':user', $userId);
+            $stmt->bindParam(':dossier', $dossierParent);
 
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -271,7 +272,7 @@ class UploadModel {
         // Ajouter les fichiers dans les dossiers correspondants
         foreach ($files as $file) {
             $dossierId = $file['dossier_id'] ?? null;
-            if ($dossierId && isset($folderIndex[$dossierId])) {
+            if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
                 $folderIndex[$dossierId]['files'][] = $file['file_name'];
             } else {
                 // Ajouter les fichiers sans dossier directement dans l'arborescence
@@ -282,22 +283,41 @@ class UploadModel {
             }
         }
 
+
+
+        foreach ($folderIndex as $folderId => &$f){
+            if(isset($f['parent_id']) and !($f['parent_id'] === 'root')){
+                $folderIndex[$f['parent_id']]['children'][] = &$f;
+            }
+        }
+
         // Construire l'arborescence hiérarchique
         foreach ($folderIndex as $folderId => &$folder) {
             if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
                 // Ajouter à la racine
-                $folderTree[] = $folder;
-            } elseif (isset($folderIndex[$folder['parent_id']])) {
-                // Ajouter comme enfant du parent
-                $folderIndex[$folder['parent_id']]['children'][] = $folder;
-
-
+                $folderTree[] = &$folder;
             } else {
                 error_log("Parent ID introuvable pour : " . $folder['name']);
             }
         }
-
         return $folderTree; // Retourne l'arborescence
+    }
+
+    public function getSubFolder($currentUserId, $folderName)
+    {
+        // Récupérer les dossiers
+        $queryFolders = "
+    SELECT d.nom AS folder_name
+    FROM dossier d
+    INNER JOIN organisation o ON d.nom = o.id_dossier
+    WHERE o.id_utilisateur = :userId
+    AND d.dossierParent = :folderName
+    ORDER BY d.dossierParent, d.nom";
+        $stmtFolders = $this->db->prepare($queryFolders);
+        $stmtFolders->bindParam(':userId', $currentUserId);
+        $stmtFolders->bindParam(':folderName', $folderName);
+        $stmtFolders->execute();
+        return $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
     }
 
 

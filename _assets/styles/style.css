@@ -289,3 +289,57 @@ input[type="submit"]:hover {
 .popup-close:hover {
     background-color: #957743;
 }
+
+
+/* Style général pour les éléments de dossier */
+.folder-toggle {
+    font-size: 20px;  /* Taille de la police plus grande pour les dossiers */
+    background-color: #4CAF50;  /* Couleur de fond plus professionnelle */
+    color: white;  /* Texte blanc */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.folder-toggle:hover {
+    background-color: #45a049;  /* Couleur de survol */
+}
+
+/* Style pour l'icône du dossier */
+.icon-folder {
+    font-size: 24px; /* Augmente la taille de l'icône du dossier */
+    margin-right: 10px;
+}
+
+/* Style pour les boutons de fichiers */
+.history-file {
+    background-color: #2196F3;  /* Couleur des boutons de fichiers */
+    color: white;
+    padding: 8px 15px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.history-file:hover {
+    background-color: #0b7dda;  /* Couleur au survol des fichiers */
+}
+
+/* Effet de tabulation pour les sous-dossiers */
+ul ul {
+    margin-left: 20px;  /* Ajout de l'indentation pour les sous-dossiers */
+}
+
+/* Icone de dossier en survol */
+.folder-toggle:hover .icon-folder {
+    transform: rotate(180deg);  /* Animation de l'icône pour donner un effet de rotation */
+    transition: transform 0.3s;
+}
+

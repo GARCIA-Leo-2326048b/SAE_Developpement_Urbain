@@ -39,6 +39,9 @@ try {
             case 'create_folder':
                 (new blog\controllers\Upload())->folder();
                 break;
+            case 'get_subfolders':
+                (new blog\controllers\Upload())->getSubFolders();
+                break;
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;
