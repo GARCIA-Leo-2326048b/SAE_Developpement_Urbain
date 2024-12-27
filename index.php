@@ -18,9 +18,6 @@ try {
             case 'compare':
                 (new blog\controllers\ComparaisonController())->compare();
                 break;
-            case 'affichageTiff':
-                (new blog\controllers\AffichageTiffController())->execute();
-                break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;

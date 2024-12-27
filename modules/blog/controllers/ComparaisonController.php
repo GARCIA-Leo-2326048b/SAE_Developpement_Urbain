@@ -34,7 +34,7 @@ class ComparaisonController{
         $areaStatsSim = $this->getStat($valuesSim['areas']);
         $areaStatsVer = $this->getStat($valuesVer['areas']);
 
-        /*// Calculer les Shape Index pour simulation et vérité terrain
+        // Calculer les Shape Index pour simulation et vérité terrain
         $shapeIndexesSim = $this->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
         $shapeIndexesVer = $this->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
 
@@ -42,23 +42,18 @@ class ComparaisonController{
         $shapeIndexStatsSim = $this->getStat($shapeIndexesSim);
         $shapeIndexStatsVer = $this->getStat($shapeIndexesVer);
 
+        $graph = $this->grapheDonnees($areaStatsSim,$areaStatsVer);
+
         $results = [
             'areaStatsSim' => $areaStatsSim,
             'areaStatsVer' => $areaStatsVer,
             'shapeIndexStatsSim' => $shapeIndexStatsSim,
-            'shapeIndexStatsVer' => $shapeIndexStatsVer
+            'shapeIndexStatsVer' => $shapeIndexStatsVer,
+            'graph' => $graph
         ];
-        $this->view->showComparison($results);*/
-
+        $this->view->showComparison($results);
 
 //        $chemin = $this->createHistogram($areaStatsSim, $areaStatsVer);
-        $graph = $this->graphe($areaStatsSim,$areaStatsVer);
-
-        $this->view->showComparison([
-            'areaStatsSim' => $areaStatsSim,
-            'areaStatsVer' => $areaStatsVer,
-            'graph' => $graph
-        ]);
     }
 
     private function getAreasAndPerimeters($geometry,&$areas = [], &$perimeters = []){
@@ -186,7 +181,8 @@ class ComparaisonController{
         return $imagePath;
     }
 
-    private function graphe($statsSim,$statsVer) {
+    private function grapheDonnees($statsSim,$statsVer): array
+    {
         $graphSim = array(
             array("label"=> "Moyenne", "y"=> $statsSim['mean']),
             array("label"=> "Minimum", "y"=> $statsSim['min']),
