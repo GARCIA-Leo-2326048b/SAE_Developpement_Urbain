@@ -37,13 +37,16 @@ try {
                 (new blog\controllers\Upload())->telechargement();
                 break;
             case 'create_folder':
-                (new blog\controllers\Upload())->folder();
+                (new blog\controllers\Upload())->folder1();
                 break;
             case 'get_subfolders':
                 (new blog\controllers\Upload())->getSubFolders();
                 break;
             case 'deletFile':
                 (new blog\controllers\Upload())->deleteFile();
+                break;
+            case 'deleteFolder':
+                (new blog\controllers\Upload())->deleteFolder();
                 break;
             case 'reloading':
                 (new blog\controllers\Upload())->getArbre();

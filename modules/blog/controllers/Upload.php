@@ -52,12 +52,45 @@ class Upload
     public function deleteFile() {
         $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
 
-        if ($this->uploadModel->deleteFileGJ($fileName)) {
+        if ($this->uploadModel->deleteFileGJ($fileName, $this->currentUserId)) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false]);
         }
     }
+
+    public function deleteFolder()
+    {
+        header('Content-Type: application/json'); // Indique que la réponse est au format JSON
+
+        try {
+            $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
+
+            if (!$folderName) {
+                echo json_encode(['success' => false, 'message' => 'Nom du dossier manquant']);
+                return;
+            }
+
+
+            $result = $this->uploadModel->deleteFolderT($folderName, $this->currentUserId);
+
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                $errorInfo = $this->db->errorInfo(); // Affiche les infos d'erreur PDO
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erreur lors de la suppression du dossier',
+                    'errorInfo' => $errorInfo
+                ]);
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500); // Indique une erreur interne
+            echo json_encode(['success' => false, 'message' => 'Une erreur est survenue: ' . $e->getMessage()]);
+        }
+    }
+
 
     public function getArbre() {
         $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
@@ -100,36 +133,40 @@ class Upload
         }
         echo '</ul>';
     }
-    public function folder1(): void
-    {
-
+    public function folder1() {
+        header('Content-Type: application/json'); // Réponse au format JSON
         try {
-
-           extract($_POST);
-            if (empty($dossier_name)) {
+            // Récupérer les données envoyées par AJAX en GET
+            if (empty($_GET['dossier_name'])) {
                 throw new \Exception("Le nom du dossier est requis.");
             }
 
-            $folderName = trim($dossier_name);
+            $folderName = trim($_GET['dossier_name']);
             $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
+
             if (empty($folderName)) {
                 throw new \Exception("Nom de dossier invalide.");
             }
 
-            if (!(isset($dossierParent))){
-                $dossierParent = null;
+            $dossierParent = $_GET['dossier_parent'] ?? null;
+
+            // Vérification de l'existence du dossier
+            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName)) {
+                throw new \Exception("Ce répertoire existe déjà.");
             }
 
-            // Appeler la méthode pour créer le dossier
+            // Création du dossier
             $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
 
-            // Envoyer une réponse JSON de succès
-            echo json_encode(['success' => true, 'message' => "Dossier créé avec succès."]);
+            // Réponse JSON pour succès
+            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
         } catch (\Exception $e) {
-            // Envoyer une réponse JSON en cas d'erreur
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            // Réponse JSON pour erreur
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
+        exit();
     }
+
 
     public function getSubFolders()
     {
@@ -158,6 +195,9 @@ class Upload
                 $dossierParent = null;
             }
 
+            var_dump(
+                $dossierParent,$folderName
+            );
             // Appeler la méthode pour créer le dossier
             $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
 
@@ -166,7 +206,7 @@ class Upload
             exit();
         } catch (\Exception $e) {
             // Rediriger vers une page d'erreur ou afficher un message d'erreur
-            header("Location: ?action=new_simulation&error=" . urlencode($e->getMessage()));
+            header("Location: index.php?action=new_simulation&error=" . urlencode($e->getMessage()));
             exit();
         }
     }

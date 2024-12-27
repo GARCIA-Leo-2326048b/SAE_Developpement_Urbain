@@ -25,7 +25,10 @@ private function displayFolderTree($folders, $parentId = '') {
                 . htmlspecialchars($folder['name']) . "</button>";
         } else {
             // Affichage des dossiers
-            echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+           // echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+            echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
+    oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")' 
+    onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
             echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
 
             // Vérifie si le dossier a des fichiers
@@ -107,87 +110,37 @@ private function generateFolderOptions($folders, $prefix = '')
                         <!-- Sélection du dossier -->
                         <div id="folder-selection">
                             <label for="dossier_parent">Sélectionnez un dossier :</label>
-                            <select id="dossier_parent" name="dossier_parent">
+                            <select class="folder-selector" id="dossier_parent" name="dossier_parent">
                                 <?php $this->generateFolderOptions($this->files); ?>
                             </select>
-                            <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
                         </div>
 
                     </form>
-
+                    <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
 
 
 
                     <!-- Formulaire pour Créer un Dossier -->
-                    <form id="createFolderForm" action="?action=create_folder" method="POST" style="display: none;">
+                    <form id="createFolderForm" method="POST" style="display: none; position: relative;">
+                        <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">&times;</button>
                         <h3>Créer un Dossier</h3>
                         <label for="dossier_name">Nom du dossier :</label>
                         <input type="text" id="dossier_name" name="dossier_name" required>
                         <br><br>
                         <label for="dossier_parent">Sélectionnez le dossier parent :</label>
-                        <select id="dossier_parent" name="dossier_parent" ">
+                        <select class="folder-selector" id="dossier_parent" name="dossier_parent">
                             <?php $this->generateFolderOptions($this->files); ?>
                         </select>
                         <br><br>
-                        <input type="submit" value="Créer" id="create">
+                        <button type="button" id="createFolderButton">Créer</button>
                     </form>
 
-                    <script>
-
-                        function createNewFolder() {
-
-                            document.getElementById('createFolderForm').style.display = 'block';
-
-                        }
-
-
-                        function toggleFolder(folderId) {
-                            const filesElement = document.getElementById(`${folderId}-files`);
-                            const childrenElement = document.getElementById(`${folderId}-children`);
-
-                            // Basculer l'affichage des fichiers
-                            if (filesElement) {
-                                filesElement.style.display = filesElement.style.display === 'none' ? 'block' : 'none';
-                            }
-
-                            // Basculer l'affichage des enfants
-                            if (childrenElement) {
-                                childrenElement.style.display = childrenElement.style.display === 'none' ? 'block' : 'none';
-                            }
-
-                            // Basculer l'icône de dossier
-                            const button = document.querySelector(`[data-folder-id="${folderId}"]`);
-                            if (button) {
-                                const icon = button.querySelector('.icon-folder');
-                                if (icon) {
-                                    icon.textContent = icon.textContent === '📁' ? '📂' : '📁';
-                                }
-                            }
-                        }
-
-
-
-                        document.getElementById("history").addEventListener("click", function(event) {
-                            // Vérifie si l'élément cliqué est #history lui-même et non un fichier
-                            if (event.target === this) {
-                                createNewFolder();
-                            }
-                        });
-
-                       function updateHistory() {
-                           fetch('index.php?action=reloading')
-                               .then(response => response.text()) // Change to .text() to handle HTML response
-                               .then(data => {
-                                   const historyFiles = document.getElementById('history-files');
-                                   historyFiles.innerHTML = data; // Update the history with the new HTML
-                               })
-                               .catch(error => {
-                                   console.error("Erreur lors de la mise à jour de l'historique :", error);
-                               });
-                       }
-
-
-                    </script>
+                    <!-- Menu contextuel pour la suppression -->
+                    <div id="context-menu" class="context-menu" style="display: none;">
+                        <ul>
+                            <li onclick="deleteFolder()">Supprimer le dossier</li>
+                        </ul>
+                    </div>
 
 
                     <!-- Formulaire pour les fichiers Raster -->
@@ -229,153 +182,6 @@ private function generateFolderOptions($folders, $prefix = '')
                 <button id="compareButton" onclick="compare()" disabled>Comparer</button>
             </div>
         </div>
-
-        <script defer>
-            let selectedFiles = [];
-            let currentMode = 'simulation';
-
-            function switchMode(mode) {
-                // Met à jour le mode courant
-                currentMode = mode;
-
-                // Affiche ou masque la section de comparaison
-                document.getElementById('compare-section').style.display = (mode === 'comparaison') ? 'block' : 'none';
-
-                // Change le texte du bouton d'action
-                document.getElementById('actionButton').textContent = (mode === 'simulation') ? 'Simuler' : 'Sélectionner';
-
-                // Réinitialise les fichiers sélectionnés
-                selectedFiles = [];
-                updateCompareButtonState();
-
-                // Gère la classe active pour les boutons
-                const buttons = document.querySelectorAll('#mode-switch button');
-                buttons.forEach(button => {
-                    if (button.textContent.includes(mode.charAt(0).toUpperCase() + mode.slice(1))) {
-                        button.classList.add('active');
-                    } else {
-                        button.classList.remove('active');
-                    }
-                });
-            }
-
-
-            function showForm(type) {
-                if (type === 'vector') {
-                    document.getElementById('vectorForm').style.display = 'block';
-                    document.getElementById('rasterForm').style.display = 'none';
-                } else if (type === 'raster') {
-                    document.getElementById('vectorForm').style.display = 'none';
-                    document.getElementById('rasterForm').style.display = 'block';
-                }
-            }
-
-            function showPopup(fileName) {
-                document.getElementById('popup-file-name').textContent = fileName;
-                document.getElementById('popup').style.display = 'block';
-            }
-
-            function closePopup() {
-                document.getElementById('popup').style.display = 'none';
-            }
-
-            function performAction() {
-                if (currentMode === 'simulation') {
-                    alert("Simulation lancée pour " + document.getElementById('popup-file-name').textContent);
-                } else {
-                    selectFile();
-                }
-                closePopup();
-            }
-
-            function selectFile() {
-                const fileName = document.getElementById('popup-file-name').textContent;
-                if (selectedFiles.length < 2 && !selectedFiles.includes(fileName)) {
-                    selectedFiles.push(fileName);
-                    alert(fileName + " a été sélectionné.");
-                } else if (selectedFiles.includes(fileName)) {
-                    alert("Ce fichier est déjà sélectionné.");
-                } else {
-                    alert("Vous ne pouvez sélectionner que deux fichiers au maximum.");
-                }
-                updateCompareButtonState();
-            }
-
-            function deleteFile() {
-                const fileName = document.getElementById('popup-file-name').textContent;
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "You won't be able to revert this!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Yes, delete it!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch(`index.php?action=deletFile&fileName=${fileName}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({fileName: fileName})
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    Swal.fire({
-                                        title: "Deleted!",
-                                        text: "Your file has been deleted.",
-                                        icon: "success"
-                                    });
-                                    updateHistory();
-                                } else {
-                                    Swal.fire({
-                                        icon: "error",
-                                        title: "Oops...",
-                                        text: "Erreur lors de la suppression de " + fileName,
-                                        footer: '<a href="#">Why do I have this issue?</a>'
-                                    });
-
-                                }
-                            });
-                    }
-                });
-                closePopup();
-            }
-
-            function updateCompareButtonState() {
-                const compareButton = document.getElementById('compareButton');
-                if (selectedFiles.length === 2) {
-                    compareButton.disabled = false;
-                    compareButton.classList.add('enabled'); // Ajouter la classe 'enabled'
-                } else {
-                    compareButton.disabled = true;
-                    compareButton.classList.remove('enabled'); // Retirer la classe 'enabled'
-                }
-            }
-
-
-            function compare() {
-                if (selectedFiles.length === 2) {
-                    alert("Comparaison entre " + selectedFiles[0] + " et " + selectedFiles[1] + " lancée !");
-                    // Ajouter la logique de comparaison ici
-                } else {
-                    alert("Veuillez sélectionner exactement deux fichiers.");
-                }
-            }
-
-
-        </script>
-
-        <style>
-            .main-content {
-                display: flex;
-                justify-content: space-between;
-                width: 100%;
-            }
-
-        </style>
 
         <?php
         (new GlobalLayout('Accueil', ob_get_clean()))->show();
