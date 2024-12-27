@@ -263,30 +263,29 @@ function deleteFile() {
     closePopup();
 }
 
-let selectedFolderName = '';
+let selectedFolderName = null;
 
 function showContextMenu(event, folderName) {
-    event.preventDefault();
+    event.preventDefault(); // Empêche le menu contextuel natif
     selectedFolderName = folderName;
 
+    // Cache tout autre menu contextuel
+    hideContextMenu();
+
     const contextMenu = document.getElementById('context-menu');
+    if (!contextMenu) {
+        console.error('Menu contextuel introuvable!');
+        return;
+    }
+
+    // Positionne et affiche le menu contextuel
     contextMenu.style.display = 'block';
     contextMenu.style.left = `${event.pageX}px`;
     contextMenu.style.top = `${event.pageY}px`;
 
-    // Supprimez tous les anciens gestionnaires avant d'en ajouter un nouveau
-    document.removeEventListener('click', hideContextMenu);
-    document.addEventListener('click', hideContextMenu);
+    // Ajoute un écouteur pour masquer le menu quand on clique ailleurs
+    document.addEventListener('click', hideContextMenu, { once: true });
 }
-
-
-document.addEventListener('contextmenu', function(event) {
-    const folderElement = event.target.closest('.folder'); // Adaptez la classe à vos dossiers
-    if (folderElement) {
-        showContextMenu(event, folderElement.dataset.folderName);
-    }
-});
-
 
 function hideContextMenu() {
     const contextMenu = document.getElementById('context-menu');
