@@ -26,19 +26,8 @@ class AffichageView
             </div>
 
             <!-- Sélectionner la couche -->
-            <h4>Sélectionnez la couche :</h4>
-            <?php if ($house !== null): ?>
-                <button onclick="selectLayer('house')">Maisons</button>
-            <?php endif; ?>
-            <?php if ($road !== null): ?>
-                <button onclick="selectLayer('road')">Routes</button>
-            <?php endif; ?>
-            <?php if ($vegetation !== null): ?>
-                <button onclick="selectLayer('vegetation')">Végétation</button>
-            <?php endif; ?>
-            <?php if ($tiffPath !== null): ?>
-                <button onclick="selectLayer('tiff')">GeoTIFF</button>
-            <?php endif; ?>
+            <div id="layerButtons"></div>
+
 
             <!-- Contrôle de l'opacité -->
             <h4>Opacité :</h4>
@@ -46,9 +35,15 @@ class AffichageView
         </div>
 
         <script>
+            let roadData = <?php echo $road ?: 'null'; ?>; // Convertit $road en JSON directement
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
-            initializeMap(<?php echo $house ?: 'null'; ?>, <?php echo $road ?: 'null'; ?>, <?php echo $vegetation ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
+            initializeMap(<?php echo $house ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
         </script>
+
+        <!-- Bouton pour ajouter la couche road -->
+        <h4>Ajouter les routes :</h4>
+        <button onclick="ajouterGeoJson('route',roadData)">Ajouter GeoJson</button>
+
         <?php
         (new GlobalLayout('Affichage', ob_get_clean()))->show();
     }
