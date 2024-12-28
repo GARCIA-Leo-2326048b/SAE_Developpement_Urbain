@@ -48,6 +48,9 @@ try {
             case 'reloading':
                 (new blog\controllers\Upload())->getArbre();
                 break;
+            case 'get_all_folders':
+                (new blog\controllers\Upload())->selectFolder();
+                break;
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;

@@ -108,7 +108,10 @@ class Upload
                     . htmlspecialchars($folder['name']) . "</button>";
             } else {
                 // Affichage des dossiers
-                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+                // echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
+                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
+    oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")' 
+    onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
                 echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
 
                 // Vérifie si le dossier a des fichiers
@@ -132,6 +135,17 @@ class Upload
             echo '</li>';
         }
         echo '</ul>';
+    }
+
+    public function selectFolder()
+    {
+        header('Content-Type: application/json');
+        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
+        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        $folders = $folderHistory->generateFolderOptions($folderHistory->getFiles());
+        return $folders;
+//        echo json_encode($folders);
+//        exit;
     }
     public function folder1() {
         header('Content-Type: application/json'); // Réponse au format JSON

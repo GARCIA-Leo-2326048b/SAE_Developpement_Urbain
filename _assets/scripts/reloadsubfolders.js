@@ -1,5 +1,5 @@
+let globalParentFolder = "root";
 $(document).ready(function() {
-    let globalParentFolder = "root";
 
     $('.folder-selector').on('change', function() {
         let folderName = $(this).val(); // Récupérer la valeur du dossier sélectionné
@@ -61,6 +61,7 @@ $(document).ready(function() {
                     }).then(() => {
                         // Recharger ou mettre à jour l'affichage sans recharger la page
                         updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                        updateFolderOptions();
                     });
                 } else {
                     Swal.fire({
@@ -141,9 +142,6 @@ function createNewFolder() {
 
 }
 
-
-
-
 function toggleFolder(folderId) {
     const filesElement = document.getElementById(`${folderId}-files`);
     const childrenElement = document.getElementById(`${folderId}-children`);
@@ -183,6 +181,29 @@ function updateHistory() {
         .then(data => {
             const historyFiles = document.getElementById('history-files');
             historyFiles.innerHTML = data; // Update the history with the new HTML
+        })
+        .catch(error => {
+            console.error("Erreur lors de la mise à jour de l'historique :", error);
+        });
+}
+
+function updateFolderOptions() {
+    globalParentFolder = 'root';
+    fetch('index.php?action=get_all_folders')
+        .then(response => response.text()) // Récupère le contenu HTML sous forme de texte
+        .then(data => {
+            console.log(data); // Vérifie la réponse HTML dans la console
+
+            const $select = $('#dossier_parent1');
+            const $select2 = $('dossier_parent');
+            $select2.empty(); // Vide le contenu actuel du select
+            $select2.append('<option value="root">Racine</option>'); // Ajoute l'option "Racine"
+            $select2.append(data); // Insère directement les options reçues du serveur
+            $select.empty(); // Vide le contenu actuel du select
+            $select.append('<option value="root">Racine</option>'); // Ajoute l'option "Racine"
+            $select.append(data); // Insère directement les options reçues du serveur
+
+            console.log($select.html());
         })
         .catch(error => {
             console.error("Erreur lors de la mise à jour de l'historique :", error);
@@ -344,6 +365,7 @@ function deleteFolder() {
                             icon: "success"
                         });
                         updateHistory();
+                        updateFolderOptions();
                     } else {
                         Swal.fire({
                             icon: "error",
