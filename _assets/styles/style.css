@@ -289,3 +289,153 @@ input[type="submit"]:hover {
 .popup-close:hover {
     background-color: #957743;
 }
+
+
+/* Style général pour les éléments de dossier */
+.folder-toggle {
+    font-size: 20px;  /* Taille de la police plus grande pour les dossiers */
+    background-color: #4CAF50;  /* Couleur de fond plus professionnelle */
+    color: white;  /* Texte blanc */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.folder-toggle:hover {
+    background-color: #45a049;  /* Couleur de survol */
+}
+
+/* Style pour l'icône du dossier */
+.icon-folder {
+    font-size: 24px; /* Augmente la taille de l'icône du dossier */
+    margin-right: 10px;
+}
+
+/* Style pour les boutons de fichiers */
+.history-file {
+    background-color: #2196F3;  /* Couleur des boutons de fichiers */
+    color: white;
+    padding: 8px 15px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.history-file:hover {
+    background-color: #0b7dda;  /* Couleur au survol des fichiers */
+}
+
+/* Effet de tabulation pour les sous-dossiers */
+ul ul {
+    margin-left: 20px;  /* Ajout de l'indentation pour les sous-dossiers */
+}
+
+/* Icone de dossier en survol */
+.folder-toggle:hover .icon-folder {
+    transform: rotate(180deg);  /* Animation de l'icône pour donner un effet de rotation */
+    transition: transform 0.3s;
+}
+
+/* Ajout d'une ligne sous les boutons de mode actif */
+#mode-switch {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#mode-switch button {
+    position: relative;
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 16px;
+    background-color: #957743;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#mode-switch button.active {
+    position: relative;
+    border-bottom: 3px solid #e2eba7; /* Ligne en dessous du bouton actif */
+    box-shadow: 0 0 10px #e2eba7; /* Effet lumineux */
+    background-color: #59481d; /* Optionnel : changer la couleur de fond */
+}
+
+#mode-switch button:hover {
+    background-color: #59481d;
+}
+
+#mode-switch button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #e2eba7; /* Couleur lumineuse */
+    box-shadow: 0 0 10px #e2eba7;
+}
+
+/* Rendre l'historique plus large */
+#history {
+    width: 50%; /* Augmenté de 40% à 50% */
+    margin-right: 20px;
+}
+
+/* Ajustement pour éviter que le contenu déborde */
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px; /* Espacement entre les sections */
+}
+
+/* Centrage du footer */
+footer {
+    background-color: #557002;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+}
+
+.context-menu {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.context-menu li:hover {
+    background-color: #f0f0f0;
+}
+
+
+
