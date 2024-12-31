@@ -27,8 +27,11 @@ try {
             case 'view_simulations':
                 (new blog\controllers\Upload())->telechargement();
                 break;
+                case 'simulation':
+                    (new blog\controllers\SimulationController())->simuler();
+                    break;
             case 'new_simulation':
-                (new blog\controllers\SimulationController())->execute();
+                (new blog\controllers\WorkSpaceController())->execute();
                 break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();

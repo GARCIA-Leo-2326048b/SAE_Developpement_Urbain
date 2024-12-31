@@ -2,7 +2,7 @@
 namespace blog\views;
 class HomepageView {
 
-    function show() : void {
+    public function show() : void {
         ob_start();?>
         <main>
             <h3>Début de la Simulation</h3>
@@ -29,6 +29,21 @@ class HomepageView {
                     <div class="container">
                         <h2>Bienvenue sur notre plateforme de Recherche de Développement Urbain</h2>
                         <p>Veuillez vous connecter pour accéder aux fonctionnalités de simulation et de comparaison.</p>
+
+                        <div class="forms">
+                            <h4>Upload de Fichiers pour Simulation ou Comparaison</h4>
+
+
+                            <?php
+                            $formView = new FormView();
+                            $formView->renderAllForms();
+                            ?>
+                        </div>
+
+                        <div class="buttons">
+                            <button onclick="location.href='?action=compare_files'">Comparer Deux Fichiers</button>
+                        </div>
+
                         <div class="buttons">
                         <button onclick="location.href='?action=authentification'">Se Connecter</button>
                         </div>
@@ -43,3 +58,4 @@ class HomepageView {
     }
 }
 ?>
+

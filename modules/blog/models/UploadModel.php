@@ -274,6 +274,7 @@ class UploadModel {
         $folderTree = [];
         $folderIndex = [];
 
+
         // Ajouter les dossiers au tableau d'index
         foreach ($folders as $folder) {
             $folderIndex[$folder['dossier_id']] = [
@@ -315,6 +316,7 @@ class UploadModel {
                 error_log("Parent ID introuvable pour : " . $folder['name']);
             }
         }
+
         return $folderTree; // Retourne l'arborescence
     }
 

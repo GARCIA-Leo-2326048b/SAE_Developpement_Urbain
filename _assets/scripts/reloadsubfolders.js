@@ -179,6 +179,7 @@ function updateHistory() {
     fetch('index.php?action=reloading')
         .then(response => response.text()) // Change to .text() to handle HTML response
         .then(data => {
+            console.log(data);
             const historyFiles = document.getElementById('history-files');
             historyFiles.innerHTML = data; // Update the history with the new HTML
         })
@@ -379,3 +380,9 @@ function deleteFolder() {
     hideContextMenu();
 }
 
+function closeForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.style.display = 'none';
+    }
+}

@@ -12,7 +12,9 @@ class Upload
     private $db;
     private $uploadModel;
     private $currentUserId; // ID de l'utilisateur connecté
-    private $errorMessage="";
+    private $header = 'Content-Type: application/json';
+    private $pref = '/[^a-zA-Z0-9_-]/';
+    private $nouser = false;
 
     public function __construct()
     {
@@ -26,14 +28,28 @@ class Upload
             $this->currentUserId = $_SESSION['user_id'];
         } else {
             // Rediriger vers la page de connexion
-            header("Location: index.php?action=authentification");
-            exit();
+//            header("Location: index.php?action=authentification");
+            $this->nouser = true;
+//            exit();
         }
     }
 
     public function telechargement()
     {
         try {
+
+            if($this->nouser){
+                // Gestion des fichiers Shapefile (Vecteur)
+                if (isset($_FILES['shapefile'])) {
+                    $this->handleShapefileUpload();
+                }
+                // Gestion des fichiers Raster
+                elseif (isset($_FILES['rasterfile'])) {
+                    $this->handleRasterUpload();
+                } else {
+                    echo "Aucun fichier n'a été téléchargé.";
+                }
+            }
             // Gestion des fichiers Shapefile (Vecteur)
             if (isset($_FILES['shapefile'])) {
                 $this->handleShapefileUpload();
@@ -61,7 +77,7 @@ class Upload
 
     public function deleteFolder()
     {
-        header('Content-Type: application/json'); // Indique que la réponse est au format JSON
+        header($this->header); // Indique que la réponse est au format JSON
 
         try {
             $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
@@ -94,61 +110,20 @@ class Upload
 
     public function getArbre() {
         $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
-        return $this->displayFolderTree($files);
-    }
-
-    private function displayFolderTree($folders, $parentId = '') {
-        echo '<ul>';
-        foreach ($folders as $folder) {
-            echo '<li>';
-
-            if (isset($folder['type']) && $folder['type'] === 'file') {
-                // Affichage des fichiers
-                echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
-                    . htmlspecialchars($folder['name']) . "</button>";
-            } else {
-                // Affichage des dossiers
-                // echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
-                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
-    oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")' 
-    onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
-                echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
-
-                // Vérifie si le dossier a des fichiers
-                if (!empty($folder['files'])) {
-                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-files' style='display: none;'>";
-                    foreach ($folder['files'] as $file) {
-                        echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">"
-                            . htmlspecialchars($file) . "</button></li>";
-                    }
-                    echo '</ul>';
-                }
-
-                // Vérifie si le dossier a des sous-dossiers
-                if (!empty($folder['children'])) {
-                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-children' style='display: none;'>";
-                    $this->displayFolderTree($folder['children'], $folder['name']);
-                    echo '</ul>';
-                }
-            }
-
-            echo '</li>';
-        }
-        echo '</ul>';
+        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        return $folderHistory->render();
     }
 
     public function selectFolder()
     {
-        header('Content-Type: application/json');
+        header($this->header);
         $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
         $folderHistory = \blog\views\HistoriqueView::getInstance($files);
-        $folders = $folderHistory->generateFolderOptions($folderHistory->getFiles());
-        return $folders;
-//        echo json_encode($folders);
-//        exit;
+        return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
+
     public function folder1() {
-        header('Content-Type: application/json'); // Réponse au format JSON
+        header($this->header); // Réponse au format JSON
         try {
             // Récupérer les données envoyées par AJAX en GET
             if (empty($_GET['dossier_name'])) {
@@ -156,7 +131,7 @@ class Upload
             }
 
             $folderName = trim($_GET['dossier_name']);
-            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
+            $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
 
             if (empty($folderName)) {
                 throw new \Exception("Nom de dossier invalide.");
@@ -186,46 +161,9 @@ class Upload
     {
         $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
         $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName);
-        header('Content-Type: application/json');
+        header($this->header);
         echo json_encode($subFolders);
     }
-
-    public function folder() {
-        try {
-            // Vérifier que les données nécessaires sont présentes
-            if (empty($_POST['dossier_name'])) {
-                throw new \Exception("Le nom du dossier est requis.");
-            }
-
-            $folderName = trim($_POST['dossier_name']);
-            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
-            if (empty($folderName)) {
-                throw new \Exception("Nom de dossier invalide.");
-            }
-
-            if (isset($_POST['dossier_parent'])){
-                $dossierParent = $_POST['dossier_parent'];
-            } else {
-                $dossierParent = null;
-            }
-
-            var_dump(
-                $dossierParent,$folderName
-            );
-            // Appeler la méthode pour créer le dossier
-            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
-
-            // Rediriger vers une page de succès ou afficher un message de succès
-            header("Location: index.php?action=new_simulation");
-            exit();
-        } catch (\Exception $e) {
-            // Rediriger vers une page d'erreur ou afficher un message d'erreur
-            header("Location: index.php?action=new_simulation&error=" . urlencode($e->getMessage()));
-            exit();
-        }
-    }
-
-
     // Gérer l'upload des Shapefiles
     public function handleShapefileUpload()
     {
@@ -244,7 +182,7 @@ class Upload
         if (isset($_POST['shapefile_name']) && !empty(trim($_POST['shapefile_name']))) {
             $customName = trim($_POST['shapefile_name']);
             // Sanitize the custom name to prevent security issues
-            $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+            $customName = preg_replace($this->pref, '', $customName);
             if (empty($customName)) {
                 throw new \Exception("Nom de fichier invalide.");
             }
@@ -310,8 +248,14 @@ class Upload
             if ($geojsonFilePath) {
                 $geojsonFileName = basename($geojsonFilePath);
                 $geojsonContent = file_get_contents($geojsonFilePath);
-                $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId,$dossierParent);
-                header("Location: index.php?action=new_simulation");
+                if($this->nouser){
+                    header("Location: index.php?action=simulation");
+
+                }else {
+
+                    $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId, $dossierParent);
+                    header("Location: index.php?action=new_simulation");
+                }
 
             }
         } else {
@@ -394,7 +338,7 @@ class Upload
             if (isset($_POST['rasterfile_name']) && !empty(trim($_POST['rasterfile_name']))) {
                 $customName = trim($_POST['rasterfile_name']);
                 // Sanitize the custom name to prevent security issues
-                $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+                $customName = preg_replace($this->pref, '', $customName);
                 if (empty($customName)) {
                     throw new \Exception("Nom de fichier invalide.");
                 }

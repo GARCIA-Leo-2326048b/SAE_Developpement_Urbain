@@ -27,14 +27,9 @@ class PreparationSimulation
             </aside>
 
             <section id="import">
-                <h2>Uploader des fichiers</h2>
-                <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
-                <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
-
                 <?php
                 $formView = new FormView();
-                $formView->renderVectorForm();
-                $formView->renderRasterForm();
+                $formView->renderAllForms();
                 ?>
 
                 <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
