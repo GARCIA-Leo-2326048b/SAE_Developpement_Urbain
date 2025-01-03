@@ -6,87 +6,106 @@ class ComparaisonView
 {
     public function showComparison($results): void
     {
-
         ob_start();
         ?>
-        <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+        <!-- Bibliothèques JS -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/_assets/scripts/graphiques.js"></script>
 
         <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
 
+        <!-- Statistiques des surfaces -->
         <h2>Statistiques des surfaces (en m²)</h2>
         <ul>
-            <li><strong>Simulation :</strong></li>
-            <ul>
-                <li>Moyenne: <?= $results['areaStatsSim']['mean']; ?> m²</li>
-                <li>Écart-type: <?= $results['areaStatsSim']['std']; ?> m²</li>
-                <li>Minimum: <?= $results['areaStatsSim']['min']; ?> m²</li>
-                <li>Maximum: <?= $results['areaStatsSim']['max']; ?> m²</li>
-            </ul>
-            <li><strong>Vérité terrain :</strong></li>
-            <ul>
-                <li>Moyenne: <?= $results['areaStatsVer']['mean']; ?> m²</li>
-                <li>Écart-type: <?= $results['areaStatsVer']['std']; ?> m²</li>
-                <li>Minimum: <?= $results['areaStatsVer']['min']; ?> m²</li>
-                <li>Maximum: <?= $results['areaStatsVer']['max']; ?> m²</li>
-            </ul>
+            <li><strong>Simulation :</strong>
+                <ul>
+                    <li>Moyenne: <?= $results['graphSim'][0]['y']; ?> m²</li>
+                    <li>Écart-type: <?= $results['graphSim'][3]['y']; ?> m²</li>
+                    <li>Minimum: <?= $results['graphSim'][1]['y']; ?> m²</li>
+                    <li>Maximum: <?= $results['graphSim'][2]['y']; ?> m²</li>
+                </ul>
+            </li>
+            <li><strong>Vérité terrain :</strong>
+                <ul>
+                    <li>Moyenne: <?= $results['graphVer'][0]['y']; ?> m²</li>
+                    <li>Écart-type: <?= $results['graphVer'][3]['y']; ?> m²</li>
+                    <li>Minimum: <?= $results['graphVer'][1]['y']; ?> m²</li>
+                    <li>Maximum: <?= $results['graphVer'][2]['y']; ?> m²</li>
+                </ul>
+            </li>
         </ul>
 
+        <!-- Statistiques des indices de forme -->
         <h2>Statistiques des indices de forme (Shape Index)</h2>
         <ul>
-            <li><strong>Simulation :</strong></li>
-            <ul>
-                <li>Moyenne: <?= $results['shapeIndexStatsSim']['mean']; ?></li>
-                <li>Écart-type: <?= $results['shapeIndexStatsSim']['std']; ?></li>
-                <li>Minimum: <?= $results['shapeIndexStatsSim']['min']; ?></li>
-                <li>Maximum: <?= $results['shapeIndexStatsSim']['max']; ?></li>
-            </ul>
-            <li><strong>Vérité terrain :</strong></li>
-            <ul>
-                <li>Moyenne: <?= $results['shapeIndexStatsVer']['mean']; ?></li>
-                <li>Écart-type: <?= $results['shapeIndexStatsVer']['std']; ?></li>
-                <li>Minimum: <?= $results['shapeIndexStatsVer']['min']; ?></li>
-                <li>Maximum: <?= $results['shapeIndexStatsVer']['max']; ?></li>
-            </ul>
+            <li><strong>Simulation :</strong>
+                <ul>
+                    <li>Moyenne: <?= $results['graphSim'][4]['y']; ?></li>
+                    <li>Écart-type: <?= $results['graphSim'][7]['y']; ?></li>
+                    <li>Minimum: <?= $results['graphSim'][5]['y']; ?></li>
+                    <li>Maximum: <?= $results['graphSim'][6]['y']; ?></li>
+                </ul>
+            </li>
+            <li><strong>Vérité terrain :</strong>
+                <ul>
+                    <li>Moyenne: <?= $results['graphVer'][4]['y']; ?></li>
+                    <li>Écart-type: <?= $results['graphVer'][7]['y']; ?></li>
+                    <li>Minimum: <?= $results['graphVer'][5]['y']; ?></li>
+                    <li>Maximum: <?= $results['graphVer'][6]['y']; ?></li>
+                </ul>
+            </li>
         </ul>
 
-        <ul>
-            <div id="diagrammeBarre" style="height: 370px; width: 100%;"></div>
-        </ul>
-
-        <ul>
-            <div>
-                <canvas id="diagrammeBarre2"></canvas>
-            </div>
-        </ul>
-
-        <ul>
-            <div>
-                <canvas id="spiderChart"></canvas>
-            </div>
-        </ul>
+        <!-- Graphiques -->
+        <div>
+            <canvas id="diagrammeBarre"></canvas>
+            <canvas id="spiderChart" style="display:none;"></canvas>
+        </div>
 
         <script>
-            // Appel de la fonction JavaScript pour le diagramme de barre
-            diagrammeBarre(
-                <?php echo json_encode($results['graph']['graphSim'])?>,
-                <?php echo json_encode($results['graph']['graphVer'])?>
-            );
-
-            // Appel de la fonction graph() avec les labels et les données passées
-            diagrammeBarre2(
-                ['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
-                <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
-                <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
-            );
-            spiderChart(['Moyenne (m²)', 'Minimum (m²)', 'Maximum (m²)', 'Écart-type (m²)'],  // Les labels que tu veux afficher
-                <?php echo json_encode(array_column($results['graph']['graphSim'], 'y')) ?>,  // Données pour la simulation
-                <?php echo json_encode(array_column($results['graph']['graphVer'], 'y')) ?>   // Données pour la vérité terrain
+            // Initialisation du graphique
+            window.initializeChart(
+                ['Area Mean (m²)', 'Area Min(m²)', 'Area Max(m²)', 'Area Std(m²)',
+                    "Shape Index Max", "Shape Index Min", "Shape Index Mean", "Shape Index Std"],
+                <?php echo json_encode(array_column($results['graphSim'], 'y')); ?>,  // Données pour la simulation
+                <?php echo json_encode(array_column($results['graphVer'], 'y')); ?>   // Données pour la vérité terrain
             );
         </script>
 
+        <!-- Options de contrôle -->
+        <div style="display: flex;">
+            <div style="width: 30%; padding: 20px; background-color: #e0f7f4;">
+                <h3>Options</h3>
+                <div class="chart-controls">
+                    <h4>Type de graphique</h4>
+                    <div class="chart-type">
+                        <label>
+                            <input type="radio" name="chartType" value="bar" checked>
+                            Histogramme
+                        </label>
+                        <label>
+                            <input type="radio" name="chartType" value="spider">
+                            Radar
+                        </label>
+                    </div>
+
+                    <form id="optionsForm">
+                        <label><input type="checkbox" id="areaMax" checked> Area Max</label><br>
+                        <label><input type="checkbox" id="areaMean" checked> Area Mean</label><br>
+                        <label><input type="checkbox" id="areaMin" checked> Area Min</label><br>
+                        <label><input type="checkbox" id="areaStd" checked> Area Std</label><br>
+                        <label><input type="checkbox" id="shapeIndexMax" checked> Shape Index Max</label><br>
+                        <label><input type="checkbox" id="shapeIndexMean" checked> Shape Index Mean</label><br>
+                        <label><input type="checkbox" id="shapeIndexMin" checked> Shape Index Min</label><br>
+                        <label><input type="checkbox" id="shapeIndexStd" checked> Shape Index Std</label><br>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <?php
+        // Affichage du layout global
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
 }
+

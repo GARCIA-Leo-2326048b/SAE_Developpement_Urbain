@@ -16,7 +16,7 @@ try {
                 (new blog\controllers\AffichageController())->execute();
                 break;
             case 'compare':
-                (new blog\controllers\ComparaisonController())->compare();
+                (new blog\controllers\ComparaisonController())->compare('Household_3-2019.geojson','Buildings2019_ABM');
                 break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
