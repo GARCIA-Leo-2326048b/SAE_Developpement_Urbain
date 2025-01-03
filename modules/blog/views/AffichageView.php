@@ -14,7 +14,7 @@ class AffichageView
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script> <!-- script de création de carte -->
 
-        <div id="map" style="width: 100%; height: 500px;"></div>
+        <div id="map"></div>
 
         <div id="controls">
             <h3>Contrôles de la carte</h3>
@@ -28,21 +28,29 @@ class AffichageView
             <!-- Sélectionner la couche -->
             <div id="layerButtons"></div>
 
-
             <!-- Contrôle de l'opacité -->
             <h4>Opacité :</h4>
             <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="1" onchange="updateLayerOpacity()">
+
+            <div>
+                <button onclick="supprimerCouche()">Supprimer la couche sélectionnée</button>
+            </div>
+
         </div>
+
 
         <script>
             let roadData = <?php echo $road ?: 'null'; ?>; // Convertit $road en JSON directement
+
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
             initializeMap(<?php echo $house ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
         </script>
 
         <!-- Bouton pour ajouter la couche road -->
         <h4>Ajouter les routes :</h4>
-        <button onclick="ajouterGeoJson('route',roadData)">Ajouter GeoJson</button>
+        <button onclick="ajouterGeoJson(roadData, 'Routes')">Ajouter Routes</button>
+        <button onclick="ajouterGeoTiff('<?php echo $tiffPath ?: ''; ?>', 'GeoTIFF')">Ajouter GeoTIFF</button>
+
 
         <?php
         (new GlobalLayout('Affichage', ob_get_clean()))->show();

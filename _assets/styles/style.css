@@ -437,5 +437,22 @@ footer {
     background-color: #f0f0f0;
 }
 
+#controls {
+    position: absolute;
+    top: 200px; /* Ajuste la position verticale selon tes besoins */
+    left: 120px; /* Positionne les contrôles à gauche */
+    background-color: rgba(255, 255, 255, 0.7); /* Fond semi-transparent pour les contrôles */
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 1000; /* Assure que les contrôles apparaissent au-dessus de la carte */
+}
 
+#map {
+    width: 100%;
+    height: 500px;
+}
 
+.selected-button {
+    border: 2px solid #007bff; /* Bordure bleue pour le bouton sélectionné */
+    background-color: #f0f8ff; /* Fond légèrement bleu pour le bouton sélectionné */
+}

@@ -54,12 +54,10 @@ function initializeMap(house, tiffUrl) {
 
                 overlayMaps["GeoTIFF"] = tiffLayer;
                 updateLayerControl();
+                updateLayerButtons();
             })
             .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
     }
-
-    updateLayerControl();
-    updateLayerButtons();
 
     // Ajuster les limites de la carte si des couches sont présentes
     if (house || road || vegetation) {
@@ -69,6 +67,18 @@ function initializeMap(house, tiffUrl) {
 
 // Fonction pour sélectionner la couche à ajuster
 function selectLayer(layerName) {
+    // Réinitialise la sélection des boutons
+    const buttons = document.querySelectorAll('#layerButtons button');
+    buttons.forEach(button => {
+        button.classList.remove('selected-button');
+    });
+
+    // Ajoute la classe au bouton sélectionné
+    const selectedButton = document.getElementById(`btn-${layerName}`);
+    if (selectedButton) {
+        selectedButton.classList.add('selected-button');
+    }
+
     // Vérifie si la couche existe dans overlayMaps
     if (overlayMaps[layerName]) {
         currentLayer = overlayMaps[layerName];  // Sélectionne la couche correspondante
@@ -83,6 +93,7 @@ function selectLayer(layerName) {
     // Mettre à jour l'opacité de la couche sélectionnée
     updateLayerOpacity();
 }
+
 
 
 
@@ -158,7 +169,7 @@ function updateLayerButtons() {
     });
 }
 
-function ajouterGeoJson(fileName, genericGeoJson) {
+function ajouterGeoJson(genericGeoJson, layerName) {
     if (genericGeoJson) {
         // Supprime l'ancienne couche si elle existe
         if (genericLayer) {
@@ -169,10 +180,7 @@ function ajouterGeoJson(fileName, genericGeoJson) {
         // Crée et ajoute la nouvelle couche GeoJSON générique
         genericLayer = L.geoJSON(genericGeoJson, {color: randomColor, weight: 2, fillColor: randomColor, fillOpacity: 1}).addTo(map);
 
-        // Utilise le nom du fichier (sans l'extension .geojson) comme nom de la couche
-        const layerName = fileName.replace('.geojson', '');
-
-        // Ajoute la couche générique à overlayMaps avec le nom du fichier
+        // Ajoute la couche générique à overlayMaps avec le nom du fichier (layerName)
         overlayMaps[layerName] = genericLayer;
 
         // Met à jour le contrôle des couches
@@ -182,5 +190,74 @@ function ajouterGeoJson(fileName, genericGeoJson) {
         updateLayerButtons();
     } else {
         console.error("Aucune donnée GeoJSON générique.");
+    }
+}
+
+function supprimerCouche() {
+    if (currentLayer) {
+        // Supprimer la couche de la carte
+        map.removeLayer(currentLayer);
+
+        // Supprimer la couche de overlayMaps
+        const layerName = getLayerName(currentLayer); // On récupère le nom de la couche
+        if (overlayMaps[layerName]) {
+            delete overlayMaps[layerName];
+        }
+
+        // Réinitialiser la couche sélectionnée
+        currentLayer = null;
+
+        // Mettre à jour le contrôle des couches
+        updateLayerControl();
+
+        // Mettre à jour les boutons dynamiquement
+        updateLayerButtons();
+    } else {
+        console.error("Aucune couche sélectionnée à supprimer.");
+    }
+}
+
+// Fonction pour récupérer le nom de la couche (c'est un exemple, tu peux l'adapter selon ton besoin)
+function getLayerName(layer) {
+    // Si tu as un nom spécifique pour chaque couche, tu peux ajuster cette fonction.
+    for (let key in overlayMaps) {
+        if (overlayMaps[key] === layer) {
+            return key;
+        }
+    }
+    return null;
+}
+
+function ajouterGeoTiff(tiffUrl, layerName) {
+    if (tiffUrl) {
+        // Supprime l'ancienne couche GeoTIFF si elle existe
+        if (tiffLayer) {
+            map.removeLayer(tiffLayer);
+        }
+
+        // Chargement du GeoTIFF
+        fetch(tiffUrl)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => parseGeoraster(arrayBuffer))
+            .then(georaster => {
+                // Crée une nouvelle couche GeoTIFF
+                tiffLayer = new GeoRasterLayer({
+                    georaster: georaster,
+                    opacity: 1,
+                    resolution: 64
+                }).addTo(map);
+
+                // Ajouter la couche à overlayMaps avec le nom de la couche
+                overlayMaps[layerName] = tiffLayer;
+
+                // Met à jour le contrôle des couches
+                updateLayerControl();
+
+                // Met à jour les boutons dynamiquement
+                updateLayerButtons();
+            })
+            .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
+    } else {
+        console.error("URL du GeoTIFF manquant.");
     }
 }
