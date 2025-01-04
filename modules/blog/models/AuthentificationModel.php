@@ -8,18 +8,8 @@ class AuthentificationModel {
 
     public function __construct()
     {
-        try {
-            // Connexion à la base de données
-            $this->db = new PDO('mysql:host=mysql-developpement-urbain.alwaysdata.net;
-            dbname=developpement-urbain_344;
-            charset=utf8',
-                '379003',
-                'saeflouvat');
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // défini le mode d'erreur
-        } catch (PDOException $e) {
-            // En cas d'erreur, affiche un message et arrête le programme
-            die('Erreur : ' . $e->getMessage());
-        }
+        // Connexion à la base de données via SingletonModel
+        $this->db = SingletonModel::getInstance()->getConnection();
     }
 
     public function test_Pass($identifiant, $password)

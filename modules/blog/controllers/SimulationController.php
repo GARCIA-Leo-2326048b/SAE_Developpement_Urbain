@@ -3,6 +3,7 @@
 namespace blog\controllers;
 
 use _assets\config\Database;
+use blog\models\SingletonModel;
 use blog\models\UploadModel;
 use blog\views\PreparationSimulation;
 
@@ -13,8 +14,8 @@ class SimulationController
     private $utilisateur;
 
     public function __construct(){
-        $database = new Database();
-        $this->db = $database->getConnection();
+        // Utiliser SingletonModel pour obtenir la connexion à la base de données
+        $this->db = SingletonModel::getInstance()->getConnection();
         $this->uploadModel = new UploadModel($this->db);
         $this->utilisateur = $_SESSION['user_id'];
 

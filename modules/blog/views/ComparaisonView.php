@@ -15,45 +15,30 @@ class ComparaisonView
         <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
 
         <!-- Statistiques des surfaces -->
+
         <h2>Statistiques des surfaces (en m²)</h2>
         <ul>
-            <li><strong>Simulation :</strong>
-                <ul>
-                    <li>Moyenne: <?= $results['graphSim'][0]['y']; ?> m²</li>
-                    <li>Écart-type: <?= $results['graphSim'][3]['y']; ?> m²</li>
-                    <li>Minimum: <?= $results['graphSim'][1]['y']; ?> m²</li>
-                    <li>Maximum: <?= $results['graphSim'][2]['y']; ?> m²</li>
-                </ul>
-            </li>
-            <li><strong>Vérité terrain :</strong>
-                <ul>
-                    <li>Moyenne: <?= $results['graphVer'][0]['y']; ?> m²</li>
-                    <li>Écart-type: <?= $results['graphVer'][3]['y']; ?> m²</li>
-                    <li>Minimum: <?= $results['graphVer'][1]['y']; ?> m²</li>
-                    <li>Maximum: <?= $results['graphVer'][2]['y']; ?> m²</li>
-                </ul>
-            </li>
+            <li><strong>Simulation :</strong></li>
+            <table border="1">
+                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th></tr>
+                <?php $this->renderRow('Moyenne des surfaces (m²)', $results['graphSim'][0]['y'], $results['graphVer'][0]['y']); ?>
+                <?php $this->renderRow('Écart-type des surfaces (m²)', $results['graphSim'][3]['y'], $results['graphVer'][3]['y']); ?>
+                <?php $this->renderRow('Minimum des surfaces (m²)', $results['graphSim'][1]['y'], $results['graphVer'][1]['y']); ?>
+                <?php $this->renderRow('Maximum des surfaces (m²)', $results['graphSim'][2]['y'], $results['graphVer'][2]['y']); ?>
+            </table>
         </ul>
 
         <!-- Statistiques des indices de forme -->
         <h2>Statistiques des indices de forme (Shape Index)</h2>
         <ul>
-            <li><strong>Simulation :</strong>
-                <ul>
-                    <li>Moyenne: <?= $results['graphSim'][4]['y']; ?></li>
-                    <li>Écart-type: <?= $results['graphSim'][7]['y']; ?></li>
-                    <li>Minimum: <?= $results['graphSim'][5]['y']; ?></li>
-                    <li>Maximum: <?= $results['graphSim'][6]['y']; ?></li>
-                </ul>
-            </li>
-            <li><strong>Vérité terrain :</strong>
-                <ul>
-                    <li>Moyenne: <?= $results['graphVer'][4]['y']; ?></li>
-                    <li>Écart-type: <?= $results['graphVer'][7]['y']; ?></li>
-                    <li>Minimum: <?= $results['graphVer'][5]['y']; ?></li>
-                    <li>Maximum: <?= $results['graphVer'][6]['y']; ?></li>
-                </ul>
-            </li>
+            <li><strong>Simulation :</strong></li>
+            <table border="1">
+                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th></tr>
+                <?php $this->renderRow('Moyenne des Shape Index', $results['graphSim'][4]['y'], $results['graphVer'][4]['y']); ?>
+                <?php $this->renderRow('Écart-type des Shape Index', $results['graphSim'][7]['y'], $results['graphVer'][7]['y']); ?>
+                <?php $this->renderRow('Minimum des Shape Index', $results['graphSim'][5]['y'], $results['graphVer'][5]['y']); ?>
+                <?php $this->renderRow('Maximum des Shape Index', $results['graphSim'][6]['y'], $results['graphVer'][6]['y']); ?>
+            </table>
         </ul>
 
         <!-- Graphiques -->
@@ -107,5 +92,16 @@ class ComparaisonView
         // Affichage du layout global
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
+    private function renderRow($label, $simValue, $verValue)
+    {
+        $simValue = round($simValue, 2);
+        $verValue = round($verValue, 2);
+        echo "<tr>
+            <td>{$label}</td>
+            <td>{$simValue}</td>
+            <td>{$verValue}</td>
+          </tr>";
+    }
 }
+
 

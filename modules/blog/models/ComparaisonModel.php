@@ -12,9 +12,8 @@ class ComparaisonModel
 
     public function __construct()
     {
-        // Connexion à la base de données
-        $this->db = new \PDO('mysql:host=mysql-developpement-urbain.alwaysdata.net;dbname=developpement-urbain_344', '379003', 'saeflouvat');
-
+        // Connexion à la base de données via SingletonModel
+        $this->db = SingletonModel::getInstance()->getConnection();
     }
     public function fetchGeoJson($name)
     {
