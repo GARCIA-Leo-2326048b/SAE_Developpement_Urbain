@@ -37,22 +37,9 @@ class Upload
     public function telechargement()
     {
         try {
-
-            if($this->nouser){
-                // Gestion des fichiers Shapefile (Vecteur)
-                if (isset($_FILES['shapefile'])) {
-                    $this->handleShapefileUpload();
-                }
-                // Gestion des fichiers Raster
-                elseif (isset($_FILES['rasterfile'])) {
-                    $this->handleRasterUpload();
-                } else {
-                    echo "Aucun fichier n'a été téléchargé.";
-                }
-            }
             // Gestion des fichiers Shapefile (Vecteur)
-            if (isset($_FILES['shapefile'])) {
-                $this->handleShapefileUpload();
+            if (isset($_FILES['geojson'])) {
+                $this->uploadfile();
             }
             // Gestion des fichiers Raster
             elseif (isset($_FILES['rasterfile'])) {
@@ -73,6 +60,57 @@ class Upload
         } else {
             echo json_encode(['success' => false]);
         }
+    }
+
+    public function uploadfile()
+    {
+        header($this->header); // Réponse au format JSON
+        try {
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+            }
+
+            // Récupérer les données envoyées par AJAX en GET
+            if (empty($_POST['shapefile_name'])) {
+                throw new \Exception("Le nom du fichier est requis.");
+            }
+
+            $fileName = trim($_POST['shapefile_name']);
+            $fileName = preg_replace($this->pref, '', $fileName); // Nettoyer le nom du dossier
+
+            if (empty($fileName)) {
+                throw new \Exception("Nom de dossier invalide.");
+            }
+
+            $dossierParent = $_POST['dossier_parent'] ?? null;
+            // Vérifier si le fichier existe déjà pour éviter les conflits
+            $nom = $fileName . '.geojson';
+            if ($this->uploadModel->file_existGJ($nom)) {
+                throw new \Exception("fichier extste déjà.");
+            }
+            // Récupérer le contenu du fichier
+            if (!isset($_FILES['geojson']) || $_FILES['geojson']['error'] !== UPLOAD_ERR_OK) {
+                throw new \Exception("Erreur lors de l'upload du fichier.");
+            }
+
+            $fileTmpPath = $_FILES['geojson']['tmp_name'];
+            $fileContent = file_get_contents($fileTmpPath);
+
+            if ($fileContent === false) {
+                throw new \Exception("Impossible de lire le fichier GeoJSON.");
+            }
+
+            // Création du dossier
+            $this->uploadModel->saveUploadGJ($nom, $fileContent,$this->currentUserId, $dossierParent);
+
+            // Réponse JSON pour succès
+            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
+        } catch (\Exception $e) {
+            // Réponse JSON pour erreur
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
     }
 
     public function deleteFolder()

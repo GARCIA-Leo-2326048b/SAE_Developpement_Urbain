@@ -23,8 +23,8 @@ class FormView
                 <label for="shapefile_name">Nom du fichier (sans extension) :</label>
                 <input type="text" id="shapefile_name" name="shapefile_name" required>
                 <br><br>
-                <label for="shapefile">Sélectionnez les 3 fichiers requis :</label>
-                <input type="file" id="shapefile" name="shapefile[]" accept=".shp,.shx,.dbf" multiple required>
+                <label for="geojson">Sélectionnez un fichier GeoJSON :</label>
+                <input type="file" id="geojson" name="geojson" accept=".geojson" required>
                 <br><br>
                 <?php if (isset($_SESSION['suid'])): ?>
                     <label for="dossier_parent">Sélectionnez un dossier :</label>
