@@ -12,8 +12,14 @@ try {
             case 'homepage':
                 (new blog\controllers\HomepageController())->execute();
                 break;
+
             case 'affichage':
-                (new blog\controllers\AffichageController())->execute();
+                $fileId = filter_input(INPUT_GET, 'file_id'); // Récupérer l'ID du fichier depuis l'URL
+                if ($fileId) {
+                    (new blog\controllers\AffichageController())->execute($fileId);
+                } else {
+                    echo "Aucun fichier sélectionné.";
+                }
                 break;
             case 'compare':
                 (new blog\controllers\ComparaisonController())->compare('Household_3-2019.geojson','Buildings2019_ABM');

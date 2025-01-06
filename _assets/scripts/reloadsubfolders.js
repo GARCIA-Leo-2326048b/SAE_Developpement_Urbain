@@ -220,10 +220,13 @@ function closePopup() {
 }
 
 function performAction() {
+    const fileId = document.getElementById('popup-file-name').textContent;
     if (currentMode === 'simulation') {
-        alert("Simulation lancée pour " + document.getElementById('popup-file-name').textContent);
+        alert("Simulation lancée pour " + fileId);
+        // Redirection vers la page d'affichage avec l'ID du fichier dans l'URL
+        window.location.href = 'index.php?action=affichage&file_id=' + encodeURIComponent(fileId);
     } else {
-        selectFile();
+        //selectFile();
     }
     closePopup();
 }

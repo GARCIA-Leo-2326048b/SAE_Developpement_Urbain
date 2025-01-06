@@ -52,7 +52,9 @@ class AffichageView
         <button onclick="ajouterGeoJson(roadData, 'Routes')">Ajouter Routes</button>
         <button onclick="ajouterGeoJson(houseData, 'Maisons')">Ajouter Maisons</button>
         <button onclick="ajouterGeoTiff('<?php echo $tiffPath ?: ''; ?>', 'GeoTIFF')">Ajouter GeoTIFF</button>
-
+        <div class="compare-section" >
+            <button class="compare-button" onclick="compare()" >Comparer</button>
+        </div>
 
         <?php
         (new GlobalLayout('Affichage', ob_get_clean()))->show();

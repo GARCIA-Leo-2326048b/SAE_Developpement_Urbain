@@ -14,14 +14,13 @@ class AffichageController
         $this->model=new GeoJsonModel();
     }
 
-    public function execute()
+    public function execute($fileId)
     {
+        //var_dump($fileId);
 
-        $house = $this->model->fetchGeoJson('Household_3-2019.geojson');
-        $road = $this->model->fetchGeoJson('Road_3-2019.geojson');
-        $vegetation = $this->model->fetchGeoJson('3');
-        $tiffPath = '/_assets/utils/valenicina_17_08_19_dtm.tif';
-
-        $this->view->show($house,$road, $vegetation,$tiffPath);
+       $file = $this->model->fetchGeoJson($fileId);
+        var_dump($file);
+       $this->view->show($file,null,null,null);
     }
+
 }
