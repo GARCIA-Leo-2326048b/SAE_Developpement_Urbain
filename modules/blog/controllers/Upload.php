@@ -2,6 +2,7 @@
 
 namespace blog\controllers;
 
+use blog\models\SingletonModel;
 use CURLFile;
 use ZipArchive;
 use _assets\config\Database;
@@ -19,8 +20,9 @@ class Upload
     public function __construct()
     {
         // Initialiser la connexion à la base de données
-        $database = new Database();
-        $this->db = $database->getConnection();
+
+        // Utiliser SingletonModel pour obtenir la connexion à la base de données
+        $this->db = SingletonModel::getInstance()->getConnection();
         $this->uploadModel = new UploadModel($this->db);
 
         // Vérifier l'authentification

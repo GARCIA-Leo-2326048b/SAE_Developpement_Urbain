@@ -12,9 +12,31 @@ class GeoJsonModel
 
     public function __construct()
     {
-        // Connexion à la base de données
-        $this->db = new \PDO('mysql:host=mysql-developpement-urbain.alwaysdata.net;dbname=developpement-urbain_344', '379003', 'saeflouvat');
+        // Connexion à la base de données via SingletonModel
+        $this->db = SingletonModel::getInstance()->getConnection();
+    }
 
+    public function fetchGeoJsonById($fileId)
+    {
+        try {
+            // Requête pour récupérer le fichier GeoJSON à partir de l'ID (nom du fichier)
+            $query = 'SELECT * FROM geojson_files WHERE file_name = :fileId';
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':fileId', $fileId, PDO::PARAM_STR);
+            $stmt->execute();
+
+            // Vérifier si le fichier existe
+            $file = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($file) {
+                return $file; // Retourner les données du fichier
+            } else {
+                throw new \Exception("Fichier non trouvé pour l'ID : $fileId");
+            }
+        } catch (\Exception $e) {
+            echo "Erreur lors de la récupération du fichier : " . $e->getMessage();
+            return null;
+        }
     }
     public function fetchGeoJson($name)
     {

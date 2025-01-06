@@ -46,6 +46,7 @@ class HomepageView {
 
                         <div class="buttons">
                         <button onclick="location.href='?action=authentification'">Se Connecter</button>
+                        <button onclick="location.href='?action=inscription' ">S'inscrire</button>
                         </div>
                     </div>
                     <?php
