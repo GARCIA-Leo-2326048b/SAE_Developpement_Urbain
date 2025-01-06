@@ -31,6 +31,7 @@ class HomepageView {
                         <p>Veuillez vous connecter pour accéder aux fonctionnalités de simulation et de comparaison.</p>
                         <div class="buttons">
                         <button onclick="location.href='?action=authentification'">Se Connecter</button>
+                        <button onclick="location.href='?action=inscription' ">S'inscrire</button>
                         </div>
                     </div>
                     <?php

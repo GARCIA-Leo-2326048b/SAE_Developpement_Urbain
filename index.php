@@ -24,6 +24,12 @@ try {
             case 'login':
                 (new blog\controllers\AuthentificationController())->connexion();
                 break;
+            case 'inscription':
+                (new blog\controllers\InscriptionController())->execute();
+                break;
+            case 'creationCompte':
+                (new blog\controllers\InscriptionController())->creationCompte();
+                break;
             case 'view_simulations':
                 (new blog\controllers\Upload())->telechargement();
                 break;

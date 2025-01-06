@@ -36,10 +36,8 @@ class AuthentificationController {
                 ob_start(); // Démarre la bufferisation
                 $this->view->show($error); // Affiche la vue avec l'erreur
                 echo ob_get_clean(); // Nettoie le tampon de sortie
-                //                require 'modules/blog/views/AuthentificationView.php';
             }
         } else {
-//            require 'modules/blog/views/AuthentificationView.php';
             ob_start(); // Démarre la bufferisation
             $this->view->show(); // Affiche la vue
             echo ob_get_clean(); // Nettoie le tampon de sortie
