@@ -37,7 +37,7 @@ try {
                 (new blog\controllers\InscriptionController())->creationCompte();
                 break;
             case 'view_simulations':
-                (new blog\controllers\Upload())->telechargement();
+                (new blog\controllers\WorkSpaceController())->project();
                 break;
                 case 'simulation':
                     (new blog\controllers\SimulationController())->simuler();

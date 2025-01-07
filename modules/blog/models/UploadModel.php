@@ -320,6 +320,56 @@ class UploadModel {
         return $folderTree; // Retourne l'arborescence
     }
 
+    public function getFolderHierarchy($rootFolderId, $userId) {
+        // Récupérer tous les dossiers
+        $queryFolders = "
+    SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
+    FROM organisation 
+    WHERE id_utilisateur = :userId
+    ORDER BY dossierParent, id_dossier";
+        $stmtFolders = $this->db->prepare($queryFolders);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
+
+        // Construire la hiérarchie
+        $folderTree = [];
+        $folderIndex = [];
+
+        // Ajouter les dossiers au tableau d'index
+        foreach ($folders as $folder) {
+            $folderIndex[$folder['dossier_id']] = [
+                'id' => $folder['dossier_id'],
+                'name' => $folder['folder_name'],
+                'parent_id' => $folder['dossierParent'],
+                'children' => []
+            ];
+        }
+
+        // Construire les relations parent-enfant
+        foreach ($folderIndex as $folderId => &$folder) {
+            if (!empty($folder['parent_id']) && isset($folderIndex[$folder['parent_id']])) {
+                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
+            }
+        }
+
+        // Trouver le dossier racine spécifié et renvoyer uniquement son arbre
+        function buildTreeFromRoot($rootId, $folderIndex) {
+            if (!isset($folderIndex[$rootId])) {
+                return null; // Si le dossier racine n'existe pas
+            }
+
+            $rootFolder = $folderIndex[$rootId];
+            return $rootFolder;
+        }
+
+        // Construire l'arborescence à partir du dossier racine
+        $folderTree = buildTreeFromRoot($rootFolderId, $folderIndex);
+
+        return $folderTree; // Retourne l'arborescence à partir du dossier racine
+    }
+
+
     public function getSubFolder($currentUserId, $folderName) {
         $queryFolders = "
         SELECT id_dossier AS folder_id, id_dossier AS folder_name 

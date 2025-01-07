@@ -135,10 +135,27 @@ $(document).ready(function() {
 
 
 
+
 });
 
 let selectedFiles = [];
 let currentMode = 'simulation';
+
+const toggleButton = document.getElementById('toggle-create-form');
+const createForm = document.getElementById('create-project-form');
+const cancelButton = document.getElementById('cancel-create-form');
+
+toggleButton.addEventListener('click', () => {
+    createForm.classList.toggle('hidden');
+    toggleButton.querySelector('i').classList.toggle('fa-plus');
+    toggleButton.querySelector('i').classList.toggle('fa-times');
+});
+
+cancelButton.addEventListener('click', () => {
+    createForm.classList.add('hidden');
+    toggleButton.querySelector('i').classList.add('fa-plus');
+    toggleButton.querySelector('i').classList.remove('fa-times');
+});
 
 function switchMode(mode) {
     // Met à jour le mode courant
