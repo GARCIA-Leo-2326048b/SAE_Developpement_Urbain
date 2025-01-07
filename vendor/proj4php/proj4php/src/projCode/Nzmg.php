@@ -93,11 +93,11 @@ namespace proj4php\projCode;
   NZMG E, N:         2216746.425      5388508.765     metres
   NZGD49 long, lat:      169.172062       -46.651295  degrees
 
-  Note that these test vectors convert from NZMG metres to lat/long referenced
+  Note that these tests vectors convert from NZMG metres to lat/long referenced
   to NZGD49, not the more usual WGS84. The difference is about 70m N/S and about
   10m E/W.
 
-  These test vectors are provided in reference [1]. Many more test
+  These tests vectors are provided in reference [1]. Many more tests
   vectors are available in
   http://www.linz.govt.nz/docs/topography/topographicdata/placenamesdatabase/nznamesmar08.zip
   which is a catalog of names on the 260-series maps.

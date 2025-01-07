@@ -12,7 +12,7 @@ class SpatialreferenceTest extends TestCase
     protected $wkt='ogcwkt'; //ersrwkt
 
     /**
-     * the following suppress.. flags indicate some inability to test or missing test code 
+     * the following suppress.. flags indicate some inability to tests or missing tests code
      * for certain situations. it would be great if the tests pass with them all set to false.
      */
 
@@ -32,7 +32,7 @@ class SpatialreferenceTest extends TestCase
     // I think this is ok to ignore.
     protected $suppressToMeterMismatch = true;
 
-    // uncomment or comment this to test all, one or some projections.
+    // uncomment or comment this to tests all, one or some projections.
     protected $onlyTestTheseProjections = null;
     //'SR-ORG:8177';//array('EPSG:32040', 'EPSG:31370');
 
@@ -53,7 +53,7 @@ class SpatialreferenceTest extends TestCase
 
     /**
      * not all Projections define all of these. but if they exist it proj4 code, 
-     * then this is the accuracy to test each
+     * then this is the accuracy to tests each
      */
     protected $internalsPrecision = array(
         'x0'    => 0.0000000001,
@@ -143,7 +143,7 @@ class SpatialreferenceTest extends TestCase
         'SR-ORG:93', //''
         'SR-ORG:98', //UNIT "1/32meter" = 0.03125 ? wierd unit name
         'SR-ORG:106', // unnamed projection
-        'SR-ORG:108', // just a test
+        'SR-ORG:108', // just a tests
         'SR-ORG:123', //custom
 
         'EPSG:2056',

@@ -246,7 +246,7 @@ class Common
      * Return the sign of an argument.
      * This differs from PHP's core sign() function in that zero returns as postive.
      * 
-     * @param int|float $x The numeric valid to test.
+     * @param int|float $x The numeric valid to tests.
      * @return int -1 for negative; +1 for positive or zero
      */
     public static function sign($x)

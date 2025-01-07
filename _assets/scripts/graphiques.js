@@ -1,122 +1,228 @@
+let activeChart = null;
+let chartType = 'bar'; // Type de graphique par défaut
 
-    let activeChart = null;
-
-    function initializeChart(labels, dataSim, dataVer) {
-    // Store data globally
+function initializeChart(labels, dataSim, dataVer) {
+    // Stockage des données globalement
     window.chartData = { labels, dataSim, dataVer };
 
-    // Create initial chart when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-    createChart('bar', labels, dataSim, dataVer);
-    setupEventListeners();
-});
-}
+    const filteredData = getFilteredData();
+    const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
+    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
 
-    function setupEventListeners() {
-    document.querySelectorAll('input[name="chartType"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            createChart(e.target.value, window.chartData.labels, window.chartData.dataSim, window.chartData.dataVer);
-        });
+    // Normalisation si la case est cochée
+    if (normalizeChecked) {
+        const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
+        filteredData.dataSim = normalizedData.normalizedSim;
+        filteredData.dataVer = normalizedData.normalizedVer;
+    }
+
+    // Masquer tous les types de graphiques avant d'afficher celui sélectionné
+    document.querySelectorAll('.chart-container').forEach(chart => {
+        chart.style.display = 'none';
     });
 
-    document.querySelectorAll('#optionsForm input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', () => {
-    const type = document.querySelector('input[name="chartType"]:checked').value;
-    createChart(type, window.chartData.labels, window.chartData.dataSim, window.chartData.dataVer);
-});
-});
-}
+    const chartDiv = document.getElementById('chart-' + chartType);
+    if (chartDiv) {
+        chartDiv.style.display = 'block'; // Affiche le graphique sélectionné
+    }
 
-    function createChart(type, labels, dataSim, dataVer) {
-    const ctx = document.getElementById(type === 'bar' ? 'diagrammeBarre' : 'spiderChart');
+    // Déterminer les datasets à afficher en fonction des options sélectionnées
+    const datasets = [];
+    if (showSimulation) {
+        datasets.push({
+            label: 'Simulation',
+            data: filteredData.dataSim,
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
 
-    if (activeChart) {
-    activeChart.destroy();
-}
-
-    const filteredData = getFilteredData();
-
-    // Display correct chart based on selected type
-    document.getElementById('diagrammeBarre').style.display = type === 'bar' ? 'block' : 'none';
-    document.getElementById('spiderChart').style.display = type === 'spider' ? 'block' : 'none';
+    if (showVeriteTerrain) {
+        datasets.push({
+            label: 'Vérité terrain',
+            data: filteredData.dataVer,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
 
     const config = {
-    type: type === 'bar' ? 'bar' : 'radar',
-    data: {
-    labels: filteredData.labels,
-    datasets: [{
-    label: 'Simulation',
-    data: type === 'spider' ? normalizeData(filteredData.dataSim, filteredData.dataVer).normalizedSim : filteredData.dataSim,
-    borderWidth: 1,
-    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-    borderColor: 'rgba(255, 99, 132, 1)',
-    fill: type === 'spider'
-}, {
-    label: 'Vérité terrain',
-    data: type === 'spider' ? normalizeData(filteredData.dataSim, filteredData.dataVer).normalizedVer : filteredData.dataVer,
-    borderWidth: 1,
-    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-    borderColor: 'rgba(54, 162, 235, 1)',
-    fill: type === 'spider'
-}]
-},
-    options: {
-    responsive: true,
-    scales: type === 'bar' ? {
-    y: {
-    beginAtZero: true,
-    ticks: { callback: value => `${value} m²` }
-}
-} : { r: { beginAtZero: true } }
-}
-};
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
+        data: {
+            labels: filteredData.labels,
+            datasets: datasets, // Utilisation dynamique des datasets
+        },
+        options: {
+            responsive: true,
+            scales: chartType === 'bar'
+                ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `${value} m²`,
+                        },
+                    },
+                }
+                : chartType === 'pie'
+                    ? {}
+                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
+        },
+    };
 
+    if (activeChart) {
+        activeChart.destroy(); // Détruire l'ancien graphique avant de créer un nouveau
+    }
+
+    const ctx = chartDiv.querySelector('canvas').getContext('2d');
     activeChart = new Chart(ctx, config);
 }
 
-    function getFilteredData() {
-    const checkboxes = {
-    areaMean: document.getElementById('areaMean')?.checked || false,
-    areaMin: document.getElementById('areaMin')?.checked || false,
-    areaMax: document.getElementById('areaMax')?.checked || false,
-    areaStd: document.getElementById('areaStd')?.checked || false,
-    shapeIndexMax: document.getElementById('shapeIndexMax')?.checked || false,
-    shapeIndexMin: document.getElementById('shapeIndexMin')?.checked || false,
-    shapeIndexMean: document.getElementById('shapeIndexMean')?.checked || false,
-    shapeIndexStd: document.getElementById('shapeIndexStd')?.checked || false
-};
-
-    // Use filter and map to simplify the logic of checking checkboxes
-    const filtered = {
-    labels: [],
-    dataSim: [],
-    dataVer: []
-};
-
-    Object.entries(checkboxes).forEach(([key, checked], index) => {
-    if (checked) {
-    filtered.labels.push(window.chartData.labels[index]);
-    filtered.dataSim.push(window.chartData.dataSim[index]);
-    filtered.dataVer.push(window.chartData.dataVer[index]);
-}
-});
-
-    return filtered;
-}
-
-    function normalizeData(dataSim, dataVer) {
+function normalizeData(dataSim, dataVer) {
     const normalizedSim = [];
     const normalizedVer = [];
 
-    // Normalisation by label
+    // Normalisation par rapport à la valeur maximale entre les deux séries
     for (let i = 0; i < dataSim.length; i++) {
-    const maxVal = Math.max(dataSim[i], dataVer[i]);
-    normalizedSim.push(dataSim[i] / maxVal);
-    normalizedVer.push(dataVer[i] / maxVal);
-}
+        const maxVal = Math.max(dataSim[i], dataVer[i]);
+        normalizedSim.push(dataSim[i] / maxVal);
+        normalizedVer.push(dataVer[i] / maxVal);
+    }
 
     return { normalizedSim, normalizedVer };
 }
 
-    window.diagrammeBarre = initializeChart;
+// Fonction pour initialiser la page
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('addChartBtn').addEventListener('click', toggleChartForm);
+    document.getElementById('createChart').addEventListener('click', createNewChart);
+});
 
+// Afficher/Masquer le formulaire d'ajout
+function toggleChartForm() {
+    const formContainer = document.getElementById('chartFormContainer');
+    formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+}
+
+// Créer un nouveau graphique
+function createNewChart() {
+    const chartName = document.getElementById('chartName').value;
+    chartType = document.querySelector('input[name="chartType"]:checked').value; // Vérifie le type sélectionné
+    const selectedOptions = Array.from(document.querySelectorAll('#chartOptions input:checked')).map(opt => opt.id);
+    const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
+    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
+
+    const chartsContainer = document.getElementById('chartsContainer');
+    const chartDiv = document.createElement('div');
+    chartDiv.className = 'chart-container';
+    chartDiv.id = 'chart-' + chartType; // Ajout de l'ID pour chaque type
+    const chartId = 'canvas-' + Date.now(); // ID unique pour chaque graphique
+    chartDiv.innerHTML = `
+    <h3>${chartName}</h3>
+    <canvas id="${chartId}"></canvas>
+`;
+    chartsContainer.appendChild(chartDiv);
+
+    const ctx = chartDiv.querySelector('canvas').getContext('2d');
+    const filteredData = getFilteredData(selectedOptions);
+
+    // Normalisation si la case est cochée
+    if (normalizeChecked) {
+        const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
+        filteredData.dataSim = normalizedData.normalizedSim;
+        filteredData.dataVer = normalizedData.normalizedVer;
+    }
+
+    // Déterminer les datasets à afficher en fonction des options sélectionnées
+    const datasets = [];
+    if (showSimulation) {
+        datasets.push({
+            label: 'Simulation',
+            data: filteredData.dataSim,
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
+
+    if (showVeriteTerrain) {
+        datasets.push({
+            label: 'Vérité terrain',
+            data: filteredData.dataVer,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
+
+    // Configuration du graphique en fonction du type sélectionné
+    const config = {
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
+        data: {
+            labels: filteredData.labels,
+            datasets: datasets, // Utilisation dynamique des datasets
+        },
+        options: {
+            responsive: true,
+            scales: chartType === 'bar'
+                ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `${value} m²`,
+                        },
+                    },
+                }
+                : chartType === 'pie'
+                    ? {}
+                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
+        },
+    };
+
+    const chart = new Chart(ctx, config);
+
+    // Cacher le formulaire après la création du graphique
+    document.getElementById('chartFormContainer').style.display = 'none';
+}
+
+// Filtrer les données en fonction des options sélectionnées
+function getFilteredData(selectedOptions = []) {
+    const labels = [];
+    const dataSim = [];
+    const dataVer = [];
+
+    // Map des options disponibles
+    const dataMap = {
+        areaMean: 0,
+        areaMin: 1,
+        areaMax: 2,
+        areaStd: 3,
+        shapeIndexMax: 6,
+        shapeIndexMin: 5,
+        shapeIndexMean: 4,
+        shapeIndexStd: 7,
+    };
+
+    // Si aucune option n'est sélectionnée, on utilise toutes les données disponibles
+    if (selectedOptions.length === 0) {
+        selectedOptions = Object.keys(dataMap);
+    }
+
+    selectedOptions.forEach(option => {
+        const index = dataMap[option];
+        if (index !== undefined) {
+            labels.push(window.chartData.labels[index]);
+            dataSim.push(window.chartData.dataSim[index]);
+            dataVer.push(window.chartData.dataVer[index]);
+        }
+    });
+
+    return { labels, dataSim, dataVer };
+}

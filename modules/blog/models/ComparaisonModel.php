@@ -184,34 +184,53 @@ class ComparaisonModel
 
         return max($maxMinDistance1, $maxMinDistance2);
     }
+    public function calculateError($results)
+    {
 
+    }
 
-    public function grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer): array
-     {
-         $graphSim = array(
-             array("label"=> "Area mean", "y"=> $areaStatsSim['mean']),
-             array("label"=> "Area min", "y"=> $areaStatsSim['min']),
-             array("label"=> "Area max", "y"=> $areaStatsSim['max']),
-             array("label"=> "Area Std", "y"=> $areaStatsSim['std']),
-             array("label"=> "Shape Index Mean", "y"=> $shapeIndexStatsSim['mean']),
-             array("label"=> "Shape Index Min", "y"=> $shapeIndexStatsSim['min']),
-             array("label"=> "Shape Index Max", "y"=> $shapeIndexStatsSim['max']),
-             array("label"=> "Shape Index Std", "y"=> $shapeIndexStatsSim['std']),
+    public function grapheDonnees($areaStatsSim, $areaStatsVer, $shapeIndexStatsSim, $shapeIndexStatsVer): array
+    {
+        // Arrondir les données de simulation
+        $graphSim = array(
+            array("label" => "Area mean", "y" => round($areaStatsSim['mean'], 2)),
+            array("label" => "Area min", "y" => round($areaStatsSim['min'], 2)),
+            array("label" => "Area max", "y" => round($areaStatsSim['max'], 2)),
+            array("label" => "Area Std", "y" => round($areaStatsSim['std'], 2)),
+            array("label" => "Shape Index Mean", "y" => round($shapeIndexStatsSim['mean'], 2)),
+            array("label" => "Shape Index Min", "y" => round($shapeIndexStatsSim['min'], 2)),
+            array("label" => "Shape Index Max", "y" => round($shapeIndexStatsSim['max'], 2)),
+            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsSim['std'], 2)),
+        );
 
-         );
-         $graphVer = array(
-             array("label"=> "Area mean", "y"=> $areaStatsVer['mean']),
-             array("label"=> "Area min", "y"=> $areaStatsVer['min']),
-             array("label"=> "Area max", "y"=> $areaStatsVer['max']),
-             array("label"=> "Area St", "y"=> $areaStatsVer['std']),
-             array("label"=> "Shape Index Mean", "y"=> $shapeIndexStatsVer['mean']),
-             array("label"=> "Shape Index Min", "y"=> $shapeIndexStatsVer['min']),
-             array("label"=> "Shape Index Max", "y"=> $shapeIndexStatsVer['max']),
-             array("label"=> "Shape Index Std", "y"=> $shapeIndexStatsVer['std']),
-         );
+        // Arrondir les données de vérité terrain
+        $graphVer = array(
+            array("label" => "Area mean", "y" => round($areaStatsVer['mean'], 2)),
+            array("label" => "Area min", "y" => round($areaStatsVer['min'], 2)),
+            array("label" => "Area max", "y" => round($areaStatsVer['max'], 2)),
+            array("label" => "Area Std", "y" => round($areaStatsVer['std'], 2)),
+            array("label" => "Shape Index Mean", "y" => round($shapeIndexStatsVer['mean'], 2)),
+            array("label" => "Shape Index Min", "y" => round($shapeIndexStatsVer['min'], 2)),
+            array("label" => "Shape Index Max", "y" => round($shapeIndexStatsVer['max'], 2)),
+            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsVer['std'], 2)),
+        );
+         // Calcul des erreurs (différences)
+        // Calcul des erreurs (différences entre valeurs arrondies)
+        $errors = [];
+        foreach ($graphSim as $index => $simData) {
+            $simValue = $simData['y']; // Valeur de simulation arrondie
+            $verValue = $graphVer[$index]['y']; // Valeur de vérité terrain arrondie
+            $errors[] = [
+                "label" => "Error " . $simData['label'],
+                "y" => round(abs($simValue - $verValue), 2), // Erreur calculée à partir des valeurs arrondies
+            ];
+        }
 
-         return ['graphSim' => $graphSim,
-             'graphVer' => $graphVer];
+        return [
+             'graphSim' => $graphSim,
+             'graphVer' => $graphVer,
+             'errors' => $errors
+         ];
      }
 
 }

@@ -14,6 +14,15 @@ class AffichageController
         $this->model=new GeoJsonModel();
     }
 
+    public function setModel(GeoJsonModel $model)
+    {
+        $this->model = $model;
+    }
+    public function setView(AffichageView $view)
+    {
+        $this->view = $view;
+    }
+
     public function execute($fileId)
     {
         //var_dump($fileId);

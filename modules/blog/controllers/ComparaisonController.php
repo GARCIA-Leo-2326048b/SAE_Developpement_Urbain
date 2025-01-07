@@ -4,9 +4,6 @@ namespace blog\controllers;
 use blog\models\ComparaisonModel;
 use blog\views\ComparaisonView;
 use geoPHP;
-use Amenadiel\JpGraph\Graph\Graph;
-use Amenadiel\JpGraph\Plot\BarPlot;
-use Amenadiel\JpGraph\Plot\GroupBarPlot;
 
 class ComparaisonController{
 
