@@ -1,7 +1,7 @@
 let activeChart = null;
 
 function initializeChart(labels, dataSim, dataVer) {
-    // Store data globally
+    // Stockage des données globalement
     window.chartData = { labels, dataSim, dataVer };
 
     const filteredData = getFilteredData();
@@ -14,43 +14,48 @@ function initializeChart(labels, dataSim, dataVer) {
         filteredData.dataVer = normalizedData.normalizedVer;
     }
 
-    // Display correct chart based on selected type
-    document.getElementById('diagrammeBarre').style.display = type === 'bar' ? 'block' : 'none';
-    document.getElementById('spiderChart').style.display = type === 'spider' ? 'block' : 'none';
+    // Affichage du graphique correct en fonction du type sélectionné
+    document.getElementById('diagrammeBarre').style.display = chartType === 'bar' ? 'block' : 'none';
+    document.getElementById('spiderChart').style.display = chartType === 'spider' ? 'block' : 'none';
+    document.getElementById('pieChart').style.display = chartType === 'pie' ? 'block' : 'none';
 
     const config = {
-        type: type === 'bar' ? 'bar' : 'radar',
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie', // Ajout du type 'pie'
         data: {
             labels: filteredData.labels,
             datasets: [
                 {
                     label: 'Simulation',
                     data: filteredData.dataSim,
-                    borderWidth: 1,
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     borderColor: 'rgba(255, 99, 132, 1)',
-                    fill: type === 'spider',
+                    borderWidth: 1,
+                    fill: chartType === 'spider',
                 },
                 {
                     label: 'Vérité terrain',
                     data: filteredData.dataVer,
-                    borderWidth: 1,
                     backgroundColor: 'rgba(54, 162, 235, 0.5)',
                     borderColor: 'rgba(54, 162, 235, 1)',
-                    fill: type === 'spider',
+                    borderWidth: 1,
+                    fill: chartType === 'spider',
                 },
             ],
         },
         options: {
             responsive: true,
-            scales: type === 'bar'
+            scales: chartType === 'bar'
                 ? {
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: value => `${value} m²` },
+                        ticks: {
+                            callback: value => `${value} m²`,
+                        },
                     },
                 }
-                : { r: { beginAtZero: true } },
+                : chartType === 'pie' // Pas de scale pour le camembert
+                    ? {}
+                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
         },
     };
 
@@ -61,7 +66,7 @@ function normalizeData(dataSim, dataVer) {
     const normalizedSim = [];
     const normalizedVer = [];
 
-    // Normalisation by label
+    // Normalisation par rapport à la valeur maximale entre les deux séries
     for (let i = 0; i < dataSim.length; i++) {
         const maxVal = Math.max(dataSim[i], dataVer[i]);
         normalizedSim.push(dataSim[i] / maxVal);
@@ -115,7 +120,7 @@ function createNewChart() {
 
     // Configuration du graphique en fonction du type sélectionné
     const config = {
-        type: chartType === 'bar' ? 'bar' : 'radar', // Vérification du type pour définir le type de graphique
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie', // Ajout du type 'pie'
         data: {
             labels: filteredData.labels,
             datasets: [
@@ -148,7 +153,9 @@ function createNewChart() {
                         },
                     },
                 }
-                : { r: { beginAtZero: true } }, // Pour le type 'spider', on utilise les échelles radiales
+                : chartType === 'pie' // Pas de scale pour le camembert
+                    ? {}
+                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
         },
     };
 
@@ -161,7 +168,7 @@ function createNewChart() {
     document.getElementById('chartFormContainer').style.display = 'none';
 }
 
-// Filtrer les données en fonction des options
+// Filtrer les données en fonction des options sélectionnées
 function getFilteredData(selectedOptions) {
     const labels = [];
     const dataSim = [];
@@ -186,5 +193,5 @@ function getFilteredData(selectedOptions) {
         dataVer.push(window.chartData.dataVer[index]);
     });
 
-    return { labels, dataSim, dataVer };
+    return {labels, dataSim, dataVer};
 }

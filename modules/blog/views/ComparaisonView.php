@@ -77,10 +77,17 @@ class ComparaisonView
                 <div>
                     <label><input type="radio" name="chartType" value="bar" checked> Histogramme</label>
                     <label><input type="radio" name="chartType" value="spider"> Radar</label>
+                    <label><input type="radio" name="chartType" value="pie"> Camembert</label>
                 </div>
 
                 <h4>Options de données</h4>
                 <label><input type="checkbox" id="normalizeCheckbox"> Normaliser les données</label>
+                <label>
+                    <input type="checkbox" id="showSimulation" checked> Simulation
+                </label>
+                <label>
+                    <input type="checkbox" id="showVeriteTerrain" checked> Vérité terrain
+                </label>
                 <div id="chartOptions">
 
                     <label><input type="checkbox" id="areaMean" checked> Area Mean</label><br>
