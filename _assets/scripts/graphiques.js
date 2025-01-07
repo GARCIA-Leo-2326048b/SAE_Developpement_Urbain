@@ -1,4 +1,5 @@
 let activeChart = null;
+let chartType = 'bar'; // Type de graphique par défaut
 
 function initializeChart(labels, dataSim, dataVer) {
     // Stockage des données globalement
@@ -6,6 +7,8 @@ function initializeChart(labels, dataSim, dataVer) {
 
     const filteredData = getFilteredData();
     const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
+    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
 
     // Normalisation si la case est cochée
     if (normalizeChecked) {
@@ -14,33 +17,45 @@ function initializeChart(labels, dataSim, dataVer) {
         filteredData.dataVer = normalizedData.normalizedVer;
     }
 
-    // Affichage du graphique correct en fonction du type sélectionné
-    document.getElementById('diagrammeBarre').style.display = chartType === 'bar' ? 'block' : 'none';
-    document.getElementById('spiderChart').style.display = chartType === 'spider' ? 'block' : 'none';
-    document.getElementById('pieChart').style.display = chartType === 'pie' ? 'block' : 'none';
+    // Masquer tous les types de graphiques avant d'afficher celui sélectionné
+    document.querySelectorAll('.chart-container').forEach(chart => {
+        chart.style.display = 'none';
+    });
+
+    const chartDiv = document.getElementById('chart-' + chartType);
+    if (chartDiv) {
+        chartDiv.style.display = 'block'; // Affiche le graphique sélectionné
+    }
+
+    // Déterminer les datasets à afficher en fonction des options sélectionnées
+    const datasets = [];
+    if (showSimulation) {
+        datasets.push({
+            label: 'Simulation',
+            data: filteredData.dataSim,
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
+
+    if (showVeriteTerrain) {
+        datasets.push({
+            label: 'Vérité terrain',
+            data: filteredData.dataVer,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
 
     const config = {
-        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie', // Ajout du type 'pie'
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
         data: {
             labels: filteredData.labels,
-            datasets: [
-                {
-                    label: 'Simulation',
-                    data: filteredData.dataSim,
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                    fill: chartType === 'spider',
-                },
-                {
-                    label: 'Vérité terrain',
-                    data: filteredData.dataVer,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    fill: chartType === 'spider',
-                },
-            ],
+            datasets: datasets, // Utilisation dynamique des datasets
         },
         options: {
             responsive: true,
@@ -53,12 +68,17 @@ function initializeChart(labels, dataSim, dataVer) {
                         },
                     },
                 }
-                : chartType === 'pie' // Pas de scale pour le camembert
+                : chartType === 'pie'
                     ? {}
                     : { r: { beginAtZero: true } }, // Pour le type 'spider'
         },
     };
 
+    if (activeChart) {
+        activeChart.destroy(); // Détruire l'ancien graphique avant de créer un nouveau
+    }
+
+    const ctx = chartDiv.querySelector('canvas').getContext('2d');
     activeChart = new Chart(ctx, config);
 }
 
@@ -76,8 +96,6 @@ function normalizeData(dataSim, dataVer) {
     return { normalizedSim, normalizedVer };
 }
 
-///
-
 // Fonction pour initialiser la page
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addChartBtn').addEventListener('click', toggleChartForm);
@@ -93,14 +111,17 @@ function toggleChartForm() {
 // Créer un nouveau graphique
 function createNewChart() {
     const chartName = document.getElementById('chartName').value;
-    const chartType = document.querySelector('input[name="chartType"]:checked').value; // Vérifie le type sélectionné
+    chartType = document.querySelector('input[name="chartType"]:checked').value; // Vérifie le type sélectionné
     const selectedOptions = Array.from(document.querySelectorAll('#chartOptions input:checked')).map(opt => opt.id);
     const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
+    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
 
     const chartsContainer = document.getElementById('chartsContainer');
     const chartDiv = document.createElement('div');
     chartDiv.className = 'chart-container';
-    const chartId = 'chart-' + Date.now(); // ID unique pour chaque graphique
+    chartDiv.id = 'chart-' + chartType; // Ajout de l'ID pour chaque type
+    const chartId = 'canvas-' + Date.now(); // ID unique pour chaque graphique
     chartDiv.innerHTML = `
     <h3>${chartName}</h3>
     <canvas id="${chartId}"></canvas>
@@ -118,29 +139,36 @@ function createNewChart() {
         filteredData.dataVer = normalizedData.normalizedVer;
     }
 
+    // Déterminer les datasets à afficher en fonction des options sélectionnées
+    const datasets = [];
+    if (showSimulation) {
+        datasets.push({
+            label: 'Simulation',
+            data: filteredData.dataSim,
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
+
+    if (showVeriteTerrain) {
+        datasets.push({
+            label: 'Vérité terrain',
+            data: filteredData.dataVer,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            fill: chartType === 'spider',
+        });
+    }
+
     // Configuration du graphique en fonction du type sélectionné
     const config = {
-        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie', // Ajout du type 'pie'
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
         data: {
             labels: filteredData.labels,
-            datasets: [
-                {
-                    label: 'Simulation',
-                    data: filteredData.dataSim,
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1,
-                    fill: chartType === 'spider',
-                },
-                {
-                    label: 'Vérité terrain',
-                    data: filteredData.dataVer,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    fill: chartType === 'spider',
-                },
-            ],
+            datasets: datasets, // Utilisation dynamique des datasets
         },
         options: {
             responsive: true,
@@ -153,7 +181,7 @@ function createNewChart() {
                         },
                     },
                 }
-                : chartType === 'pie' // Pas de scale pour le camembert
+                : chartType === 'pie'
                     ? {}
                     : { r: { beginAtZero: true } }, // Pour le type 'spider'
         },
@@ -169,7 +197,7 @@ function createNewChart() {
 }
 
 // Filtrer les données en fonction des options sélectionnées
-function getFilteredData(selectedOptions) {
+function getFilteredData(selectedOptions = []) {
     const labels = [];
     const dataSim = [];
     const dataVer = [];
@@ -186,12 +214,24 @@ function getFilteredData(selectedOptions) {
         shapeIndexStd: 7,
     };
 
+    // Si aucune option n'est sélectionnée, on utilise toutes les données disponibles
+    if (selectedOptions.length === 0) {
+        selectedOptions = Object.keys(dataMap);
+    }
+
     selectedOptions.forEach(option => {
         const index = dataMap[option];
-        labels.push(window.chartData.labels[index]);
-        dataSim.push(window.chartData.dataSim[index]);
-        dataVer.push(window.chartData.dataVer[index]);
+        if (index !== undefined) {
+            labels.push(window.chartData.labels[index]);
+            dataSim.push(window.chartData.dataSim[index]);
+            dataVer.push(window.chartData.dataVer[index]);
+        }
     });
 
-    return {labels, dataSim, dataVer};
+    return { labels, dataSim, dataVer };
+}
+
+function editChart(chart, chartName) {
+    // Exemple d'action pour modifier un graphique
+    alert(`Modifier le graphique : ${chartName}`);
 }
