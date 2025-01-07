@@ -12,41 +12,29 @@ class ComparaisonView
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/_assets/scripts/graphiques.js"></script>
 
-        <h1>Comparaison des polygones (Simulation vs Vérité terrain)</h1>
-
         <!-- Statistiques des surfaces -->
-
-        <h2>Statistiques des surfaces (en m²)</h2>
         <ul>
-            <li><strong>Simulation :</strong></li>
             <table border="1">
-                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th></tr>
-                <?php $this->renderRow('Moyenne des surfaces (m²)', $results['graphSim'][0]['y'], $results['graphVer'][0]['y']); ?>
-                <?php $this->renderRow('Écart-type des surfaces (m²)', $results['graphSim'][3]['y'], $results['graphVer'][3]['y']); ?>
-                <?php $this->renderRow('Minimum des surfaces (m²)', $results['graphSim'][1]['y'], $results['graphVer'][1]['y']); ?>
-                <?php $this->renderRow('Maximum des surfaces (m²)', $results['graphSim'][2]['y'], $results['graphVer'][2]['y']); ?>
+                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th><th>Erreur</th></tr>
+                <?php $this->renderRow('Moyenne des surfaces (m²)', $results['graphSim'][0]['y'], $results['graphVer'][0]['y'], $results['errors'][0]['y']); ?>
+                <?php $this->renderRow('Écart-type des surfaces (m²)', $results['graphSim'][3]['y'], $results['graphVer'][3]['y'], $results['errors'][3]['y']); ?>
+                <?php $this->renderRow('Minimum des surfaces (m²)', $results['graphSim'][1]['y'], $results['graphVer'][1]['y'], $results['errors'][1]['y']); ?>
+                <?php $this->renderRow('Maximum des surfaces (m²)', $results['graphSim'][2]['y'], $results['graphVer'][2]['y'], $results['errors'][2]['y']); ?>
             </table>
         </ul>
 
         <!-- Statistiques des indices de forme -->
-        <h2>Statistiques des indices de forme (Shape Index)</h2>
         <ul>
-            <li><strong>Simulation :</strong></li>
             <table border="1">
-                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th></tr>
-                <?php $this->renderRow('Moyenne des Shape Index', $results['graphSim'][4]['y'], $results['graphVer'][4]['y']); ?>
-                <?php $this->renderRow('Écart-type des Shape Index', $results['graphSim'][7]['y'], $results['graphVer'][7]['y']); ?>
-                <?php $this->renderRow('Minimum des Shape Index', $results['graphSim'][5]['y'], $results['graphVer'][5]['y']); ?>
-                <?php $this->renderRow('Maximum des Shape Index', $results['graphSim'][6]['y'], $results['graphVer'][6]['y']); ?>
+                <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th><th>Erreur</th></tr>
+                <?php $this->renderRow('Moyenne des Shape Index', $results['graphSim'][4]['y'], $results['graphVer'][4]['y'], $results['errors'][4]['y']); ?>
+                <?php $this->renderRow('Écart-type des Shape Index', $results['graphSim'][7]['y'], $results['graphVer'][7]['y'], $results['errors'][7]['y']); ?>
+                <?php $this->renderRow('Minimum des Shape Index', $results['graphSim'][5]['y'], $results['graphVer'][5]['y'], $results['errors'][5]['y']); ?>
+                <?php $this->renderRow('Maximum des Shape Index', $results['graphSim'][6]['y'], $results['graphVer'][6]['y'], $results['errors'][6]['y']); ?>
             </table>
         </ul>
 
         <!-- Graphiques -->
-        <div>
-            <canvas id="diagrammeBarre"></canvas>
-            <canvas id="spiderChart" style="display:none;"></canvas>
-        </div>
-
         <script>
             // Initialisation du graphique
             window.initializeChart(
@@ -56,52 +44,74 @@ class ComparaisonView
                 <?php echo json_encode(array_column($results['graphVer'], 'y')); ?>   // Données pour la vérité terrain
             );
         </script>
-
         <!-- Options de contrôle -->
-        <div style="display: flex;">
+        <div style="display: none;">
             <div style="width: 30%; padding: 20px; background-color: #e0f7f4;">
                 <h3>Options</h3>
                 <div class="chart-controls">
                     <h4>Type de graphique</h4>
                     <div class="chart-type">
                         <label>
-                            <input type="radio" name="chartType" value="bar" checked>
+                            <input type="radio" name="chartType1" value="bar" checked>
                             Histogramme
                         </label>
                         <label>
-                            <input type="radio" name="chartType" value="spider">
+                            <input type="radio" name="chartType1" value="spider">
                             Radar
                         </label>
                     </div>
-
-                    <form id="optionsForm">
-                        <label><input type="checkbox" id="areaMax" checked> Area Max</label><br>
-                        <label><input type="checkbox" id="areaMean" checked> Area Mean</label><br>
-                        <label><input type="checkbox" id="areaMin" checked> Area Min</label><br>
-                        <label><input type="checkbox" id="areaStd" checked> Area Std</label><br>
-                        <label><input type="checkbox" id="shapeIndexMax" checked> Shape Index Max</label><br>
-                        <label><input type="checkbox" id="shapeIndexMean" checked> Shape Index Mean</label><br>
-                        <label><input type="checkbox" id="shapeIndexMin" checked> Shape Index Min</label><br>
-                        <label><input type="checkbox" id="shapeIndexStd" checked> Shape Index Std</label><br>
-                    </form>
                 </div>
             </div>
         </div>
+
+        <!-- Bouton pour ajouter un graphique -->
+        <button id="addChartBtn">Ajouter un graphique</button>
+
+        <!-- Formulaire de création de graphique -->
+        <div id="chartFormContainer" style="display: none;">
+            <form id="chartForm">
+                <label for="chartName">Nom du graphique :</label>
+                <input type="text" id="chartName" name="chartName" required>
+
+                <h4>Type de graphique</h4>
+                <div>
+                    <label><input type="radio" name="chartType" value="bar" checked> Histogramme</label>
+                    <label><input type="radio" name="chartType" value="spider"> Radar</label>
+                </div>
+
+                <h4>Options de données</h4>
+                <label><input type="checkbox" id="normalizeCheckbox"> Normaliser les données</label>
+                <div id="chartOptions">
+
+                    <label><input type="checkbox" id="areaMean" checked> Area Mean</label><br>
+                    <label><input type="checkbox" id="areaMin" checked> Area Min</label><br>
+                    <label><input type="checkbox" id="areaMax" checked> Area Max</label><br>
+                    <label><input type="checkbox" id="areaStd" checked> Area Std</label><br>
+                    <label><input type="checkbox" id="shapeIndexMax" checked> Shape Index Max</label><br>
+                    <label><input type="checkbox" id="shapeIndexMean" checked> Shape Index Mean</label><br>
+                    <label><input type="checkbox" id="shapeIndexMin" checked> Shape Index Min</label><br>
+                    <label><input type="checkbox" id="shapeIndexStd" checked> Shape Index Std</label><br>
+                </div>
+
+                <button type="button" id="createChart">Créer</button>
+            </form>
+        </div>
+
+        <!-- Conteneur des graphiques -->
+        <div id="chartsContainer"></div>
 
         <?php
         // Affichage du layout global
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
-    private function renderRow($label, $simValue, $verValue)
+
+    private function renderRow($label, $simValue, $verValue, $errorValue)
     {
-        $simValue = round($simValue, 2);
-        $verValue = round($verValue, 2);
         echo "<tr>
             <td>{$label}</td>
             <td>{$simValue}</td>
             <td>{$verValue}</td>
+            <td>{$errorValue}</td>
           </tr>";
     }
 }
-
-

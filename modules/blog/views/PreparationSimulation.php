@@ -79,8 +79,8 @@ class PreparationSimulation
                 </div>
 
                 <!-- Bouton Comparer (visible uniquement en mode Comparaison) -->
-                <div id="compare-section" style="display: none;">
-                    <button id="compareButton" onclick="compare()" disabled>Comparer</button>
+                <div class="compare-section" style="display: none;">
+                    <button class="compare-button" onclick="compare()" disabled>Comparer</button>
                 </div>
         </div>
 
