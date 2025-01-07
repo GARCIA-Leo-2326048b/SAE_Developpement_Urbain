@@ -185,7 +185,7 @@ class Datum
         /*
          * * Don't blow up if Latitude is just a little out of the value
          * * range as it may just be a rounding issue.  Also removed longitude
-         * * test, it should be wrapped by cos() and sin().  NFW for PROJ.4, Sep/2001.
+         * * tests, it should be wrapped by cos() and sin().  NFW for PROJ.4, Sep/2001.
          */
 
         if ($Latitude < -Common::HALF_PI && $Latitude > -1.001 * Common::HALF_PI) {
