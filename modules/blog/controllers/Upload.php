@@ -36,6 +36,62 @@ class Upload
         }
     }
 
+    public function createProject()
+    {
+        header($this->header); // Réponse au format JSON
+        try {
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+            }
+
+            // Récupérer les données envoyées par AJAX en GET
+            if (empty($_POST['new_project_name'])) {
+                throw new \Exception("Le nom du projet est requis.");
+            }
+
+            $project = trim($_POST['new_project_name']);
+            $project = preg_replace($this->pref, '', $project); // Nettoyer le nom du dossier
+
+
+            if ($this->uploadModel->projetExiste($project,$this->currentUserId)) {
+                throw new \Exception("Ce projet existe déjà");
+            }
+
+            // Création du projet
+            $this->uploadModel->createProjectM($project,$this->currentUserId);
+
+            // Récupérer l'ID du projet récemment ajouté
+            $newProjectId = $this->db->lastInsertId();
+
+            // Ajouter ce projet à la session
+            // Vous pouvez créer un tableau de projets si ce n'est pas déjà fait dans la session
+            $_SESSION['projects'][] = [
+                'id' => $newProjectId,
+                'name' => $project
+            ];
+
+            // Mettre à jour le projet actif dans la session
+            $_SESSION['current_project_id'] = $newProjectId;
+            $_SESSION['current_project_name'] = $project;
+
+            // Réponse JSON pour succès
+            echo json_encode(['success' => true, 'message' => 'Projet créé avec succès.']);
+        } catch (\Exception $e) {
+            // Réponse JSON pour erreur
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
+
+    public function getProjects()
+    {
+        header($this->header);
+        $files = $this->uploadModel->getUserProjects($this->currentUserId);
+        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        return $folderHistory->generateProjects($files);
+    }
+
     public function telechargement()
     {
         try {

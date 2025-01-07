@@ -62,6 +62,12 @@ class HistoriqueView
         }
     }
 
+    public function generateProjects($folders, $prefix = ''): void {
+        foreach ($folders as $folder) {
+                echo "<option value='" . htmlspecialchars($folder['projet']) . "'>" . $prefix . htmlspecialchars($folder['projet']) . "</option>";
+        }
+    }
+
     public function getFiles(): array {
         return $this->files;
     }

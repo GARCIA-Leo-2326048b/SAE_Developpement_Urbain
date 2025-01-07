@@ -4,6 +4,14 @@ namespace blog\views;
 
 class MesSimulationView
 {
+    private $historique;
+
+    public function __construct($project){
+        // Utiliser SingletonModel pour obtenir la connexion à la base de données
+        $this->historique = \blog\views\HistoriqueView::getInstance($project);
+    }
+
+
     public function show()
     { ?>
         <div class="switcher-container">
@@ -14,6 +22,9 @@ class MesSimulationView
             <div class="tabs-content">
                 <div id="simulation-content" class="tab-content active">
                     <h2>Historique des Simulations</h2>
+                    <?php
+                        $this->historique->render();
+                    ?>
                     <!-- Contenu de l'historique des simulations -->
                     <p>Aucune simulation enregistrée pour l'instant.</p>
                 </div>

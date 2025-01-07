@@ -36,6 +36,12 @@ try {
             case 'creationCompte':
                 (new blog\controllers\InscriptionController())->creationCompte();
                 break;
+            case 'create_project':
+                (new blog\controllers\Upload())->createProject();
+                break;
+            case 'get_all_projects':
+                (new blog\controllers\Upload())->getProjects();
+                break;
             case 'view_simulations':
                 (new blog\controllers\WorkSpaceController())->project();
                 break;

@@ -1,6 +1,51 @@
 let globalParentFolder = "root";
 $(document).ready(function() {
 
+    $('#create-project-form').on('submit', function (e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
+
+        console.log("Début de l'envoi du fichier...");
+
+        $.ajax({
+            url: 'index.php?action=create_project', // URL de votre contrôleur
+            type: 'POST', // Utilisez POST pour les fichiers
+            data: formData,
+            processData: false, // Nécessaire pour éviter que jQuery ne traite les données
+            contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
+            dataType: 'json',
+            success: function (response) {
+                console.log("Réponse du serveur :", response);
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: response.message,
+                    }).then(() => {
+                        // Recharger ou mettre à jour l'affichage sans recharger la page
+                        updateProjectload();  // Appeler ta fonction pour mettre à jour l'historique
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: response.message,
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX :", status, error);
+                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors du téléchargement.',
+                });
+            },
+        });
+    });
+
     $('.folder-selector').on('change', function() {
         let folderName = $(this).val(); // Récupérer la valeur du dossier sélectionné
         globalParentFolder = folderName;
@@ -157,6 +202,25 @@ cancelButton.addEventListener('click', () => {
     toggleButton.querySelector('i').classList.remove('fa-times');
 });
 
+function updateProjectload(){
+
+    fetch('index.php?action=get_all_projects')
+        .then(response => response.text()) // Récupère le contenu HTML sous forme de texte
+        .then(data => {
+            console.log(data); // Vérifie la réponse HTML dans la console
+
+            const $select = $('#project');
+
+
+            $select.empty(); // Vide le contenu actuel du select
+            $select.append(data); // Insère directement les options reçues du serveur
+
+            console.log($select.html());
+        })
+        .catch(error => {
+            console.error("Erreur lors de la mise à jour de l'historique :", error);
+        });
+}
 function switchMode(mode) {
     // Met à jour le mode courant
     currentMode = mode;

@@ -12,6 +12,53 @@ class UploadModel {
         $this->db = $dbConnection;
     }
 
+    public function projetExiste($project,$userId)
+    {
+        $query = "SELECT COUNT(*) FROM projets WHERE nom = :projet and utilisateur = :utilisateur";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':projet', $project);
+        $stmt->bindParam(':utilisateur', $userId);
+        $stmt->execute();
+
+        if( $stmt->fetchColumn() > 0){
+            return true;
+
+        }else{
+            return false;
+        }
+    }
+
+    public function createProjectM($project,$userId)
+    {
+         try {
+            $query = "INSERT INTO projets  
+                      VALUES (:project, :user)";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':project', $project);
+            $stmt->bindParam(':user', $userId);
+
+
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            throw new \Exception("Erreur lors de la création du projet : " . $e->getMessage());
+        }
+    }
+
+    public function getUserProjects($userId)
+    {
+        $queryFolders = "
+        SELECT nom AS projet
+        FROM projets 
+        WHERE utilisateur = :userId 
+        ORDER BY nom";
+        $stmtFolders = $this->db->prepare($queryFolders);
+        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->execute();
+        return $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     // Enregistrer un upload GeoJSON
     public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent)
     {

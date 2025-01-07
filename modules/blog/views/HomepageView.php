@@ -1,6 +1,12 @@
 <?php
 namespace blog\views;
 class HomepageView {
+    private $projets;
+
+    public function __construct($project){
+        // Utiliser SingletonModel pour obtenir la connexion à la base de données
+        $this->projets = $project;
+    }
 
     public function show() : void {
         ob_start();?>
@@ -28,7 +34,8 @@ class HomepageView {
                                 <div class="project-selection">
                                     <select id="project" name="project_id" onchange="this.form.submit()">
                                         <option value="" disabled selected>Choisir un projet</option>
-                                        <?php foreach ($_SESSION['projects'] as $project): ?>
+                                        <?php
+                                        foreach ($this->projets as $project): ?>
                                             <option value="<?php echo htmlspecialchars($project['id']); ?>"
                                                 <?php echo ($_SESSION['current_project_id'] ?? '') === $project['id'] ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($project['name']); ?>
@@ -43,7 +50,7 @@ class HomepageView {
                             </form>
 
                             <!-- Formulaire de création de projet (par défaut caché) -->
-                            <form id="create-project-form" method="POST" action="?action=create_project" class="hidden create-project-form">
+                            <form id="create-project-form" method="POST" action="" class="hidden create-project-form">
                                 <label for="new_project_name">Créer un nouveau projet :</label>
                                 <input type="text" id="new_project_name" name="new_project_name" placeholder="Nom du projet" required>
                                 <div class="form-buttons">
