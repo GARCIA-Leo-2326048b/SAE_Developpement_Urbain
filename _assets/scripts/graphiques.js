@@ -125,7 +125,6 @@ function createNewChart() {
     chartDiv.innerHTML = `
     <h3>${chartName}</h3>
     <canvas id="${chartId}"></canvas>
-    <button class="editChartBtn">Modifier</button>
 `;
     chartsContainer.appendChild(chartDiv);
 
@@ -189,9 +188,6 @@ function createNewChart() {
 
     const chart = new Chart(ctx, config);
 
-    // Ajouter l'événement pour modifier le graphique
-    chartDiv.querySelector('.editChartBtn').addEventListener('click', () => editChart(chart, chartName));
-
     // Cacher le formulaire après la création du graphique
     document.getElementById('chartFormContainer').style.display = 'none';
 }
@@ -229,9 +225,4 @@ function getFilteredData(selectedOptions = []) {
     });
 
     return { labels, dataSim, dataVer };
-}
-
-function editChart(chart, chartName) {
-    // Exemple d'action pour modifier un graphique
-    alert(`Modifier le graphique : ${chartName}`);
 }
