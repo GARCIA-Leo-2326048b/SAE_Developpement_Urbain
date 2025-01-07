@@ -6,8 +6,11 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'proj4php\\' => array($vendorDir . '/proj4php/proj4php/src', $vendorDir . '/proj4php/proj4php/src'),
     'blog\\' => array($baseDir . '/modules/blog'),
     '_assets\\config\\' => array($baseDir . '/_assets/config'),
+    'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
+    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
     'Amenadiel\\JpGraph\\Util\\' => array($vendorDir . '/amenadiel/jpgraph/src/util'),
     'Amenadiel\\JpGraph\\Themes\\' => array($vendorDir . '/amenadiel/jpgraph/src/themes'),
     'Amenadiel\\JpGraph\\Text\\' => array($vendorDir . '/amenadiel/jpgraph/src/text'),

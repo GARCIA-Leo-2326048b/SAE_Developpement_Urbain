@@ -36,7 +36,4 @@ class SingletonModel
     {
         return $this->connection;
     }
-
-    private function __clone() {}
-    private function __wakeup() {}
 }
