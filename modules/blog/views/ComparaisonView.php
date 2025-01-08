@@ -4,14 +4,48 @@ namespace blog\views;
 
 class ComparaisonView
 {
-    public function showComparison($results): void
+    public function showComparison($results, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName): void
     {
         ob_start();
         ?>
         <!-- Bibliothèques JS -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/_assets/scripts/graphiques.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+        <script src="https://unpkg.com/georaster"></script>
+        <script src="/_assets/scripts/affichageCarte.js"></script>
+        <script src="/_assets/scripts/redirect.js"></script>
 
+        <!-- Affichage cartes -->
+        <div class="map-container">
+            <form method="POST" action="">
+                <!-- Formulaire pour la Carte Simulation -->
+                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonSimName; ?>">
+                <h4><button type="submit">Carte Simulation</button></h4>
+            </form>
+            <!-- Formulaire pour la Carte Vérité Terrain -->
+            <form method="POST" action="">
+                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonVerName; ?>">
+                <h4><button type="submit">Carte Vérité Terrain</button></h4>
+            </form>
+        </div>
+        <div class="map-container">
+            <div class="map-card">
+                <div id="mapSim"></div>
+                <script>
+                    initializeMap(<?php echo $geoJsonSim ?>, '', 'mapSim');
+                </script>
+            </div>
+
+            <div class="map-card">
+                <div id="mapVer"></div>
+                <script>
+                    initializeMap(<?php echo $geoJsonVer ?>, '', 'mapVer');
+                </script>
+            </div>
+        </div>
         <!-- Statistiques des surfaces -->
         <ul>
             <table border="1">
@@ -70,7 +104,7 @@ class ComparaisonView
         <!-- Formulaire de création de graphique -->
         <div id="chartFormContainer" style="display: none;">
             <form id="chartForm">
-                <label for="chartName">Nom du graphique :</label>
+                <h4><label for="chartName">Nom du graphique :</label></h4>
                 <input type="text" id="chartName" name="chartName" required>
 
                 <h4>Type de graphique</h4>
@@ -79,25 +113,29 @@ class ComparaisonView
                     <label><input type="radio" name="chartType" value="spider"> Radar</label>
                     <label><input type="radio" name="chartType" value="pie"> Camembert</label>
                 </div>
-
                 <h4>Options de données</h4>
-                <label><input type="checkbox" id="normalizeCheckbox"> Normaliser les données</label>
-                <label>
-                    <input type="checkbox" id="showSimulation" checked> Simulation
-                </label>
-                <label>
-                    <input type="checkbox" id="showVeriteTerrain" checked> Vérité terrain
-                </label>
+                <div>
+                    <label>
+                        <input type="checkbox" id="showSimulation" checked> Simulation
+                    </label>
+                    <label>
+                        <input type="checkbox" id="showVeriteTerrain" checked> Vérité terrain
+                    </label>
+                    <label><input type="checkbox" id="normalizeCheckbox"> Normaliser les données</label>
+                </div>
+
+                <h4>Données</h4>
+
                 <div id="chartOptions">
 
                     <label><input type="checkbox" id="areaMean" checked> Area Mean</label><br>
                     <label><input type="checkbox" id="areaMin" checked> Area Min</label><br>
                     <label><input type="checkbox" id="areaMax" checked> Area Max</label><br>
                     <label><input type="checkbox" id="areaStd" checked> Area Std</label><br>
-                    <label><input type="checkbox" id="shapeIndexMax" checked> Shape Index Max</label><br>
-                    <label><input type="checkbox" id="shapeIndexMean" checked> Shape Index Mean</label><br>
-                    <label><input type="checkbox" id="shapeIndexMin" checked> Shape Index Min</label><br>
-                    <label><input type="checkbox" id="shapeIndexStd" checked> Shape Index Std</label><br>
+                    <label><input type="checkbox" id="shapeIndexMax" > Shape Index Max</label><br>
+                    <label><input type="checkbox" id="shapeIndexMean" > Shape Index Mean</label><br>
+                    <label><input type="checkbox" id="shapeIndexMin" > Shape Index Min</label><br>
+                    <label><input type="checkbox" id="shapeIndexStd" > Shape Index Std</label><br>
                 </div>
 
                 <button type="button" id="createChart">Créer</button>
@@ -106,6 +144,12 @@ class ComparaisonView
 
         <!-- Conteneur des graphiques -->
         <div id="chartsContainer"></div>
+        <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
+        <div id="geoJsonNames"
+             data-geojson-sim="<?php echo $geoJsonSimName; ?>"
+             data-geojson-ver="<?php echo $geoJsonVerName; ?>">
+        </div>
+        <button type="submit" id="saveBtn">Sauvegarder</button>
 
         <?php
         // Affichage du layout global
