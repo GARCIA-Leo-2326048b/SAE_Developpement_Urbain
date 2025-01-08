@@ -116,5 +116,37 @@ class ComparaisonModelTest extends TestCase
 
         $this->assertNotEmpty($result);
     }
+
+    public function testSaveExperimentation()
+    {
+        $data = [
+            'charts' => ['chart1' => 'data1'],
+            'tableData' => ['table1' => 'data1']
+        ];
+        $geoJsonNameSim = 'sim.geojson';
+        $geoJsonNameVer = 'ver.geojson';
+
+        $this->comparaisonModel->expects($this->once())
+            ->method('saveExperimentation')
+            ->with($data, $geoJsonNameSim, $geoJsonNameVer)
+            ->willReturn(true);
+
+        $result = $this->comparaisonModel->saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer);
+        $this->assertTrue($result);
+    }
+
+    public function testLoadExperimentation()
+    {
+        $experimentId = 1;
+        $expectedData = ['chart1' => 'data1'];
+
+        $this->comparaisonModel->expects($this->once())
+            ->method('loadExperimentation')
+            ->with($experimentId)
+            ->willReturn($expectedData);
+
+        $result = $this->comparaisonModel->loadExperimentation($experimentId);
+        $this->assertEquals($expectedData, $result);
+    }
 }
 ?>
