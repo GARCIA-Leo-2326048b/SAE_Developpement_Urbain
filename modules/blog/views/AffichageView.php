@@ -44,14 +44,9 @@ class AffichageView
             let houseData = <?php echo $house ?: 'null'; ?>; // Convertit $house en JSON directement
 
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
-            initializeMap(<?php echo $house ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
+            initializeMap();
+            ajouterGeoJson(houseData);
         </script>
-
-        <!-- Bouton pour ajouter la couche road -->
-        <h4>Ajouter les routes :</h4>
-        <button onclick="ajouterGeoJson(roadData, 'Routes')">Ajouter Routes</button>
-        <button onclick="ajouterGeoJson(houseData, 'Maisons')">Ajouter Maisons</button>
-        <button onclick="ajouterGeoTiff('<?php echo $tiffPath ?: ''; ?>', 'GeoTIFF')">Ajouter GeoTIFF</button>
         <div class="compare-section" >
             <button class="compare-button" onclick="compare()" >Comparer</button>
         </div>

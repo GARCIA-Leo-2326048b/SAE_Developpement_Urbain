@@ -7,12 +7,9 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, tiffUrl) {
-    const firstHouseCoordinates = house && house.features && house.features[0] ? house.features[0].geometry.coordinates[0][0] : null;
-    const lat = firstHouseCoordinates ? firstHouseCoordinates[1] : 0;
-    const lng = firstHouseCoordinates ? firstHouseCoordinates[0] : 0;
+function initializeMap() {
 
-    map = L.map('map').setView([lat, lng], 16);
+    map = L.map('map').setView([0, 0], 16);
 
     // Création des couches de fond de carte
     satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
@@ -31,38 +28,7 @@ function initializeMap(house, tiffUrl) {
         crossOrigin: true
     });
 
-    // Ajout de la couche satellite par défaut
-    satelliteLayer.addTo(map);
-
-    if (house) {
-        houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);
-        overlayMaps["Maisons"] = houseLayer;
-    }
-
-    // Chargement du GeoTIFF uniquement si l'URL est fournie
-    // Chargement du GeoTIFF
-    if (tiffUrl) {
-        fetch(tiffUrl)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => parseGeoraster(arrayBuffer))
-            .then(georaster => {
-                tiffLayer = new GeoRasterLayer({
-                    georaster: georaster,
-                    opacity: 1,
-                    resolution: 64
-                }).addTo(map);
-
-                overlayMaps["GeoTIFF"] = tiffLayer;
-                updateLayerControl();
-                updateLayerButtons();
-            })
-            .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
-    }
-
-    // Ajuster les limites de la carte si des couches sont présentes
-    if (house || road || vegetation) {
-        map.fitBounds(L.featureGroup([houseLayer]).getBounds());
-    }
+    map.addLayer(streetsLayer);
 }
 
 // Fonction pour sélectionner la couche à ajuster
@@ -182,6 +148,8 @@ function ajouterGeoJson(genericGeoJson, layerName) {
 
         // Ajoute la couche générique à overlayMaps avec le nom du fichier (layerName)
         overlayMaps[layerName] = genericLayer;
+
+        map.fitBounds(genericLayer.getBounds());
 
         // Met à jour le contrôle des couches
         updateLayerControl();
