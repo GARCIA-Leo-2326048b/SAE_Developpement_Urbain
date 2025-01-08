@@ -14,7 +14,7 @@ try {
                 break;
 
             case 'affichage':
-                $fileId = filter_input(INPUT_GET, 'file_id'); // Récupérer l'ID du fichier depuis l'URL
+                $fileId = filter_input(INPUT_GET, 'file_name'); // Récupérer l'ID du fichier depuis l'URL
                 if ($fileId) {
                     (new blog\controllers\AffichageController())->execute($fileId);
                 } else {

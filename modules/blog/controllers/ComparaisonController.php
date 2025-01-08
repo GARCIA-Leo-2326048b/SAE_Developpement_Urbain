@@ -2,33 +2,36 @@
 
 namespace blog\controllers;
 use blog\models\ComparaisonModel;
+use blog\models\GeoJsonModel;
 use blog\views\ComparaisonView;
 use geoPHP;
 
 class ComparaisonController{
 
     private $comparaisonModel;
+    private $GeoJsonModel;
     private $view;
 
     public function __construct()
     {
         $this->comparaisonModel = new ComparaisonModel();
         $this->view = new ComparaisonView();
+        $this->GeoJsonModel = new GeoJsonModel();
     }
     public function compare($geoJsonSimName, $geoJsonVerName){
 
 
         // Charger les GeoJSON depuis la base de données
-        $geoJsonSim = $this->comparaisonModel->fetchGeoJson($geoJsonSimName);
-        $geoJsonVer = $this->comparaisonModel->fetchGeoJson($geoJsonVerName);
+        $geoJsonSim = $this->GeoJsonModel->fetchGeoJson($geoJsonSimName);
+        $geoJsonVer = $this->GeoJsonModel->fetchGeoJson($geoJsonVerName);
 
         // Projeter les GeoJSON dans le même système de coordonnées
-        $geoJsonSim = $this->comparaisonModel->projectGeoJson($geoJsonSim);
-        $geoJsonVer = $this->comparaisonModel->projectGeoJson($geoJsonVer);
+        $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonSim);
+        $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonVer);
 
         // Calculer les statistiques pour chaque GeoJSON
-        $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSim));
-        $valuesVer = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonVer));
+        $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSimProj));
+        $valuesVer = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonVerProj));
 
         $areaStatsSim = $this->comparaisonModel->getStat($valuesSim['areas']);
         $areaStatsVer = $this->comparaisonModel->getStat($valuesVer['areas']);
@@ -54,7 +57,7 @@ class ComparaisonController{
 
             //'graph' => $graph
         ];*/
-        $this->view->showComparison($results);
+        $this->view->showComparison($results,$geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName);
 
     }
 
