@@ -7,12 +7,13 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, tiffUrl) {
+function initializeMap(house, tiffUrl = null,idMap = 'map') {
+
     const firstHouseCoordinates = house && house.features && house.features[0] ? house.features[0].geometry.coordinates[0][0] : null;
     const lat = firstHouseCoordinates ? firstHouseCoordinates[1] : 0;
     const lng = firstHouseCoordinates ? firstHouseCoordinates[0] : 0;
 
-    map = L.map('map').setView([lat, lng], 16);
+    map = L.map(idMap).setView([lat, lng], 16);
 
     // Création des couches de fond de carte
     satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
@@ -32,7 +33,7 @@ function initializeMap(house, tiffUrl) {
     });
 
     // Ajout de la couche satellite par défaut
-    satelliteLayer.addTo(map);
+    streetsLayer.addTo(map);
 
     if (house) {
         houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);

@@ -50,8 +50,11 @@ class HistoriqueView
         echo $ulCloseTag;
     }
 
-    public function render(): void {
+     public function render(): void {
+        // Encapsule le contenu dans un div
+        echo "<div id='history-files'>";
         $this->displayFolderTree($this->files);
+        echo "</div>";
     }
 
     public function generateFolderOptions($folders, $prefix = ''): void {

@@ -22,14 +22,21 @@ class WorkSpaceController
 
     }
     public function execute() : void {
-        $repertoires = $this->uploadModel->getUserFilesWithFolders($this->utilisateur);
+
+        if (!isset($_SESSION['current_project_id'])) {
+            $_SESSION['current_project_id'] = null; // Initialisez à `null` si non défini
+        }
+        $repertoires = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->utilisateur);
         (new PreparationSimulation($repertoires))->show();
     }
 
     public function project()
     {
+        if (!isset($_SESSION['current_project_id'])) {
+            $_SESSION['current_project_id'] = null; // Initialisez à `null` si non défini
+        }
+
         $project = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->utilisateur);
-        var_dump($_SESSION['current_project_id']);
         (new MesSimulationView($project))->show();
     }
 

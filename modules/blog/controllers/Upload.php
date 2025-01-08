@@ -10,6 +10,7 @@ use blog\models\UploadModel;
 
 class Upload
 {
+
     private $db;
     private $uploadModel;
     private $currentUserId; // ID de l'utilisateur connecté
@@ -84,6 +85,20 @@ class Upload
         exit();
     }
 
+    public function setProject()
+    {
+        if (!empty($_POST['project_id'])) {
+            $_SESSION['current_project_id'] = $_POST['project_id'];
+            $_SESSION['current_project_name'] =  $_POST['project_id'];
+            header("Location: index.php?action=home");
+//            echo json_encode(['success' => true, 'message' => 'Projet sélectionné avec succès.']);
+        } else {
+//            echo json_encode(['success' => false, 'message' => 'Aucun projet sélectionné.']);
+        }
+        exit();
+    }
+
+
     public function getProjects()
     {
         header($this->header);
@@ -113,7 +128,7 @@ class Upload
     public function deleteFile() {
         $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
 
-        if ($this->uploadModel->deleteFileGJ($fileName, $this->currentUserId)) {
+        if ($this->uploadModel->deleteFileGJ($fileName, $this->currentUserId,$_SESSION['current_project_id'])) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false]);
@@ -160,7 +175,7 @@ class Upload
             }
 
             // Création du dossier
-            $this->uploadModel->saveUploadGJ($nom, $fileContent,$this->currentUserId, $dossierParent);
+            $this->uploadModel->saveUploadGJ($nom, $fileContent,$this->currentUserId, $dossierParent,$_SESSION['current_project_id']);
 
             // Réponse JSON pour succès
             echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
@@ -184,7 +199,7 @@ class Upload
             }
 
 
-            $result = $this->uploadModel->deleteFolderT($folderName, $this->currentUserId);
+            $result = $this->uploadModel->deleteFolderT($folderName, $this->currentUserId,$_SESSION['current_project_id']);
 
             if ($result) {
                 echo json_encode(['success' => true]);
@@ -205,7 +220,7 @@ class Upload
 
 
     public function getArbre() {
-        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
+        $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
         $folderHistory = \blog\views\HistoriqueView::getInstance($files);
         return $folderHistory->render();
     }
@@ -213,35 +228,71 @@ class Upload
     public function selectFolder()
     {
         header($this->header);
-        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
+        $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
         $folderHistory = \blog\views\HistoriqueView::getInstance($files);
         return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
 
+//    public function folder1() {
+//        header($this->header); // Réponse au format JSON
+//        try {
+//            // Récupérer les données envoyées par AJAX en GET
+//            if (empty($_GET['dossier_name'])) {
+//                throw new \Exception("Le nom du dossier est requis.");
+//            }
+//
+//            $folderName = trim($_GET['dossier_name']);
+//            $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
+//
+//            if (empty($folderName)) {
+//                throw new \Exception("Nom de dossier invalide.");
+//            }
+//
+//            $dossierParent = $_GET['dossier_parent'] ?? null;
+//
+//            // Vérification de l'existence du dossier
+//            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id'])) {
+//                throw new \Exception("Ce répertoire existe déjà.");
+//            }
+//
+//            // Création du dossier
+//            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id']);
+//
+//            // Réponse JSON pour succès
+//            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
+//        } catch (\Exception $e) {
+//            // Réponse JSON pour erreur
+//            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+//        }
+//        exit();
+//    }
+
     public function folder1() {
-        header($this->header); // Réponse au format JSON
+        header('Content-Type: application/json'); // Réponse au format JSON
         try {
-            // Récupérer les données envoyées par AJAX en GET
-            if (empty($_GET['dossier_name'])) {
+            // Récupérer les données envoyées par AJAX en POST
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+            if (empty($inputData['dossier_name'])) {
                 throw new \Exception("Le nom du dossier est requis.");
             }
 
-            $folderName = trim($_GET['dossier_name']);
+            $folderName = trim($inputData['dossier_name']);
             $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
 
             if (empty($folderName)) {
                 throw new \Exception("Nom de dossier invalide.");
             }
 
-            $dossierParent = $_GET['dossier_parent'] ?? null;
+            $dossierParent = $inputData['dossier_parent'] ?? null;
 
             // Vérification de l'existence du dossier
-            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName)) {
+            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName, $_SESSION['current_project_id'])) {
                 throw new \Exception("Ce répertoire existe déjà.");
             }
 
             // Création du dossier
-            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
+            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName, $_SESSION['current_project_id']);
 
             // Réponse JSON pour succès
             echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
@@ -253,10 +304,11 @@ class Upload
     }
 
 
+
     public function getSubFolders()
     {
         $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
-        $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName);
+        $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName,$_SESSION['current_project_id']);
         header($this->header);
         echo json_encode($subFolders);
     }

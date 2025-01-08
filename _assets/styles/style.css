@@ -83,7 +83,7 @@ header .titre h1 {
     display: flex;
     flex-direction: column;
     padding: 20px;
-    margin: 20px auto;
+    margin: 4rem auto;
     max-width: 1000px;
     background-color: white;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -98,6 +98,7 @@ footer {
     position: fixed;
     width: 100%;
     bottom: 0;
+    z-index: 1000;
 }
 
 footer p {
@@ -534,7 +535,7 @@ footer {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    margin-top: 3rem;
 }
 
 th, td {
@@ -563,6 +564,7 @@ tr:hover {
     box-shadow: 0 4px 8px rgb(0, 0, 0);
     margin-top: 20px;
     width: 100%;
+    border: 2px solid #6b5eba;
 }
 
 /* Stylisation des labels et champs de formulaire */
@@ -589,7 +591,7 @@ tr:hover {
 
 /* Bouton "Créer" du formulaire */
 #chartForm button {
-    background-color: #957743;
+    background-color: #6b5eba;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -617,7 +619,11 @@ tr:hover {
     margin-right: 10px; /* Moins d'espace entre les options */
     margin-bottom: 5px;
 }
-
+form h4 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #6b5eba;
+}
 /* Espacement des champs de texte dans le formulaire */
 #chartForm input[type="text"] {
     padding: 6px;
@@ -625,6 +631,79 @@ tr:hover {
     margin-bottom: 15px;
     border-radius: 4px;
     border: 1px solid #ddd;
+}
+
+/* Style du bouton supprimer avec une image */
+.deleteChartBtn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Style de l'icône de poubelle */
+.trash-icon {
+    width: 35px;
+    height: 35px;
+}
+
+/* Effet au survol */
+.deleteChartBtn:hover .trash-icon {
+    transform: scale(1.1); /* Agrandissement léger */
+}
+
+/* Effet au focus */
+.deleteChartBtn:focus .trash-icon {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 99, 132, 0.5);
+}
+
+.map-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px; /* Espacement entre les cartes */
+    flex-wrap: wrap;
+}
+
+.map-card {
+    flex: 1;
+    height: 450px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    position: relative;
+}
+
+#mapSim, #mapVer {
+    width: 100%;
+    height: 100%;
+}
+/* Style des boutons dans la carte */
+.map-container button {
+    background-color: #6b5eba; /* Couleur secondaire */
+    color: #fff; /* Texte en blanc */
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.map-container form {
+    padding: 0;
+    box-shadow: none;
+}
+
+/* Effet de survol pour les boutons dans la carte */
+.map-container button:hover {
+    background-color: #59481d; /* Couleur de survol */
+    transform: scale(1.05); /* Agrandissement léger du bouton */
+}
+
+/* Effet de focus pour les boutons dans la carte */
+.map-container button:focus {
+    outline: none;
+    box-shadow: 0 0 10px #957763; /* Ombre pour mettre en valeur le bouton */
 }
 
 
@@ -757,4 +836,51 @@ tr:hover {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/*mes simulation view*/
+
+ .switcher-container {
+     width: 80%;
+     margin: auto;
+     padding: 20px;
+     border: 1px solid #ccc;
+     border-radius: 8px;
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+     background-color: #f9f9f9;
+ }
+
+.tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #957743;
+    color: white;
+}
+
+.tabs-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
 }

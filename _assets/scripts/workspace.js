@@ -1,6 +1,6 @@
 let globalParentFolder = "root";
 $(document).ready(function() {
-
+//Cree le projet
     $('#create-project-form').on('submit', function (e) {
         e.preventDefault(); // Empêche le rechargement de la page
 
@@ -46,6 +46,21 @@ $(document).ready(function() {
         });
     });
 
+    // Tab switching logic
+    $('.tab-button').on('click', function () {
+        const targetId = $(this).attr('id').replace('-tab', '-content');
+
+        // Remove active state from buttons
+        $('.tab-button').removeClass('active');
+        $(this).addClass('active');
+
+        // Switch content
+        $('.tab-content').removeClass('active');
+        $('#' + targetId).addClass('active');
+    });
+
+
+//Recharger les options
     $('.folder-selector').on('change', function() {
         let folderName = $(this).val(); // Récupérer la valeur du dossier sélectionné
         globalParentFolder = folderName;
@@ -76,7 +91,7 @@ $(document).ready(function() {
 
 
     $('#createFolderButton').on('click', function () {
-        const folderName = $('#dossier_name').val().trim();  // Enlève les espaces
+        const folderName = $('#dossier_name').val().trim(); // Enlève les espaces
         const parentFolder = globalParentFolder;
 
         // Vérifie si folderName est vide après avoir supprimé les espaces
@@ -86,17 +101,23 @@ $(document).ready(function() {
                 title: 'Erreur',
                 text: 'Le nom du dossier est requis.',
             });
-            return;  // Sortir si le nom du dossier est vide
+            return; // Sortir si le nom du dossier est vide
         }
-        console.log("Nom du dossier:", folderName);  // Affiche la valeur nettoyée du dossier
-        console.log("Dossier parent:", parentFolder);  // Affiche la valeur du parent du dossier
 
-        // Envoyer les données au contrôleur via AJAX (en GET avec des paramètres dans l'URL)
+        console.log("Nom du dossier:", folderName); // Affiche la valeur nettoyée du dossier
+        console.log("Dossier parent:", parentFolder); // Affiche la valeur du parent du dossier
+
+        // Envoyer les données au contrôleur via AJAX (en POST)
         $.ajax({
-            url: `index.php?action=create_folder&dossier_name=${encodeURIComponent(folderName)}&dossier_parent=${encodeURIComponent(parentFolder)}`,
-            type: 'GET',
+            url: 'index.php?action=create_folder',
+            type: 'POST',
+            contentType: 'application/json', // Spécifie le format des données
+            data: JSON.stringify({
+                dossier_name: folderName,
+                dossier_parent: parentFolder
+            }),
             dataType: 'json',
-            success: function(data) {
+            success: function (data) {
                 console.log(data);
                 if (data.success) {
                     Swal.fire({
@@ -105,7 +126,7 @@ $(document).ready(function() {
                         text: data.message,
                     }).then(() => {
                         // Recharger ou mettre à jour l'affichage sans recharger la page
-                        updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                        updateHistory(); // Appeler ta fonction pour mettre à jour l'historique
                         updateFolderOptions();
                     });
                 } else {
@@ -116,7 +137,10 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
+            error: function (xhr, status, error) {
+                console.error("Statut :", status);
+                console.error("Erreur :", error);
+                console.error("Réponse du serveur :", xhr.responseText);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erreur',
@@ -125,6 +149,7 @@ $(document).ready(function() {
             }
         });
     });
+
 
     document.getElementById('createFolderButton').addEventListener('click', function() {
         document.getElementById('createFolderForm').reset();
@@ -182,7 +207,7 @@ $(document).ready(function() {
 
 
 });
-
+let selectedFolderName = null;
 let selectedFiles = [];
 let currentMode = 'simulation';
 
@@ -349,14 +374,9 @@ function closePopup() {
 
 function performAction() {
     const fileId = document.getElementById('popup-file-name').textContent;
-    if (currentMode === 'simulation') {
-        alert("Simulation lancée pour " + fileId);
-        // Redirection vers la page d'affichage avec l'ID du fichier dans l'URL
+
         window.location.href = 'index.php?action=affichage&file_id=' + encodeURIComponent(fileId);
-    } else {
-        //selectFile();
-    }
-    closePopup();
+
 }
 
 function selectFile() {
@@ -415,11 +435,18 @@ function deleteFile() {
     closePopup();
 }
 
-let selectedFolderName = null;
+
 
 function showContextMenu(event, folderName) {
+
     event.preventDefault(); // Empêche le menu contextuel natif
-    selectedFolderName = folderName;
+    selectedFolderName = folderName; // Initialisation correcte de selectedFolderName
+    console.log(selectedFolderName);
+    // Vérifier si selectedFolderName est défini avant de l'utiliser
+    if (!selectedFolderName) {
+        console.error('Aucun dossier sélectionné.');
+        return; // Si la variable est indéfinie, on arrête la fonction
+    }
 
     // Cache tout autre menu contextuel
     hideContextMenu();
@@ -438,6 +465,7 @@ function showContextMenu(event, folderName) {
     // Ajoute un écouteur pour masquer le menu quand on clique ailleurs
     document.addEventListener('click', hideContextMenu, { once: true });
 }
+
 
 function hideContextMenu() {
     const contextMenu = document.getElementById('context-menu');
