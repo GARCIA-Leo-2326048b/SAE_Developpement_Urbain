@@ -17,6 +17,7 @@ class AffichageController
     public function execute($fileId)
     {
        $file = $this->model->fetchGeoJson($fileId);
+        var_dump($file);
        $this->view->show($file,null,null,null);
     }
 
