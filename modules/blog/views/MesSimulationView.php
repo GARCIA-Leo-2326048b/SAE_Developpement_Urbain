@@ -5,15 +5,17 @@ namespace blog\views;
 class MesSimulationView
 {
     private $historique;
+    private $projects;
 
     public function __construct($project){
+        $this->projects = $project;
         // Utiliser SingletonModel pour obtenir la connexion à la base de données
         $this->historique = \blog\views\HistoriqueView::getInstance($project);
     }
 
 
     public function show()
-    { ?>
+    { ob_start();?>
         <div class="switcher-container">
             <div class="tabs">
                 <button id="simulation-tab" class="tab-button active">Simulation</button>
@@ -24,9 +26,14 @@ class MesSimulationView
                     <h2>Historique des Simulations</h2>
                     <?php
                         $this->historique->render();
+                    if ($this->projects == null){
+
                     ?>
                     <!-- Contenu de l'historique des simulations -->
                     <p>Aucune simulation enregistrée pour l'instant.</p>
+                    <?php
+                    }
+                    ?>
                 </div>
                 <div id="experience-content" class="tab-content">
                     <h2>Historique des Expériences</h2>
@@ -36,69 +43,18 @@ class MesSimulationView
             </div>
         </div>
 
-        <style>
-            .switcher-container {
-                width: 80%;
-                margin: auto;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                background-color: #f9f9f9;
-            }
 
-            .tabs {
-                display: flex;
-                justify-content: space-around;
-                margin-bottom: 20px;
-            }
+        <!-- Pop-up pour les actions selon le mode -->
+        <div id="popup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <h2 id="popup-file-name">File</h2>
+                <button class="popup-button" id="actionButton" onclick="performAction()">Simuler</button>
+                <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
+                <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
+            </div>
+        </div>
 
-            .tab-button {
-                padding: 10px 20px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                background-color: #e0e0e0;
-                font-size: 16px;
-                transition: background-color 0.3s ease;
-            }
-
-            .tab-button.active {
-                background-color: #957743;
-                color: white;
-            }
-
-            .tabs-content {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .tab-content {
-                display: none;
-            }
-
-            .tab-content.active {
-                display: block;
-            }
-        </style>
-
-        <script>
-            $(document).ready(function () {
-                // Tab switching logic
-                $('.tab-button').on('click', function () {
-                    const targetId = $(this).attr('id').replace('-tab', '-content');
-
-                    // Remove active state from buttons
-                    $('.tab-button').removeClass('active');
-                    $(this).addClass('active');
-
-                    // Switch content
-                    $('.tab-content').removeClass('active');
-                    $('#' + targetId).addClass('active');
-                });
-            });
-        </script>
-    <?php (new GlobalLayout('Accueil', ob_get_clean()))->show(); }
+    <?php (new GlobalLayout('Accueil', ob_get_clean()))->show();
+    }
 
 }

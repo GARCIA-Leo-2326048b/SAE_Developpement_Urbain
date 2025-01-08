@@ -60,17 +60,18 @@ class UploadModel {
 
 
     // Enregistrer un upload GeoJSON
-    public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent)
+    public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent,$project)
     {
         try {
-            $query = "INSERT INTO uploadGJ (file_name, file_data, user,dossier) 
-                      VALUES (:file_name, :file_data, :user, :dossier)";
+            $query = "INSERT INTO uploadGJ (file_name, file_data, user,dossier,projet) 
+                      VALUES (:file_name, :file_data, :user, :dossier, :project)";
 
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(':file_name', $fileName);
             $stmt->bindParam(':file_data', $fileContent, PDO::PARAM_STR);
             $stmt->bindParam(':user', $userId);
             $stmt->bindParam(':dossier', $dossierParent);
+            $stmt->bindParam(':project', $project);
 
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -210,90 +211,56 @@ class UploadModel {
         }
     }
 
-    public function deleteFileGJ($fileName,$userId) {
+    public function deleteFileGJ($fileName,$userId,$projet) {
 
-        $query = "DELETE FROM uploadGJ WHERE file_name = :file_name and user = :user";
+        $query = "DELETE FROM uploadGJ WHERE file_name = :file_name and user = :user and projet = :projet";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':file_name', $fileName);
         $stmt->bindParam(':user', $userId);
+        $stmt->bindParam(':projet', $projet);
         return $stmt->execute();
     }
 
 
-    public function verifyFolder($userId, $parentFolder, $folderName): bool {
+    public function verifyFolder($userId, $parentFolder, $folderName,$project): bool {
         $query = "
         SELECT COUNT(*) 
         FROM organisation 
         WHERE id_dossier = :folderName 
         AND dossierParent = :parentFolder 
-        AND id_utilisateur = :userId";
+        AND id_utilisateur = :userId
+        AND projet = :project";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':folderName', $folderName);
         $stmt->bindParam(':parentFolder', $parentFolder);
         $stmt->bindParam(':userId', $userId);
+        $stmt->bindParam(':project', $project);
         $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
     }
 
-    public function createFolder($userId, $parentFolder, $folderName): void {
+    public function createFolder($userId, $parentFolder, $folderName,$project): void {
         try {
             // Vérifier si le dossier existe déjà
-            if ($this->verifyFolder($userId, $parentFolder, $folderName)) {
+            if ($this->verifyFolder($userId, $parentFolder, $folderName,$project)) {
                 throw new \Exception("Ce répertoire existe déjà.");
             }
 
             // Insérer le dossier dans 'organisation'
             $insertFolder = "
-            INSERT INTO organisation (id_dossier, dossierParent, id_utilisateur) 
-            VALUES (:folderName, :parentFolder, :userId)";
+            INSERT INTO organisation (id_dossier, dossierParent, id_utilisateur,projet) 
+            VALUES (:folderName, :parentFolder, :userId,:project)";
             $stmtFolder = $this->db->prepare($insertFolder);
             $stmtFolder->bindParam(':folderName', $folderName);
             $stmtFolder->bindParam(':parentFolder', $parentFolder);
             $stmtFolder->bindParam(':userId', $userId);
+            $stmtFolder->bindParam(':project', $project);
             $stmtFolder->execute();
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
     }
-
-
-
-//    public function createFolder($userId, $parentFolder, $folderName): void {
-//        try {
-//            // Vérifier si cette combinaison existe déjà
-//            $query = "
-//            SELECT id_dossier
-//            FROM organisation
-//            WHERE id_dossier = :folderName
-//            AND dossierParent = :parentFolder
-//            AND id_utilisateur = :userId";
-//            $stmt = $this->db->prepare($query);
-//            $stmt->bindParam(':folderName', $folderName);
-//            $stmt->bindParam(':parentFolder', $parentFolder);
-//            $stmt->bindParam(':userId', $userId);
-//            $stmt->execute();
-//
-//            $folderExists = $stmt->fetchColumn();
-//
-//            if ($folderExists) {
-//                throw new \Exception("Ce répertoire existe déjà.");
-//            }
-//
-//            // Insérer le dossier dans 'organisation'
-//            $insertFolder = "
-//            INSERT INTO organisation (id_dossier, dossierParent, id_utilisateur)
-//            VALUES (:folderName, :parentFolder, :userId)";
-//            $stmtFolder = $this->db->prepare($insertFolder);
-//            $stmtFolder->bindParam(':folderName', $folderName);
-//            $stmtFolder->bindParam(':parentFolder', $parentFolder);
-//            $stmtFolder->bindParam(':userId', $userId);
-//            $stmtFolder->execute();
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
-//    }
-//
 
     public function getUserFilesWithFolders($userId) {
         // Récupérer les dossiers
@@ -367,87 +334,119 @@ class UploadModel {
         return $folderTree; // Retourne l'arborescence
     }
 
-    public function getFolderHierarchy($rootFolderId, $userId) {
-        // Récupérer tous les dossiers
+    public function getFolderHierarchy($project, $userId) {
+        // Récupérer les dossiers
         $queryFolders = "
-    SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
-    FROM organisation 
-    WHERE id_utilisateur = :userId
-    ORDER BY dossierParent, id_dossier";
+        SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
+        FROM organisation 
+        WHERE id_utilisateur = :userId
+        and projet = :project
+        ORDER BY dossierParent, id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->bindParam(':project', $project);
         $stmtFolders->execute();
         $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
+
+        // Récupérer les fichiers
+        $queryFiles = "
+    SELECT f.file_name, f.dossier as dossier_id
+    FROM uploadGJ f
+    WHERE user = :userId
+    and projet = :project";
+        $stmtFiles = $this->db->prepare($queryFiles);
+        $stmtFiles->bindParam(':userId', $userId);
+        $stmtFiles->bindParam(':project', $project);
+        $stmtFiles->execute();
+        $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
 
         // Construire la hiérarchie
         $folderTree = [];
         $folderIndex = [];
 
+
         // Ajouter les dossiers au tableau d'index
         foreach ($folders as $folder) {
             $folderIndex[$folder['dossier_id']] = [
-                'id' => $folder['dossier_id'],
                 'name' => $folder['folder_name'],
                 'parent_id' => $folder['dossierParent'],
-                'children' => []
+                'children' => [],
+                'files' => []
             ];
         }
 
-        // Construire les relations parent-enfant
+        // Ajouter les fichiers dans les dossiers correspondants
+        foreach ($files as $file) {
+            $dossierId = $file['dossier_id'] ?? null;
+            if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
+                $folderIndex[$dossierId]['files'][] = $file['file_name'];
+            } else {
+                // Ajouter les fichiers sans dossier directement dans l'arborescence
+
+                $folderTree[] = [
+                    'name' => $file['file_name'],
+                    'type' => 'file'
+                ];
+            }
+        }
+
+
+
+        foreach ($folderIndex as $folderId => &$f){
+            if(isset($f['parent_id']) and !($f['parent_id'] === 'root')){
+                $folderIndex[$f['parent_id']]['children'][] = &$f;
+            }
+        }
+
+        // Construire l'arborescence hiérarchique
         foreach ($folderIndex as $folderId => &$folder) {
-            if (!empty($folder['parent_id']) && isset($folderIndex[$folder['parent_id']])) {
-                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
+            if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
+                // Ajouter à la racine
+                $folderTree[] = &$folder;
+            } else {
+                error_log("Parent ID introuvable pour : " . $folder['name']);
             }
         }
 
-        // Trouver le dossier racine spécifié et renvoyer uniquement son arbre
-        function buildTreeFromRoot($rootId, $folderIndex) {
-            if (!isset($folderIndex[$rootId])) {
-                return null; // Si le dossier racine n'existe pas
-            }
-
-            $rootFolder = $folderIndex[$rootId];
-            return $rootFolder;
-        }
-
-        // Construire l'arborescence à partir du dossier racine
-        $folderTree = buildTreeFromRoot($rootFolderId, $folderIndex);
-
-        return $folderTree; // Retourne l'arborescence à partir du dossier racine
+        return $folderTree; // Retourne l'arborescence
     }
 
 
-    public function getSubFolder($currentUserId, $folderName) {
+    public function getSubFolder($currentUserId, $folderName,$project) {
         $queryFolders = "
         SELECT id_dossier AS folder_id, id_dossier AS folder_name 
         FROM organisation 
         WHERE id_utilisateur = :userId 
         AND dossierParent = :folderName
+        AND projet = :project
         ORDER BY id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $currentUserId);
         $stmtFolders->bindParam(':folderName', $folderName);
+        $stmtFolders->bindParam(':project', $project);
         $stmtFolders->execute();
         return $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
 
-    public function deleteFolderByName($folderName, $userId) {
+    public function deleteFolderByName($folderName, $userId,$project) {
         try {
             // Étape 1 : Supprimer les fichiers du dossier
-            $deleteFilesQuery = "DELETE FROM uploadGJ WHERE dossier = :folderName AND user = :userId";
+            $deleteFilesQuery = "DELETE FROM uploadGJ WHERE dossier = :folderName AND user = :userId AND projet = :project";
             $stmtFiles = $this->db->prepare($deleteFilesQuery);
             $stmtFiles->bindParam(':folderName', $folderName);
             $stmtFiles->bindParam(':userId', $userId);
+            $stmtFiles->bindParam(':project', $project);
             $stmtFiles->execute();
             error_log("Fichiers supprimés pour le dossier : " . $folderName);
 
             // Étape 2 : Récupérer les sous-dossiers
-            $subFoldersQuery = "SELECT id_dossier FROM organisation WHERE dossierParent = :folderName AND id_utilisateur = :userId";
+            $subFoldersQuery = "SELECT id_dossier FROM organisation WHERE dossierParent = :folderName AND id_utilisateur = :userId AND projet = :project";
             $stmtSubFolders = $this->db->prepare($subFoldersQuery);
             $stmtSubFolders->bindParam(':folderName', $folderName);
             $stmtSubFolders->bindParam(':userId', $userId);
+            $stmtSubFolders->bindParam(':project', $project);
             $stmtSubFolders->execute();
             $subFolders = $stmtSubFolders->fetchAll(PDO::FETCH_ASSOC);
 
@@ -457,10 +456,11 @@ class UploadModel {
             }
 
             // Étape 3 : Supprimer le dossier lui-même
-            $deleteFolderQuery = "DELETE FROM organisation WHERE id_dossier = :folderName AND id_utilisateur = :userId";
+            $deleteFolderQuery = "DELETE FROM organisation WHERE id_dossier = :folderName AND id_utilisateur = :userId AND projet = :project";
             $stmtFolder = $this->db->prepare($deleteFolderQuery);
             $stmtFolder->bindParam(':folderName', $folderName);
             $stmtFolder->bindParam(':userId', $userId);
+            $stmtFolder->bindParam(':project', $project);
             $stmtFolder->execute();
 
             error_log("Dossier supprimé : " . $folderName);
@@ -472,12 +472,12 @@ class UploadModel {
     }
 
 
-    public function deleteFolderT($folderName, $userId)
+    public function deleteFolderT($folderName, $userId,$project)
     {
         $this->db->beginTransaction();
         try {
             // Suppression des fichiers, sous-dossiers et du dossier
-            $this->deleteFolderByName($folderName, $userId);
+            $this->deleteFolderByName($folderName, $userId,$project);
             $this->db->commit();
             return true;
         } catch (Exception $e) {

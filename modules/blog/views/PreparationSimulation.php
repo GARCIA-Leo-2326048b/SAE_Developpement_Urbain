@@ -21,9 +21,7 @@ class PreparationSimulation
             <!-- Barre de défilement pour l'historique -->
             <aside id="history" >
                 <h2>Historique des fichiers</h2>
-                <div id="history-files">
                     <?php HistoriqueView::getInstance($this->files)->render(); ?>
-                </div>
             </aside>
 
             <section id="import">
@@ -81,6 +79,6 @@ class PreparationSimulation
 
         </div>
         <?php
-        (new GlobalLayout('Accueil', ob_get_clean()))->show();
+        (new GlobalLayout('Simulation', ob_get_clean()))->show();
     }
 }

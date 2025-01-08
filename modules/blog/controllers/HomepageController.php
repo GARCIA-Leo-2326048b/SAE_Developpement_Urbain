@@ -15,11 +15,17 @@ class HomepageController {
         // Utiliser SingletonModel pour obtenir la connexion à la base de données
         $this->db = SingletonModel::getInstance()->getConnection();
         $this->uploadModel = new UploadModel($this->db);
-        $this->utilisateur = $_SESSION['user_id'];
+        if(isset($_SESSION['user_id'])){
+            $this->utilisateur = $_SESSION['user_id'];
+        }
 
     }
     public function execute() : void {
-        $projets = $this->uploadModel->getUserProjects($this->utilisateur);
+        if(isset($_SESSION['user_id'])){
+            $projets = $this->uploadModel->getUserProjects($this->utilisateur);
+        }else{
+            $projets= null;
+        }
         (new HomepageView($projets))->show();
     }
 }

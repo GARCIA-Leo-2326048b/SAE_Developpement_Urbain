@@ -42,6 +42,9 @@ try {
             case 'get_all_projects':
                 (new blog\controllers\Upload())->getProjects();
                 break;
+            case 'set_project':
+                (new blog\controllers\Upload())->setProject();
+                break;
             case 'view_simulations':
                 (new blog\controllers\WorkSpaceController())->project();
                 break;
@@ -50,6 +53,9 @@ try {
                     break;
             case 'new_simulation':
                 (new blog\controllers\WorkSpaceController())->execute();
+                break;
+            case 'save_experimentation':
+                (new blog\controllers\ComparaisonController())->saveExperimentation();
                 break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();

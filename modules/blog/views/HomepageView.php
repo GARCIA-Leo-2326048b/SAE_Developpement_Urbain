@@ -36,8 +36,7 @@ class HomepageView {
                                         <option value="" disabled selected>Choisir un projet</option>
                                         <?php
                                         foreach ($this->projets as $project): ?>
-                                            <option value="<?php echo htmlspecialchars($project['projet']); ?>"
-                                                <?php echo ($_SESSION['current_project_id'] ?? '') === $project['projet'] ? 'selected' : ''; ?>>
+                                            <option value="<?php echo htmlspecialchars($project['projet']); ?>">
                                                 <?php echo htmlspecialchars($project['projet']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -64,7 +63,7 @@ class HomepageView {
 
                         <!-- Projet actif -->
                         <?php if (!empty($_SESSION['current_project_id'])): ?>
-                            <p class="active-project">Projet actif : <strong><?php echo htmlspecialchars($_SESSION['current_project_name']); ?></strong></p>
+                            <p class="active-project">Projet actif : <strong><?php echo htmlspecialchars($_SESSION['current_project_id']); ?></strong></p>
                         <?php else: ?>
                             <p class="info-message">Veuillez sélectionner ou créer un projet pour continuer.</p>
                         <?php endif; ?>
