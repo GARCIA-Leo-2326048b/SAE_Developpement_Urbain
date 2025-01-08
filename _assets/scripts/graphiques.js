@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('createChart').addEventListener('click', createNewChart);
 });
 
+
 // Afficher/Masquer le formulaire d'ajout
 function toggleChartForm() {
     const formContainer = document.getElementById('chartFormContainer');
@@ -178,7 +179,12 @@ function configureChart(chartDiv, chartType, filteredData, datasets) {
     };
 
     const ctx = chartDiv.querySelector('canvas').getContext('2d');
-    return new Chart(ctx, config);
+    const chart = new Chart(ctx, config);
+
+    // Attacher l'objet chart à l'élément <canvas>
+    chartDiv.querySelector('canvas').chart = chart;
+
+    return chart;
 }
 function applyNormalization(filteredData, normalizeChecked) {
     if (normalizeChecked) {
@@ -207,4 +213,81 @@ function removeChart(chartDiv, chart) {
     if (chart) {
         chart.destroy(); // Détruire le graphique
     }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const geoJsonNamesElement = document.getElementById('geoJsonNames');
+    const geoJsonSimName = geoJsonNamesElement.getAttribute('data-geojson-sim');
+    const geoJsonVerName = geoJsonNamesElement.getAttribute('data-geojson-ver');
+
+    // Déplacer l'écouteur ici, dans le DOMContentLoaded
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        const charts = [];
+        const chartContainers = document.querySelectorAll('.chart-container');
+
+        chartContainers.forEach(chartContainer => {
+            const chartName = chartContainer.querySelector('h3').textContent;
+            const chartType = chartContainer.querySelector('canvas').getAttribute('id').split('-')[1];
+            const chartData = chartContainer.querySelector('canvas').chart.data; // Récupérer les données du graphique
+            const chartOptions = chartContainer.querySelector('canvas').chart.options; // Récupérer les options
+
+            // Rassembler toutes les informations du graphique
+            charts.push({
+                name: chartName,
+                type: chartType,
+                data: chartData,
+                options: chartOptions,
+            });
+        });
+
+        // Créer un objet avec toutes les informations à sauvegarder
+        const tableData = getTableData();
+
+        const experimentationData = {
+            charts: charts,
+            geoJsonSimName: geoJsonSimName,
+            geoJsonVerName: geoJsonVerName,
+            tableData: tableData, // Inclure les données du tableau
+        };
+
+        // Sauvegarder dans la base de données (envoi de données à PHP)
+        saveExperimentation(experimentationData);
+    });
+});
+
+function getTableData() {
+    const tableRows = document.querySelectorAll('table tr'); // Sélectionne toutes les lignes de tous les tableaux
+    const tableData = Array.from(tableRows).map(row => {
+        const cells = row.querySelectorAll('td, th'); // Sélectionne toutes les cellules (y compris les en-têtes)
+        return Array.from(cells).map(cell => cell.textContent.trim()); // Extrait le contenu de chaque cellule
+    });
+
+    // On supprime les lignes qui ne contiennent pas de données utiles (celles avec uniquement des en-têtes)
+    return tableData.filter(row => row.some(cell => cell.trim() !== ''));
+}
+
+function saveExperimentation(experimentationData) {
+    fetch('index.php?action=save_experimentation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(experimentationData),
+    })
+        .then(response => response.text())  // Récupère la réponse en tant que texte
+        .then(data => {
+            console.log('Réponse brute du serveur:', data);
+            try {
+                const jsonData = JSON.parse(data); // Essaie de convertir la réponse en JSON
+                if (jsonData.success) {
+                    alert("Données enregistrées avec succès !");
+                } else {
+                    alert("Une erreur est survenue lors de la sauvegarde.");
+                }
+            } catch (error) {
+                console.error('Erreur lors du parsing du JSON:', error);
+                //console.log('Réponse brute:', data);  // Affiche la réponse brute pour débogage
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
 }

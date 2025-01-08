@@ -14,8 +14,11 @@ try {
                 break;
 
             case 'affichage':
-                $fileId = filter_input(INPUT_GET, 'file_name'); // Récupérer l'ID du fichier depuis l'URL
+
+                // Récupérer le paramètre 'file_name' depuis l'URL
+                $fileId = filter_input(INPUT_GET, 'file_name'); // Récupérer le nom du fichier
                 if ($fileId) {
+                    // Passer le paramètre 'file_name' au contrôleur pour traitement
                     (new blog\controllers\AffichageController())->execute($fileId);
                 } else {
                     echo "Aucun fichier sélectionné.";
@@ -65,6 +68,9 @@ try {
                 break;
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
+                break;
+            case 'save_experimentation':
+                (new blog\controllers\ComparaisonController())->saveExperimentation();
                 break;
             default:
                 (new blog\controllers\HomepageController())->execute();

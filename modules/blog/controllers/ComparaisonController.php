@@ -18,7 +18,28 @@ class ComparaisonController{
         $this->view = new ComparaisonView();
         $this->GeoJsonModel = new GeoJsonModel();
     }
-    public function compare($geoJsonSimName, $geoJsonVerName){
+
+    public function saveExperimentation()
+    {
+        // Récupérer les données JSON envoyées par l'AJAX
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        // Récupérer les noms des fichiers GeoJSON pour la simulation et la vérité terrain
+        $geoJsonSimName = $data['geoJsonSimName'] ?? 'default_simulation'; // Récupérer depuis le JSON
+        $geoJsonVerName = $data['geoJsonVerName'] ?? 'default_verite';  // Récupérer depuis le JSON
+
+        // Appeler la méthode saveExperimentation du modèle
+        try {
+            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimName, $geoJsonVerName);
+        } catch (Exception $e) {
+
+        }
+
+
+        // Répondre à l'AJAX
+        echo json_encode(['success' => true]);
+    }
+    public function compare($geoJsonSimName, $geoJsonVerName,$experimentId = null){
 
 
         // Charger les GeoJSON depuis la base de données
@@ -46,18 +67,23 @@ class ComparaisonController{
 
         $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
 
-        /*$results = [
-            'StatsSim'=>
-                ['areaStatsSim' => $areaStatsSim,
-                'areaStatsVer' => $areaStatsVer,],
-            'StatsVer' =>
-                ['shapeIndexStatsSim' => $shapeIndexStatsSim,
-                'shapeIndexStatsVer' => $shapeIndexStatsVer,]
+        // PHP : Gestion des redirections après soumission du formulaire
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['geoJsonName'])) {
+            $geoJsonName = htmlspecialchars($_POST['geoJsonName']);
 
-
-            //'graph' => $graph
-        ];*/
-        $this->view->showComparison($results,$geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName);
+            // Redirige vers une nouvelle page en utilisant la méthode GET
+            header("Location: https://developpement-urbain.alwaysdata.net/index.php?action=affichage&file_name=$geoJsonName");
+            exit;
+        }
+        if ($experimentId) {
+            // Charger l'expérience si un ID est fourni
+            $experimentData = $this->comparaisonModel->loadExperimentation($experimentId);
+            // Passer l'expérience à la vue si nécessaire
+            //$this->view->showComparisonWithExperiment($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName, $experimentData);
+        } else {
+            // Si aucun ID n'est fourni, juste afficher les résultats
+            $this->view->showComparison($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName);
+        }
 
     }
 

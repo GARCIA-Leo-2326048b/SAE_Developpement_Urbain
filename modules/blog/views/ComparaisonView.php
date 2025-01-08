@@ -17,14 +17,7 @@ class ComparaisonView
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script>
         <script src="/_assets/scripts/redirect.js"></script>
-        <?php
-        // PHP : Gestion des redirections après soumission du formulaire
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['geoJsonName'])) {
-            $geoJsonName = htmlspecialchars($_POST['geoJsonName']);
-            header("Location: https://developpement-urbain.alwaysdata.net/index.php?action=affichage&file_name=$geoJsonName");
-            exit;
-        }
-        ?>
+
         <!-- Affichage cartes -->
         <div class="map-container">
             <form method="POST" action="">
@@ -151,6 +144,12 @@ class ComparaisonView
 
         <!-- Conteneur des graphiques -->
         <div id="chartsContainer"></div>
+        <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
+        <div id="geoJsonNames"
+             data-geojson-sim="<?php echo $geoJsonSimName; ?>"
+             data-geojson-ver="<?php echo $geoJsonVerName; ?>">
+        </div>
+        <button type="submit" id="saveBtn">Sauvegarder</button>
 
         <?php
         // Affichage du layout global
