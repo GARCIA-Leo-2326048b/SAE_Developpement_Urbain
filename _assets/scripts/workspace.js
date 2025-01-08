@@ -1,6 +1,66 @@
 let globalParentFolder = "root";
 $(document).ready(function() {
+//Cree le projet
+    $('#create-project-form').on('submit', function (e) {
+        e.preventDefault(); // Empêche le rechargement de la page
 
+        let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
+
+        console.log("Début de l'envoi du fichier...");
+
+        $.ajax({
+            url: 'index.php?action=create_project', // URL de votre contrôleur
+            type: 'POST', // Utilisez POST pour les fichiers
+            data: formData,
+            processData: false, // Nécessaire pour éviter que jQuery ne traite les données
+            contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
+            dataType: 'json',
+            success: function (response) {
+                console.log("Réponse du serveur :", response);
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: response.message,
+                    }).then(() => {
+                        // Recharger ou mettre à jour l'affichage sans recharger la page
+                        updateProjectload();  // Appeler ta fonction pour mettre à jour l'historique
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: response.message,
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX :", status, error);
+                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors du téléchargement.',
+                });
+            },
+        });
+    });
+
+    // Tab switching logic
+    $('.tab-button').on('click', function () {
+        const targetId = $(this).attr('id').replace('-tab', '-content');
+
+        // Remove active state from buttons
+        $('.tab-button').removeClass('active');
+        $(this).addClass('active');
+
+        // Switch content
+        $('.tab-content').removeClass('active');
+        $('#' + targetId).addClass('active');
+    });
+
+
+//Recharger les options
     $('.folder-selector').on('change', function() {
         let folderName = $(this).val(); // Récupérer la valeur du dossier sélectionné
         globalParentFolder = folderName;
@@ -31,7 +91,7 @@ $(document).ready(function() {
 
 
     $('#createFolderButton').on('click', function () {
-        const folderName = $('#dossier_name').val().trim();  // Enlève les espaces
+        const folderName = $('#dossier_name').val().trim(); // Enlève les espaces
         const parentFolder = globalParentFolder;
 
         // Vérifie si folderName est vide après avoir supprimé les espaces
@@ -41,17 +101,23 @@ $(document).ready(function() {
                 title: 'Erreur',
                 text: 'Le nom du dossier est requis.',
             });
-            return;  // Sortir si le nom du dossier est vide
+            return; // Sortir si le nom du dossier est vide
         }
-        console.log("Nom du dossier:", folderName);  // Affiche la valeur nettoyée du dossier
-        console.log("Dossier parent:", parentFolder);  // Affiche la valeur du parent du dossier
 
-        // Envoyer les données au contrôleur via AJAX (en GET avec des paramètres dans l'URL)
+        console.log("Nom du dossier:", folderName); // Affiche la valeur nettoyée du dossier
+        console.log("Dossier parent:", parentFolder); // Affiche la valeur du parent du dossier
+
+        // Envoyer les données au contrôleur via AJAX (en POST)
         $.ajax({
-            url: `index.php?action=create_folder&dossier_name=${encodeURIComponent(folderName)}&dossier_parent=${encodeURIComponent(parentFolder)}`,
-            type: 'GET',
+            url: 'index.php?action=create_folder',
+            type: 'POST',
+            contentType: 'application/json', // Spécifie le format des données
+            data: JSON.stringify({
+                dossier_name: folderName,
+                dossier_parent: parentFolder
+            }),
             dataType: 'json',
-            success: function(data) {
+            success: function (data) {
                 console.log(data);
                 if (data.success) {
                     Swal.fire({
@@ -60,7 +126,7 @@ $(document).ready(function() {
                         text: data.message,
                     }).then(() => {
                         // Recharger ou mettre à jour l'affichage sans recharger la page
-                        updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                        updateHistory(); // Appeler ta fonction pour mettre à jour l'historique
                         updateFolderOptions();
                     });
                 } else {
@@ -71,7 +137,10 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
+            error: function (xhr, status, error) {
+                console.error("Statut :", status);
+                console.error("Erreur :", error);
+                console.error("Réponse du serveur :", xhr.responseText);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erreur',
@@ -81,19 +150,102 @@ $(document).ready(function() {
         });
     });
 
+
     document.getElementById('createFolderButton').addEventListener('click', function() {
         document.getElementById('createFolderForm').reset();
         document.getElementById('createFolderForm').style.display = 'none';
     });
 
 
+    $('#vectorForm').on('submit', function (e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
+        formData.append('shapefile_name', $('#shapefile_name').val()); // Ajouter des données supplémentaires si nécessaire
+
+        console.log("Début de l'envoi du fichier...");
+
+        $.ajax({
+            url: 'index.php?action=upload', // URL de votre contrôleur
+            type: 'POST', // Utilisez POST pour les fichiers
+            data: formData,
+            processData: false, // Nécessaire pour éviter que jQuery ne traite les données
+            contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
+            dataType: 'json',
+            success: function (response) {
+                console.log("Réponse du serveur :", response);
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: response.message,
+                    }).then(() => {
+                        // Recharger ou mettre à jour l'affichage sans recharger la page
+                        updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: response.message,
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX :", status, error);
+                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors du téléchargement.',
+                });
+            },
+        });
+    });
+
+
 
 
 });
-
+let selectedFolderName = null;
 let selectedFiles = [];
 let currentMode = 'simulation';
 
+const toggleButton = document.getElementById('toggle-create-form');
+const createForm = document.getElementById('create-project-form');
+const cancelButton = document.getElementById('cancel-create-form');
+
+toggleButton.addEventListener('click', () => {
+    createForm.classList.toggle('hidden');
+    toggleButton.querySelector('i').classList.toggle('fa-plus');
+    toggleButton.querySelector('i').classList.toggle('fa-times');
+});
+
+cancelButton.addEventListener('click', () => {
+    createForm.classList.add('hidden');
+    toggleButton.querySelector('i').classList.add('fa-plus');
+    toggleButton.querySelector('i').classList.remove('fa-times');
+});
+
+function updateProjectload(){
+
+    fetch('index.php?action=get_all_projects')
+        .then(response => response.text()) // Récupère le contenu HTML sous forme de texte
+        .then(data => {
+            console.log(data); // Vérifie la réponse HTML dans la console
+
+            const $select = $('#project');
+
+
+            $select.empty(); // Vide le contenu actuel du select
+            $select.append(data); // Insère directement les options reçues du serveur
+
+            console.log($select.html());
+        })
+        .catch(error => {
+            console.error("Erreur lors de la mise à jour de l'historique :", error);
+        });
+}
 function switchMode(mode) {
     // Met à jour le mode courant
     currentMode = mode;
@@ -179,6 +331,7 @@ function updateHistory() {
     fetch('index.php?action=reloading')
         .then(response => response.text()) // Change to .text() to handle HTML response
         .then(data => {
+            console.log(data);
             const historyFiles = document.getElementById('history-files');
             historyFiles.innerHTML = data; // Update the history with the new HTML
         })
@@ -282,11 +435,18 @@ function deleteFile() {
     closePopup();
 }
 
-let selectedFolderName = null;
+
 
 function showContextMenu(event, folderName) {
+
     event.preventDefault(); // Empêche le menu contextuel natif
-    selectedFolderName = folderName;
+    selectedFolderName = folderName; // Initialisation correcte de selectedFolderName
+    console.log(selectedFolderName);
+    // Vérifier si selectedFolderName est défini avant de l'utiliser
+    if (!selectedFolderName) {
+        console.error('Aucun dossier sélectionné.');
+        return; // Si la variable est indéfinie, on arrête la fonction
+    }
 
     // Cache tout autre menu contextuel
     hideContextMenu();
@@ -305,6 +465,7 @@ function showContextMenu(event, folderName) {
     // Ajoute un écouteur pour masquer le menu quand on clique ailleurs
     document.addEventListener('click', hideContextMenu, { once: true });
 }
+
 
 function hideContextMenu() {
     const contextMenu = document.getElementById('context-menu');
@@ -377,3 +538,9 @@ function deleteFolder() {
     hideContextMenu();
 }
 
+function closeForm(formId) {
+    const form = document.getElementById(formId);
+    if (form) {
+        form.style.display = 'none';
+    }
+}

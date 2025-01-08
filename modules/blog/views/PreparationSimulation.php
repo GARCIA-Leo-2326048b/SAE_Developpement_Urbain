@@ -21,20 +21,13 @@ class PreparationSimulation
             <!-- Barre de défilement pour l'historique -->
             <aside id="history" >
                 <h2>Historique des fichiers</h2>
-                <div id="history-files">
                     <?php HistoriqueView::getInstance($this->files)->render(); ?>
-                </div>
             </aside>
 
             <section id="import">
-                <h2>Uploader des fichiers</h2>
-                <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
-                <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
-
                 <?php
                 $formView = new FormView();
-                $formView->renderVectorForm();
-                $formView->renderRasterForm();
+                $formView->renderAllForms();
                 ?>
 
                 <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
@@ -86,6 +79,6 @@ class PreparationSimulation
 
         </div>
         <?php
-        (new GlobalLayout('Accueil', ob_get_clean()))->show();
+        (new GlobalLayout('Simulation', ob_get_clean()))->show();
     }
 }

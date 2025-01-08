@@ -50,8 +50,11 @@ class HistoriqueView
         echo $ulCloseTag;
     }
 
-    public function render(): void {
+     public function render(): void {
+        // Encapsule le contenu dans un div
+        echo "<div id='history-files'>";
         $this->displayFolderTree($this->files);
+        echo "</div>";
     }
 
     public function generateFolderOptions($folders, $prefix = ''): void {
@@ -59,6 +62,12 @@ class HistoriqueView
             if (!isset($folder['type']) || $folder['type'] !== 'file') {
                 echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";
             }
+        }
+    }
+
+    public function generateProjects($folders, $prefix = ''): void {
+        foreach ($folders as $folder) {
+                echo "<option value='" . htmlspecialchars($folder['projet']) . "'>" . $prefix . htmlspecialchars($folder['projet']) . "</option>";
         }
     }
 

@@ -39,11 +39,26 @@ try {
             case 'creationCompte':
                 (new blog\controllers\InscriptionController())->creationCompte();
                 break;
-            case 'view_simulations':
-                (new blog\controllers\Upload())->telechargement();
+            case 'create_project':
+                (new blog\controllers\Upload())->createProject();
                 break;
+            case 'get_all_projects':
+                (new blog\controllers\Upload())->getProjects();
+                break;
+            case 'set_project':
+                (new blog\controllers\Upload())->setProject();
+                break;
+            case 'view_simulations':
+                (new blog\controllers\WorkSpaceController())->project();
+                break;
+                case 'simulation':
+                    (new blog\controllers\SimulationController())->simuler();
+                    break;
             case 'new_simulation':
-                (new blog\controllers\SimulationController())->execute();
+                (new blog\controllers\WorkSpaceController())->execute();
+                break;
+            case 'save_experimentation':
+                (new blog\controllers\ComparaisonController())->saveExperimentation();
                 break;
             case 'upload':
                 (new blog\controllers\Upload())->telechargement();

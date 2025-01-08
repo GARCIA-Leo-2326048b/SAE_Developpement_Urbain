@@ -10,10 +10,13 @@ use blog\models\UploadModel;
 
 class Upload
 {
+
     private $db;
     private $uploadModel;
     private $currentUserId; // ID de l'utilisateur connecté
-    private $errorMessage="";
+    private $header = 'Content-Type: application/json';
+    private $pref = '/[^a-zA-Z0-9_-]/';
+    private $nouser = false;
 
     public function __construct()
     {
@@ -28,17 +31,88 @@ class Upload
             $this->currentUserId = $_SESSION['user_id'];
         } else {
             // Rediriger vers la page de connexion
-            header("Location: index.php?action=authentification");
-            exit();
+//            header("Location: index.php?action=authentification");
+            $this->nouser = true;
+//            exit();
         }
+    }
+
+    public function createProject()
+    {
+        header($this->header); // Réponse au format JSON
+        try {
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+            }
+
+            // Récupérer les données envoyées par AJAX en GET
+            if (empty($_POST['new_project_name'])) {
+                throw new \Exception("Le nom du projet est requis.");
+            }
+
+            $project = trim($_POST['new_project_name']);
+            $project = preg_replace($this->pref, '', $project); // Nettoyer le nom du dossier
+
+
+            if ($this->uploadModel->projetExiste($project,$this->currentUserId)) {
+                throw new \Exception("Ce projet existe déjà");
+            }
+
+            // Création du projet
+            $this->uploadModel->createProjectM($project,$this->currentUserId);
+
+            // Récupérer l'ID du projet récemment ajouté
+            $newProjectId = $this->db->lastInsertId();
+
+            // Ajouter ce projet à la session
+            // Vous pouvez créer un tableau de projets si ce n'est pas déjà fait dans la session
+            $_SESSION['projects'][] = [
+                'id' => $newProjectId,
+                'name' => $project
+            ];
+
+            // Mettre à jour le projet actif dans la session
+            $_SESSION['current_project_id'] = $newProjectId;
+            $_SESSION['current_project_name'] = $project;
+
+            // Réponse JSON pour succès
+            echo json_encode(['success' => true, 'message' => 'Projet créé avec succès.']);
+        } catch (\Exception $e) {
+            // Réponse JSON pour erreur
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
+
+    public function setProject()
+    {
+        if (!empty($_POST['project_id'])) {
+            $_SESSION['current_project_id'] = $_POST['project_id'];
+            $_SESSION['current_project_name'] =  $_POST['project_id'];
+            header("Location: index.php?action=home");
+//            echo json_encode(['success' => true, 'message' => 'Projet sélectionné avec succès.']);
+        } else {
+//            echo json_encode(['success' => false, 'message' => 'Aucun projet sélectionné.']);
+        }
+        exit();
+    }
+
+
+    public function getProjects()
+    {
+        header($this->header);
+        $files = $this->uploadModel->getUserProjects($this->currentUserId);
+        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        return $folderHistory->generateProjects($files);
     }
 
     public function telechargement()
     {
         try {
             // Gestion des fichiers Shapefile (Vecteur)
-            if (isset($_FILES['shapefile'])) {
-                $this->handleShapefileUpload();
+            if (isset($_FILES['geojson'])) {
+                $this->uploadfile();
             }
             // Gestion des fichiers Raster
             elseif (isset($_FILES['rasterfile'])) {
@@ -54,16 +128,67 @@ class Upload
     public function deleteFile() {
         $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
 
-        if ($this->uploadModel->deleteFileGJ($fileName, $this->currentUserId)) {
+        if ($this->uploadModel->deleteFileGJ($fileName, $this->currentUserId,$_SESSION['current_project_id'])) {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false]);
         }
     }
 
+    public function uploadfile()
+    {
+        header($this->header); // Réponse au format JSON
+        try {
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+            }
+
+            // Récupérer les données envoyées par AJAX en GET
+            if (empty($_POST['shapefile_name'])) {
+                throw new \Exception("Le nom du fichier est requis.");
+            }
+
+            $fileName = trim($_POST['shapefile_name']);
+            $fileName = preg_replace($this->pref, '', $fileName); // Nettoyer le nom du dossier
+
+            if (empty($fileName)) {
+                throw new \Exception("Nom de dossier invalide.");
+            }
+
+            $dossierParent = $_POST['dossier_parent'] ?? null;
+            // Vérifier si le fichier existe déjà pour éviter les conflits
+            $nom = $fileName . '.geojson';
+            if ($this->uploadModel->file_existGJ($nom)) {
+                throw new \Exception("fichier extste déjà.");
+            }
+            // Récupérer le contenu du fichier
+            if (!isset($_FILES['geojson']) || $_FILES['geojson']['error'] !== UPLOAD_ERR_OK) {
+                throw new \Exception("Erreur lors de l'upload du fichier.");
+            }
+
+            $fileTmpPath = $_FILES['geojson']['tmp_name'];
+            $fileContent = file_get_contents($fileTmpPath);
+
+            if ($fileContent === false) {
+                throw new \Exception("Impossible de lire le fichier GeoJSON.");
+            }
+
+            // Création du dossier
+            $this->uploadModel->saveUploadGJ($nom, $fileContent,$this->currentUserId, $dossierParent,$_SESSION['current_project_id']);
+
+            // Réponse JSON pour succès
+            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
+        } catch (\Exception $e) {
+            // Réponse JSON pour erreur
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
+
     public function deleteFolder()
     {
-        header('Content-Type: application/json'); // Indique que la réponse est au format JSON
+        header($this->header); // Indique que la réponse est au format JSON
 
         try {
             $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
@@ -74,7 +199,7 @@ class Upload
             }
 
 
-            $result = $this->uploadModel->deleteFolderT($folderName, $this->currentUserId);
+            $result = $this->uploadModel->deleteFolderT($folderName, $this->currentUserId,$_SESSION['current_project_id']);
 
             if ($result) {
                 echo json_encode(['success' => true]);
@@ -95,84 +220,79 @@ class Upload
 
 
     public function getArbre() {
-        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
-        return $this->displayFolderTree($files);
-    }
-
-    private function displayFolderTree($folders, $parentId = '') {
-        echo '<ul>';
-        foreach ($folders as $folder) {
-            echo '<li>';
-
-            if (isset($folder['type']) && $folder['type'] === 'file') {
-                // Affichage des fichiers
-                echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
-                    . htmlspecialchars($folder['name']) . "</button>";
-            } else {
-                // Affichage des dossiers
-                // echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
-                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
-    oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")' 
-    onclick='toggleFolder(\"" . htmlspecialchars($folder['name']) . "\")'>";
-                echo "<i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
-
-                // Vérifie si le dossier a des fichiers
-                if (!empty($folder['files'])) {
-                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-files' style='display: none;'>";
-                    foreach ($folder['files'] as $file) {
-                        echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">"
-                            . htmlspecialchars($file) . "</button></li>";
-                    }
-                    echo '</ul>';
-                }
-
-                // Vérifie si le dossier a des sous-dossiers
-                if (!empty($folder['children'])) {
-                    echo "<ul id='" . htmlspecialchars($folder['name']) . "-children' style='display: none;'>";
-                    $this->displayFolderTree($folder['children'], $folder['name']);
-                    echo '</ul>';
-                }
-            }
-
-            echo '</li>';
-        }
-        echo '</ul>';
+        $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
+        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        return $folderHistory->render();
     }
 
     public function selectFolder()
     {
-        header('Content-Type: application/json');
-        $files = $this->uploadModel->getUserFilesWithFolders($this->currentUserId);
+        header($this->header);
+        $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
         $folderHistory = \blog\views\HistoriqueView::getInstance($files);
-        $folders = $folderHistory->generateFolderOptions($folderHistory->getFiles());
-        return $folders;
-//        echo json_encode($folders);
-//        exit;
+        return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
+
+//    public function folder1() {
+//        header($this->header); // Réponse au format JSON
+//        try {
+//            // Récupérer les données envoyées par AJAX en GET
+//            if (empty($_GET['dossier_name'])) {
+//                throw new \Exception("Le nom du dossier est requis.");
+//            }
+//
+//            $folderName = trim($_GET['dossier_name']);
+//            $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
+//
+//            if (empty($folderName)) {
+//                throw new \Exception("Nom de dossier invalide.");
+//            }
+//
+//            $dossierParent = $_GET['dossier_parent'] ?? null;
+//
+//            // Vérification de l'existence du dossier
+//            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id'])) {
+//                throw new \Exception("Ce répertoire existe déjà.");
+//            }
+//
+//            // Création du dossier
+//            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id']);
+//
+//            // Réponse JSON pour succès
+//            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
+//        } catch (\Exception $e) {
+//            // Réponse JSON pour erreur
+//            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+//        }
+//        exit();
+//    }
+
     public function folder1() {
         header('Content-Type: application/json'); // Réponse au format JSON
         try {
-            // Récupérer les données envoyées par AJAX en GET
-            if (empty($_GET['dossier_name'])) {
+            // Récupérer les données envoyées par AJAX en POST
+            $inputData = json_decode(file_get_contents('php://input'), true);
+
+            if (empty($inputData['dossier_name'])) {
                 throw new \Exception("Le nom du dossier est requis.");
             }
 
-            $folderName = trim($_GET['dossier_name']);
-            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
+            $folderName = trim($inputData['dossier_name']);
+            $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
 
             if (empty($folderName)) {
                 throw new \Exception("Nom de dossier invalide.");
             }
 
-            $dossierParent = $_GET['dossier_parent'] ?? null;
+            $dossierParent = $inputData['dossier_parent'] ?? null;
 
             // Vérification de l'existence du dossier
-            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName)) {
+            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName, $_SESSION['current_project_id'])) {
                 throw new \Exception("Ce répertoire existe déjà.");
             }
 
             // Création du dossier
-            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
+            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName, $_SESSION['current_project_id']);
 
             // Réponse JSON pour succès
             echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
@@ -184,50 +304,14 @@ class Upload
     }
 
 
+
     public function getSubFolders()
     {
         $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
-        $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName);
-        header('Content-Type: application/json');
+        $subFolders = $this->uploadModel->getSubFolder($this->currentUserId, $folderName,$_SESSION['current_project_id']);
+        header($this->header);
         echo json_encode($subFolders);
     }
-
-    public function folder() {
-        try {
-            // Vérifier que les données nécessaires sont présentes
-            if (empty($_POST['dossier_name'])) {
-                throw new \Exception("Le nom du dossier est requis.");
-            }
-
-            $folderName = trim($_POST['dossier_name']);
-            $folderName = preg_replace('/[^a-zA-Z0-9_-]/', '', $folderName); // Nettoyer le nom du dossier
-            if (empty($folderName)) {
-                throw new \Exception("Nom de dossier invalide.");
-            }
-
-            if (isset($_POST['dossier_parent'])){
-                $dossierParent = $_POST['dossier_parent'];
-            } else {
-                $dossierParent = null;
-            }
-
-            var_dump(
-                $dossierParent,$folderName
-            );
-            // Appeler la méthode pour créer le dossier
-            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName);
-
-            // Rediriger vers une page de succès ou afficher un message de succès
-            header("Location: index.php?action=new_simulation");
-            exit();
-        } catch (\Exception $e) {
-            // Rediriger vers une page d'erreur ou afficher un message d'erreur
-            header("Location: index.php?action=new_simulation&error=" . urlencode($e->getMessage()));
-            exit();
-        }
-    }
-
-
     // Gérer l'upload des Shapefiles
     public function handleShapefileUpload()
     {
@@ -246,7 +330,7 @@ class Upload
         if (isset($_POST['shapefile_name']) && !empty(trim($_POST['shapefile_name']))) {
             $customName = trim($_POST['shapefile_name']);
             // Sanitize the custom name to prevent security issues
-            $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+            $customName = preg_replace($this->pref, '', $customName);
             if (empty($customName)) {
                 throw new \Exception("Nom de fichier invalide.");
             }
@@ -312,8 +396,14 @@ class Upload
             if ($geojsonFilePath) {
                 $geojsonFileName = basename($geojsonFilePath);
                 $geojsonContent = file_get_contents($geojsonFilePath);
-                $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId,$dossierParent);
-                header("Location: index.php?action=new_simulation");
+                if($this->nouser){
+                    header("Location: index.php?action=simulation");
+
+                }else {
+
+                    $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId, $dossierParent);
+                    header("Location: index.php?action=new_simulation");
+                }
 
             }
         } else {
@@ -396,7 +486,7 @@ class Upload
             if (isset($_POST['rasterfile_name']) && !empty(trim($_POST['rasterfile_name']))) {
                 $customName = trim($_POST['rasterfile_name']);
                 // Sanitize the custom name to prevent security issues
-                $customName = preg_replace('/[^a-zA-Z0-9_-]/', '', $customName);
+                $customName = preg_replace($this->pref, '', $customName);
                 if (empty($customName)) {
                     throw new \Exception("Nom de fichier invalide.");
                 }
