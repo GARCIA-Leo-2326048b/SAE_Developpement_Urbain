@@ -15,15 +15,54 @@ class ComparaisonModel
         // Connexion à la base de données via SingletonModel
         $this->db = SingletonModel::getInstance()->getConnection();
     }
-    public function fetchGeoJson($name)
+    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer)
     {
-        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE file_name = :name");
-        $stmt->bindParam(':name', $name);
-        $stmt->execute();
+        $userId = $_SESSION['user_id'];
+        $name = 'Nom de l\'expérience'; // Vous pouvez remplacer ceci par un nom dynamique si nécessaire
 
-        // Retourner les données GeoJSON
-        return $stmt->fetchColumn();
+        // Convertir les données en JSON pour les stocker dans la base de données
+        $chartsJson = json_encode($data['charts']); // Données des graphiques
+        $tableDataJson = json_encode($data['tableData']); // Données du tableau
+
+        // Sauvegarder dans la base de données
+        $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur) 
+            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':geoJsonNameSim', $geoJsonNameSim);
+        $stmt->bindParam(':geoJsonNameVer', $geoJsonNameVer);
+        $stmt->bindParam(':chartsJson', $chartsJson);
+        $stmt->bindParam(':tableDataJson', $tableDataJson);
+
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            error_log('Erreur lors de la sauvegarde : ' . print_r($stmt->errorInfo(), true));
+            return false;
+        }
     }
+
+
+    public function loadExperimentation($experimentId)
+    {
+        // Récupérer l'expérience depuis la base de données
+        $sql = "SELECT * FROM experimentation WHERE id = :experimentId";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':experimentId', $experimentId);
+        $stmt->execute();
+        $experiment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($experiment) {
+            $chartsData = json_decode($experiment['data'], true);
+
+            // Retourner les données des graphiques
+            return $chartsData;
+        }
+        return null;
+    }
+
+
     public function getEPSGCode($geoJson)
     {
         $geometry = geoPHP::load($geoJson);
@@ -232,5 +271,6 @@ class ComparaisonModel
              'errors' => $errors
          ];
      }
+
 
 }

@@ -1,106 +1,16 @@
-let activeChart = null;
-let chartType = 'bar'; // Type de graphique par défaut
+let chartType = 'bar';
 
+//initialiser les données
 function initializeChart(labels, dataSim, dataVer) {
-    // Stockage des données globalement
     window.chartData = { labels, dataSim, dataVer };
-
-    const filteredData = getFilteredData();
-    const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
-    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
-    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
-
-    // Normalisation si la case est cochée
-    if (normalizeChecked) {
-        const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
-        filteredData.dataSim = normalizedData.normalizedSim;
-        filteredData.dataVer = normalizedData.normalizedVer;
-    }
-
-    // Masquer tous les types de graphiques avant d'afficher celui sélectionné
-    document.querySelectorAll('.chart-container').forEach(chart => {
-        chart.style.display = 'none';
-    });
-
-    const chartDiv = document.getElementById('chart-' + chartType);
-    if (chartDiv) {
-        chartDiv.style.display = 'block'; // Affiche le graphique sélectionné
-    }
-
-    // Déterminer les datasets à afficher en fonction des options sélectionnées
-    const datasets = [];
-    if (showSimulation) {
-        datasets.push({
-            label: 'Simulation',
-            data: filteredData.dataSim,
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            fill: chartType === 'spider',
-        });
-    }
-
-    if (showVeriteTerrain) {
-        datasets.push({
-            label: 'Vérité terrain',
-            data: filteredData.dataVer,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            fill: chartType === 'spider',
-        });
-    }
-
-    const config = {
-        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
-        data: {
-            labels: filteredData.labels,
-            datasets: datasets, // Utilisation dynamique des datasets
-        },
-        options: {
-            responsive: true,
-            scales: chartType === 'bar'
-                ? {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => `${value} m²`,
-                        },
-                    },
-                }
-                : chartType === 'pie'
-                    ? {}
-                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
-        },
-    };
-
-    if (activeChart) {
-        activeChart.destroy(); // Détruire l'ancien graphique avant de créer un nouveau
-    }
-
-    const ctx = chartDiv.querySelector('canvas').getContext('2d');
-    activeChart = new Chart(ctx, config);
 }
 
-function normalizeData(dataSim, dataVer) {
-    const normalizedSim = [];
-    const normalizedVer = [];
 
-    // Normalisation par rapport à la valeur maximale entre les deux séries
-    for (let i = 0; i < dataSim.length; i++) {
-        const maxVal = Math.max(dataSim[i], dataVer[i]);
-        normalizedSim.push(dataSim[i] / maxVal);
-        normalizedVer.push(dataVer[i] / maxVal);
-    }
-
-    return { normalizedSim, normalizedVer };
-}
-
-// Fonction pour initialiser la page
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addChartBtn').addEventListener('click', toggleChartForm);
     document.getElementById('createChart').addEventListener('click', createNewChart);
 });
+
 
 // Afficher/Masquer le formulaire d'ajout
 function toggleChartForm() {
@@ -111,84 +21,41 @@ function toggleChartForm() {
 // Créer un nouveau graphique
 function createNewChart() {
     const chartName = document.getElementById('chartName').value;
-    chartType = document.querySelector('input[name="chartType"]:checked').value; // Vérifie le type sélectionné
+    chartType = document.querySelector('input[name="chartType"]:checked').value;
+
     const selectedOptions = Array.from(document.querySelectorAll('#chartOptions input:checked')).map(opt => opt.id);
-    const normalizeChecked = document.getElementById('normalizeCheckbox').checked; // Vérifie si la case de normalisation est cochée
-    const showSimulation = document.getElementById('showSimulation').checked; // Vérifie si on doit afficher la simulation
-    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked; // Vérifie si on doit afficher la vérité terrain
+    const normalizeChecked = document.getElementById('normalizeCheckbox').checked;
+    const showSimulation = document.getElementById('showSimulation').checked;
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked;
 
     const chartsContainer = document.getElementById('chartsContainer');
     const chartDiv = document.createElement('div');
     chartDiv.className = 'chart-container';
-    chartDiv.id = 'chart-' + chartType; // Ajout de l'ID pour chaque type
-    const chartId = 'canvas-' + Date.now(); // ID unique pour chaque graphique
+    chartDiv.id = 'chart-' + chartType;
+    const chartId = 'canvas-' + Date.now();
     chartDiv.innerHTML = `
-    <h3>${chartName}</h3>
-    <canvas id="${chartId}"></canvas>
-`;
+        <h3>${chartName}</h3>
+        <canvas id="${chartId}"></canvas>
+        <button class="deleteChartBtn">
+    <img src="./_assets/includes/trash-icon.png" alt="Supprimer" class="trash-icon" />
+</button>
+    `;
     chartsContainer.appendChild(chartDiv);
 
-    const ctx = chartDiv.querySelector('canvas').getContext('2d');
+    chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv, null));
+
     const filteredData = getFilteredData(selectedOptions);
 
-    // Normalisation si la case est cochée
-    if (normalizeChecked) {
-        const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
-        filteredData.dataSim = normalizedData.normalizedSim;
-        filteredData.dataVer = normalizedData.normalizedVer;
-    }
+    // Appliquer la normalisation si nécessaire
+    const normalizedData = applyNormalization(filteredData, normalizeChecked);
 
-    // Déterminer les datasets à afficher en fonction des options sélectionnées
-    const datasets = [];
-    if (showSimulation) {
-        datasets.push({
-            label: 'Simulation',
-            data: filteredData.dataSim,
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            fill: chartType === 'spider',
-        });
-    }
+    // Gérer les datasets
+    const datasets = createDatasets(normalizedData, chartType, showSimulation, showVeriteTerrain);
 
-    if (showVeriteTerrain) {
-        datasets.push({
-            label: 'Vérité terrain',
-            data: filteredData.dataVer,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            fill: chartType === 'spider',
-        });
-    }
+    // Créer le graphique
+    configureChart(chartDiv, chartType, normalizedData, datasets);
 
-    // Configuration du graphique en fonction du type sélectionné
-    const config = {
-        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
-        data: {
-            labels: filteredData.labels,
-            datasets: datasets, // Utilisation dynamique des datasets
-        },
-        options: {
-            responsive: true,
-            scales: chartType === 'bar'
-                ? {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => `${value} m²`,
-                        },
-                    },
-                }
-                : chartType === 'pie'
-                    ? {}
-                    : { r: { beginAtZero: true } }, // Pour le type 'spider'
-        },
-    };
-
-    const chart = new Chart(ctx, config);
-
-    // Cacher le formulaire après la création du graphique
+    // Cacher le formulaire
     document.getElementById('chartFormContainer').style.display = 'none';
 }
 
@@ -225,4 +92,202 @@ function getFilteredData(selectedOptions = []) {
     });
 
     return { labels, dataSim, dataVer };
+}
+function createDatasets(filteredData, chartType, showSimulation, showVeriteTerrain) {
+    const datasets = [];
+    const colors = [
+        'rgba(255, 99, 132, 0.5)', // Couleur pour la première donnée
+        'rgba(54, 162, 235, 0.5)', // Couleur pour la deuxième donnée
+        'rgba(255, 206, 86, 0.5)', // Couleur pour la troisième donnée
+        'rgba(75, 192, 192, 0.5)', // Couleur pour la quatrième donnée
+        'rgba(153, 102, 255, 0.5)', // Couleur pour la cinquième donnée
+        'rgba(255, 159, 64, 0.5)', // Couleur pour la sixième donnée
+        // Ajoutez autant de couleurs que nécessaire
+    ];
+
+    // Si Simulation est sélectionné
+    if (showSimulation) {
+        if (showVeriteTerrain) {
+            // Si les deux sont sélectionnés, utiliser une seule couleur pour la Simulation
+            datasets.push({
+                label: 'Simulation',
+                data: filteredData.dataSim,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)', // Couleur uniforme pour la Simulation
+                borderColor: 'rgba(255, 99, 132, 1)', // Bordure uniforme
+                borderWidth: 1,
+            });
+        } else {
+            // Si seul la Simulation est sélectionnée, utiliser des couleurs différentes
+            datasets.push({
+                label: 'Simulation',
+                data: filteredData.dataSim,
+                backgroundColor: colors.slice(0, filteredData.dataSim.length), // Couleurs différentes pour chaque donnée
+                borderColor: colors.slice(0, filteredData.dataSim.length).map(color => color.replace('0.5', '1')), // Bordure avec couleurs différentes
+                borderWidth: 1,
+            });
+        }
+    }
+
+    // Si Vérité terrain est sélectionné
+    if (showVeriteTerrain) {
+        if (showSimulation) {
+            // Si les deux sont sélectionnés, utiliser une seule couleur pour la Vérité terrain
+            datasets.push({
+                label: 'Vérité terrain',
+                data: filteredData.dataVer,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)', // Couleur uniforme pour la Vérité terrain
+                borderColor: 'rgba(54, 162, 235, 1)', // Bordure uniforme
+                borderWidth: 1,
+            });
+        } else {
+            // Si seul la Vérité terrain est sélectionnée, utiliser des couleurs différentes
+            datasets.push({
+                label: 'Vérité terrain',
+                data: filteredData.dataVer,
+                backgroundColor: colors.slice(0, filteredData.dataVer.length), // Couleurs différentes pour chaque donnée
+                borderColor: colors.slice(0, filteredData.dataVer.length).map(color => color.replace('0.5', '1')), // Bordure avec couleurs différentes
+                borderWidth: 1,
+            });
+        }
+    }
+
+    return datasets;
+}
+
+function configureChart(chartDiv, chartType, filteredData, datasets) {
+    const config = {
+        type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
+        data: {
+            labels: filteredData.labels,
+            datasets: datasets,
+        },
+        options: {
+            responsive: true,
+            scales: chartType === 'bar'
+                ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => `${value} m²`,
+                        },
+                    },
+                }
+                : chartType === 'pie'
+                    ? {}
+                    : { r: { beginAtZero: true } },
+        },
+    };
+
+    const ctx = chartDiv.querySelector('canvas').getContext('2d');
+    const chart = new Chart(ctx, config);
+
+    // Attacher l'objet chart à l'élément <canvas>
+    chartDiv.querySelector('canvas').chart = chart;
+
+    return chart;
+}
+function applyNormalization(filteredData, normalizeChecked) {
+    if (normalizeChecked) {
+        const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
+        filteredData.dataSim = normalizedData.normalizedSim;
+        filteredData.dataVer = normalizedData.normalizedVer;
+    }
+    return filteredData;
+}
+
+function normalizeData(dataSim, dataVer) {
+    const normalizedSim = [];
+    const normalizedVer = [];
+
+    // Normalisation par rapport à la valeur maximale entre les deux séries
+    for (let i = 0; i < dataSim.length; i++) {
+        const maxVal = Math.max(dataSim[i], dataVer[i]);
+        normalizedSim.push(dataSim[i] / maxVal);
+        normalizedVer.push(dataVer[i] / maxVal);
+    }
+
+    return { normalizedSim, normalizedVer };
+}
+function removeChart(chartDiv, chart) {
+    chartDiv.remove(); // Supprimer l'élément graphique
+    if (chart) {
+        chart.destroy(); // Détruire le graphique
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const geoJsonNamesElement = document.getElementById('geoJsonNames');
+    const geoJsonSimName = geoJsonNamesElement.getAttribute('data-geojson-sim');
+    const geoJsonVerName = geoJsonNamesElement.getAttribute('data-geojson-ver');
+
+    // Déplacer l'écouteur ici, dans le DOMContentLoaded
+    document.getElementById('saveBtn').addEventListener('click', () => {
+        const charts = [];
+        const chartContainers = document.querySelectorAll('.chart-container');
+
+        chartContainers.forEach(chartContainer => {
+            const chartName = chartContainer.querySelector('h3').textContent;
+            const chartType = chartContainer.querySelector('canvas').getAttribute('id').split('-')[1];
+            const chartData = chartContainer.querySelector('canvas').chart.data; // Récupérer les données du graphique
+            const chartOptions = chartContainer.querySelector('canvas').chart.options; // Récupérer les options
+
+            // Rassembler toutes les informations du graphique
+            charts.push({
+                name: chartName,
+                type: chartType,
+                data: chartData,
+                options: chartOptions,
+            });
+        });
+
+        // Créer un objet avec toutes les informations à sauvegarder
+        const tableData = getTableData();
+
+        const experimentationData = {
+            charts: charts,
+            geoJsonSimName: geoJsonSimName,
+            geoJsonVerName: geoJsonVerName,
+            tableData: tableData, // Inclure les données du tableau
+        };
+
+        // Sauvegarder dans la base de données (envoi de données à PHP)
+        saveExperimentation(experimentationData);
+    });
+});
+
+function getTableData() {
+    const tableRows = document.querySelectorAll('table tr'); // Sélectionne toutes les lignes de tous les tableaux
+    const tableData = Array.from(tableRows).map(row => {
+        const cells = row.querySelectorAll('td, th'); // Sélectionne toutes les cellules (y compris les en-têtes)
+        return Array.from(cells).map(cell => cell.textContent.trim()); // Extrait le contenu de chaque cellule
+    });
+
+    // On supprime les lignes qui ne contiennent pas de données utiles (celles avec uniquement des en-têtes)
+    return tableData.filter(row => row.some(cell => cell.trim() !== ''));
+}
+
+function saveExperimentation(experimentationData) {
+    fetch('index.php?action=save_experimentation', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(experimentationData),
+    })
+        .then(response => response.text())  // Récupère la réponse en tant que texte
+        .then(data => {
+            console.log('Réponse brute du serveur:', data);
+            try {
+                const jsonData = JSON.parse(data); // Essaie de convertir la réponse en JSON
+                if (jsonData.success) {
+                    alert("Données enregistrées avec succès !");
+                } else {
+                    alert("Une erreur est survenue lors de la sauvegarde.");
+                }
+            } catch (error) {
+                console.error('Erreur lors du parsing du JSON:', error);
+                //console.log('Réponse brute:', data);  // Affiche la réponse brute pour débogage
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
 }

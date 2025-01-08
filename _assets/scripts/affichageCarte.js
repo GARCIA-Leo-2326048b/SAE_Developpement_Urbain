@@ -7,8 +7,7 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap() {
-
+function initializeMap(house, tiffUrl = null,idMap = 'map') {
     map = L.map('map').setView([0, 0], 16);
 
     // Création des couches de fond de carte
@@ -28,7 +27,40 @@ function initializeMap() {
         crossOrigin: true
     });
 
-    map.addLayer(streetsLayer);
+    // Ajout de la couche satellite par défaut
+    satelliteLayer.addTo(map);
+
+    if (house) {
+        houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);
+        overlayMaps["Maisons"] = houseLayer;
+    }
+    updateLayerControl();
+    updateLayerButtons();
+
+    // Chargement du GeoTIFF uniquement si l'URL est fournie
+    // Chargement du GeoTIFF
+    if (tiffUrl) {
+        fetch(tiffUrl)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => parseGeoraster(arrayBuffer))
+            .then(georaster => {
+                tiffLayer = new GeoRasterLayer({
+                    georaster: georaster,
+                    opacity: 1,
+                    resolution: 64
+                }).addTo(map);
+
+                overlayMaps["GeoTIFF"] = tiffLayer;
+                updateLayerControl();
+                updateLayerButtons();
+            })
+            .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
+    }
+
+    // Ajuster les limites de la carte si des couches sont présentes
+    if (house || road || vegetation) {
+        map.fitBounds(L.featureGroup([houseLayer]).getBounds());
+    }
 }
 
 // Fonction pour sélectionner la couche à ajuster
