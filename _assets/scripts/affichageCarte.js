@@ -7,13 +7,8 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, tiffUrl = null,idMap = 'map') {
-
-    const firstHouseCoordinates = house && house.features && house.features[0] ? house.features[0].geometry.coordinates[0][0] : null;
-    const lat = firstHouseCoordinates ? firstHouseCoordinates[1] : 0;
-    const lng = firstHouseCoordinates ? firstHouseCoordinates[0] : 0;
-
-    map = L.map(idMap).setView([lat, lng], 16);
+function initializeMap(house, road, tiffUrl,idMap = 'map') {
+    map = L.map('map').setView([0, 0], 16);
 
     // Création des couches de fond de carte
     satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
@@ -39,6 +34,14 @@ function initializeMap(house, tiffUrl = null,idMap = 'map') {
         houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);
         overlayMaps["Maisons"] = houseLayer;
     }
+
+    if (road) {
+        roadLayer = L.geoJSON(road, { color: '#0d61fa', weight: 2, fillColor: '#0d61fa', fillOpacity: 1 }).addTo(map);
+        overlayMaps["Routes"] = roadLayer;
+    }
+
+    updateLayerControl();
+    updateLayerButtons();
 
     // Chargement du GeoTIFF uniquement si l'URL est fournie
     // Chargement du GeoTIFF
@@ -183,6 +186,8 @@ function ajouterGeoJson(genericGeoJson, layerName) {
 
         // Ajoute la couche générique à overlayMaps avec le nom du fichier (layerName)
         overlayMaps[layerName] = genericLayer;
+
+        map.fitBounds(genericLayer.getBounds());
 
         // Met à jour le contrôle des couches
         updateLayerControl();
