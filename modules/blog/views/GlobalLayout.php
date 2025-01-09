@@ -11,7 +11,7 @@ class GlobalLayout
         $this->title = $title;
         $this->content = $content;
     }
-    function show() {?>
+    public function show() {?>
         <!-- views/layout.php -->
         <!DOCTYPE html>
         <html lang="fr">
@@ -29,6 +29,7 @@ class GlobalLayout
                 <!--  logo -->
                 <img class="logo-img" src="_assets/includes/logoMAS.png" alt="Logo MAS">
             </div>
+
             <h1>Recherche de Développement Urbain</h1>
             <section id="header">
                 <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a><a href="?action=compare">Comparer</a>

@@ -37,7 +37,8 @@ class WorkSpaceController
         }
 
         $project = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->utilisateur);
-        (new MesSimulationView($project))->show();
+        $experimentation= $this->uploadModel->getExperimentation($this->utilisateur,$_SESSION['current_project_id']);
+        (new MesSimulationView($project,$experimentation))->show();
     }
 
 }

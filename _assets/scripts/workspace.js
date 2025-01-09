@@ -352,7 +352,7 @@ function updateFolderOptions() {
             console.log(data); // Vérifie la réponse HTML dans la console
 
             const $select = $('#dossier_parent1');
-            const $select2 = $('dossier_parent');
+            const $select2 = $('#dossier_parent');
             $select2.empty(); // Vide le contenu actuel du select
             $select2.append('<option value="root">Racine</option>'); // Ajoute l'option "Racine"
             $select2.append(data); // Insère directement les options reçues du serveur

@@ -5,9 +5,11 @@ namespace blog\views;
 class PreparationSimulation
 {
     private $files;
+    private $historiqueView;
 
     public function __construct($files) {
         $this->files = $files;
+        $this->historiqueView = new \blog\views\HistoriqueView($this->files);
     }
 
     public function show(): void {
@@ -21,12 +23,15 @@ class PreparationSimulation
             <!-- Barre de défilement pour l'historique -->
             <aside id="history" >
                 <h2>Historique des fichiers</h2>
-                    <?php HistoriqueView::getInstance($this->files)->render(); ?>
+                    <?php
+                    $historyId = 'history-' . uniqid();
+                    $this->historiqueView->render($historyId);?>
             </aside>
 
             <section id="import">
                 <?php
-                $formView = new FormView();
+                if(isset($_SESSION['current_project_id'])){
+                $formView = new FormView($this->files);
                 $formView->renderAllForms();
                 ?>
 
@@ -35,7 +40,7 @@ class PreparationSimulation
 
                 <!-- Formulaire pour Créer un Dossier -->
                 <?php
-                $folderHistory = HistoriqueView::getInstance([]);
+                $folderHistory =  $this->historiqueView;
                 ?>
                 <form id="createFolderForm" method="POST" style="display: none; position: relative;">
                     <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">&times;</button>
@@ -87,6 +92,10 @@ class PreparationSimulation
 
         </div>
         <?php
+        }else{?>
+            <p>Veuillez Choisir ou crée un projet</p>
+        <?php
+        }
         (new GlobalLayout('Simulation', ob_get_clean()))->show();
     }
 }

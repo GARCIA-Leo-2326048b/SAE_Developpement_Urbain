@@ -3,6 +3,8 @@
 namespace blog\controllers;
 use blog\models\ComparaisonModel;
 use blog\models\GeoJsonModel;
+use blog\models\SingletonModel;
+use blog\models\UploadModel;
 use blog\views\ComparaisonView;
 use geoPHP;
 
@@ -11,11 +13,15 @@ class ComparaisonController{
     private $comparaisonModel;
     private $GeoJsonModel;
     private $view;
+    private $db;
 
     public function __construct()
     {
+        $this->db = SingletonModel::getInstance()->getConnection();
+        $uploadModel = new UploadModel($this->db);
+        $folders = $uploadModel->getFolderHierarchy($_SESSION['current_project_id'], $_SESSION['user_id']);
         $this->comparaisonModel = new ComparaisonModel();
-        $this->view = new ComparaisonView();
+        $this->view = new ComparaisonView($folders);
         $this->GeoJsonModel = new GeoJsonModel();
     }
 
@@ -25,20 +31,25 @@ class ComparaisonController{
         $data = json_decode(file_get_contents('php://input'), true);
 
         // Récupérer les noms des fichiers GeoJSON pour la simulation et la vérité terrain
-        $geoJsonSimName = $data['geoJsonSimName'] ?? 'default_simulation'; // Récupérer depuis le JSON
-        $geoJsonVerName = $data['geoJsonVerName'] ?? 'default_verite';  // Récupérer depuis le JSON
+        $geoJsonSimName = $data['geoJsonSimName'] ?? 'default_simulation';
+        $geoJsonVerName = $data['geoJsonVerName'] ?? 'default_verite';
 
-        // Appeler la méthode saveExperimentation du modèle
+        // Récupérer le nom, le dossier, et le projet depuis la requête AJAX
+        $name = $data['name'] ?? 'Nom par défaut';
+        $dossier = $data['dossier'] ?? 'Dossier par défaut';
+        $project = $data['project'] ?? 'Projet par défaut';
+
+        // Appeler la méthode `saveExperimentation` du modèle
         try {
-            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimName, $geoJsonVerName);
+            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimName, $geoJsonVerName, $name, $dossier, $project);
+            // Répondre à l'AJAX
+            echo json_encode(['success' => true]);
         } catch (Exception $e) {
-
+            error_log('Erreur lors de la sauvegarde : ' . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
-
-
-        // Répondre à l'AJAX
-        echo json_encode(['success' => true]);
     }
+
     public function compare($geoJsonSimName, $geoJsonVerName,$experimentId = null){
 
 

@@ -26,6 +26,7 @@ class Upload
         $this->db = SingletonModel::getInstance()->getConnection();
         $this->uploadModel = new UploadModel($this->db);
 
+
         // Vérifier l'authentification
         if (isset($_SESSION['user_id'])) {
             $this->currentUserId = $_SESSION['user_id'];
@@ -66,7 +67,6 @@ class Upload
             $newProjectId = $this->db->lastInsertId();
 
             // Ajouter ce projet à la session
-            // Vous pouvez créer un tableau de projets si ce n'est pas déjà fait dans la session
             $_SESSION['projects'][] = [
                 'id' => $newProjectId,
                 'name' => $project
@@ -103,7 +103,7 @@ class Upload
     {
         header($this->header);
         $files = $this->uploadModel->getUserProjects($this->currentUserId);
-        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        $folderHistory = new \blog\views\HistoriqueView($files);
         return $folderHistory->generateProjects($files);
     }
 
@@ -221,15 +221,16 @@ class Upload
 
     public function getArbre() {
         $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
-        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
-        return $folderHistory->render();
+        $folderHistory = new \blog\views\HistoriqueView($files);
+        $historyId = 'history-' . uniqid();
+        return $folderHistory->render($historyId);
     }
 
     public function selectFolder()
     {
         header($this->header);
         $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
-        $folderHistory = \blog\views\HistoriqueView::getInstance($files);
+        $folderHistory = new \blog\views\HistoriqueView($files);
         return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
 

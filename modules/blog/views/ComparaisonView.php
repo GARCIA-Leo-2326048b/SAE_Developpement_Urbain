@@ -4,6 +4,11 @@ namespace blog\views;
 
 class ComparaisonView
 {
+    private $hfolders;
+
+    public function __construct($hfolders){
+        $this->hfolders = new HistoriqueView($hfolders);
+    }
     public function showComparison($results, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName): void
     {
         ob_start();
@@ -150,6 +155,27 @@ class ComparaisonView
              data-geojson-ver="<?php echo $geoJsonVerName; ?>">
         </div>
         <button type="submit" id="saveBtn">Sauvegarder</button>
+
+        <!-- Modale pour entrer le nom et choisir le dossier -->
+        <div id="saveModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Sauvegarder l'expérimentation</h2>
+                <form id="saveForm">
+                    <label for="experimentName">Nom de l'expérimentation :</label>
+                    <input type="text" id="experimentName" name="experimentName" required>
+
+                    <label for="folderSelect">Choisir un dossier :</label>
+                    <select id="folderSelect" name="folderSelect" required>
+                        <!-- Les options seront générées ici via PHP -->
+                        <?php $this->hfolders->generateFolderOptions($this->hfolders->getFiles()); ?>
+                    </select>
+
+                    <button type="submit" id="confirmSaveBtn">Confirmer</button>
+                </form>
+            </div>
+        </div>
+
 
         <?php
         // Affichage du layout global

@@ -15,18 +15,18 @@ class ComparaisonModel
         // Connexion à la base de données via SingletonModel
         $this->db = SingletonModel::getInstance()->getConnection();
     }
-    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer)
+    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer,$name,$dossier,$project)
     {
         $userId = $_SESSION['user_id'];
-        $name = 'Nom de l\'expérience'; // Vous pouvez remplacer ceci par un nom dynamique si nécessaire
+//        $name = 'Nom de l\'expérience'; // Vous pouvez remplacer ceci par un nom dynamique si nécessaire
 
         // Convertir les données en JSON pour les stocker dans la base de données
         $chartsJson = json_encode($data['charts']); // Données des graphiques
         $tableDataJson = json_encode($data['tableData']); // Données du tableau
 
         // Sauvegarder dans la base de données
-        $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur) 
-            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id)";
+        $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur,dossier,projet) 
+            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id, :dossier,:project)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':user_id', $userId);
         $stmt->bindParam(':name', $name);
@@ -34,6 +34,8 @@ class ComparaisonModel
         $stmt->bindParam(':geoJsonNameVer', $geoJsonNameVer);
         $stmt->bindParam(':chartsJson', $chartsJson);
         $stmt->bindParam(':tableDataJson', $tableDataJson);
+        $stmt->bindParam(':dossier', $dossier);
+        $stmt->bindParam(':project', $project);
 
         if ($stmt->execute()) {
             return true;

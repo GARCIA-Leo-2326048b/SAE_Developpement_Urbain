@@ -262,25 +262,30 @@ class UploadModel {
         }
     }
 
-    public function getUserFilesWithFolders($userId) {
-        // Récupérer les dossiers
+    public function getExperimentation($userId,$project) {
+        // Récupérer les dossier
         $queryFolders = "
-        SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
-        FROM organisation 
+        SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent
+        FROM organisation
         WHERE id_utilisateur = :userId
+        AND projet = :project
         ORDER BY dossierParent, id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->bindParam(':project', $project);
         $stmtFolders->execute();
         $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
 
+
         // Récupérer les fichiers
         $queryFiles = "
-    SELECT f.file_name, f.dossier as dossier_id
-    FROM uploadGJ f
-    WHERE user = :userId";
+    SELECT e.nom_xp, e.dossier as dossier_id
+    FROM experimentation e
+    WHERE id_utilisateur = :userId
+    AND projet = :project";
         $stmtFiles = $this->db->prepare($queryFiles);
         $stmtFiles->bindParam(':userId', $userId);
+        $stmtFiles->bindParam(':project', $project);
         $stmtFiles->execute();
         $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
 
@@ -303,12 +308,13 @@ class UploadModel {
         foreach ($files as $file) {
             $dossierId = $file['dossier_id'] ?? null;
             if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
-                $folderIndex[$dossierId]['files'][] = $file['file_name'];
+                $folderIndex[$dossierId]['files'][] = $file['nom_xp'];
             } else {
                 // Ajouter les fichiers sans dossier directement dans l'arborescence
                 $folderTree[] = [
-                    'name' => $file['file_name'],
-                    'type' => 'file'
+                    'name' => $file['nom_xp'],
+                    'type' => 'file',
+                    'exp'  => 'oui'
                 ];
             }
         }
@@ -452,7 +458,7 @@ class UploadModel {
 
             foreach ($subFolders as $subFolder) {
                 error_log("Suppression récursive pour le sous-dossier : " . $subFolder['id_dossier']);
-                $this->deleteFolderByName($subFolder['id_dossier'], $userId);
+                $this->deleteFolderByName($subFolder['id_dossier'], $userId, $project);
             }
 
             // Étape 3 : Supprimer le dossier lui-même

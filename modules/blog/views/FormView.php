@@ -4,6 +4,12 @@ namespace blog\views;
 
 class FormView
 {
+    private $folderHistory;
+
+    public function __construct($files){
+        $this->folderHistory = new HistoriqueView($files);
+    }
+
     public function renderButtons(): void {
         ?>
         <h2>Uploader des fichiers</h2>
@@ -13,7 +19,6 @@ class FormView
     }
 
     public function renderForm(string $type): void {
-        $folderHistory = HistoriqueView::getInstance([]);
 
         if ($type === 'vector') {
             ?>
@@ -29,7 +34,7 @@ class FormView
                 <?php if (isset($_SESSION['suid'])): ?>
                     <label for="dossier_parent">Sélectionnez un dossier :</label>
                     <select class="folder-selector" id="dossier_parent" name="dossier_parent">
-                        <?php $folderHistory->generateFolderOptions($folderHistory->getFiles()); ?>
+                        <?php $this->folderHistory->generateFolderOptions($this->folderHistory->getFiles()); ?>
                     </select>
                 <?php endif; ?>
                 <input type="submit" value="Télécharger">
@@ -49,7 +54,7 @@ class FormView
                 <?php if (isset($_SESSION['suid'])): ?>
                     <label for="dossier_parent">Sélectionnez un dossier :</label>
                     <select class="folder-selector" id="dossier_parent" name="dossier_parent">
-                        <?php $folderHistory->generateFolderOptions($folderHistory->getFiles()); ?>
+                        <?php $this->folderHistory->generateFolderOptions($this->folderHistory->getFiles()); ?>
                     </select>
                 <?php endif; ?>
                 <input type="submit" value="Télécharger">
