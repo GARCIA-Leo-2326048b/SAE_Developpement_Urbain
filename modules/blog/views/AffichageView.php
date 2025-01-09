@@ -36,16 +36,48 @@ class AffichageView
                 <button onclick="supprimerCouche()">Supprimer la couche sélectionnée</button>
             </div>
 
+            <!-- Bouton pour uploader un fichier GeoTIFF -->
+            <div>
+                <h4>Uploader un fichier GeoTIFF :</h4>
+                <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
+            </div>
         </div>
 
-
         <script>
-            let roadData = <?php echo $road ?: 'null'; ?>; // Convertit $road en JSON directement
-            let houseData = <?php echo $house ?: 'null'; ?>; // Convertit $house en JSON directement
-
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
-            initializeMap();
-            ajouterGeoJson(houseData);
+            initializeMap(<?php echo $house ?: 'null'; ?>, <?php echo $road ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
+
+            // Gestion de l'upload et affichage du fichier GeoTIFF
+            document.getElementById('uploadGeoTiff').addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    if (tiffLayer) {
+                        map.removeLayer(tiffLayer);
+                    }
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const arrayBuffer = e.target.result;
+                        const georaster = await parseGeoraster(arrayBuffer); // Utilisation de georaster pour lire le fichier
+                        tiffLayer = new GeoRasterLayer({
+                            georaster: georaster,
+                            opacity: 1,
+                            resolution: 64
+                        }).addTo(map);
+                        //recuperer le nom du fichier
+                        const layerName = file.name; // Nom de la couche basé sur le nom du fichier
+                        // Ajouter la couche à overlayMaps avec le nom de la couche
+                        overlayMaps[layerName] = tiffLayer;
+
+                        // Met à jour le contrôle des couches
+                        updateLayerControl();
+
+                        // Met à jour les boutons dynamiquement
+                        updateLayerButtons();
+                    };
+                    reader.readAsArrayBuffer(file);
+                }
+            });
+
         </script>
         <div class="compare-section" >
             <button class="compare-button" onclick="compare()" >Comparer</button>

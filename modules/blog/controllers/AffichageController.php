@@ -23,11 +23,12 @@ class AffichageController
         $this->view = $view;
     }
 
-    public function execute($fileId)
+    public function execute($house = null, $road = null, $tiff = null)
     {
-       $file = $this->model->fetchGeoJson($fileId);
+       $houseData = $this->model->fetchGeoJson($house);
+       $roadData = $this->model->fetchGeoJson($road);
 
-       $this->view->show($file,null,null,null);
+       $this->view->show($houseData,$roadData,null,null);
     }
 
 }

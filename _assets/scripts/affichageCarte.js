@@ -7,7 +7,7 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, tiffUrl = null,idMap = 'map') {
+function initializeMap(house, road, tiffUrl,idMap = 'map') {
     map = L.map('map').setView([0, 0], 16);
 
     // Création des couches de fond de carte
@@ -28,12 +28,18 @@ function initializeMap(house, tiffUrl = null,idMap = 'map') {
     });
 
     // Ajout de la couche satellite par défaut
-    satelliteLayer.addTo(map);
+    streetsLayer.addTo(map);
 
     if (house) {
         houseLayer = L.geoJSON(house, { color: '#e4a0b5', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(map);
         overlayMaps["Maisons"] = houseLayer;
     }
+
+    if (road) {
+        roadLayer = L.geoJSON(road, { color: '#0d61fa', weight: 2, fillColor: '#0d61fa', fillOpacity: 1 }).addTo(map);
+        overlayMaps["Routes"] = roadLayer;
+    }
+
     updateLayerControl();
     updateLayerButtons();
 
