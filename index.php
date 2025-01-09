@@ -16,10 +16,11 @@ try {
             case 'affichage':
 
                 // Récupérer le paramètre 'file_name' depuis l'URL
-                $fileId = filter_input(INPUT_GET, 'file_name'); // Récupérer le nom du fichier
-                if ($fileId) {
+                $house = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
+                $road = filter_input(INPUT_GET, 'road');
+                if ($house || $road) {
                     // Passer le paramètre 'file_name' au contrôleur pour traitement
-                    (new blog\controllers\AffichageController())->execute($fileId);
+                    (new blog\controllers\AffichageController())->execute($house, $road);
                 } else {
                     echo "Aucun fichier sélectionné.";
                 }

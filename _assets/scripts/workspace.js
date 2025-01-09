@@ -209,11 +209,13 @@ $(document).ready(function() {
 });
 let selectedFolderName = null;
 let selectedFiles = [];
+let simulationSelectedFiles = [];
 let currentMode = 'simulation';
 
 const toggleButton = document.getElementById('toggle-create-form');
 const createForm = document.getElementById('create-project-form');
 const cancelButton = document.getElementById('cancel-create-form');
+
 
 toggleButton.addEventListener('click', () => {
     createForm.classList.toggle('hidden');
@@ -320,6 +322,8 @@ function toggleFolder(folderId) {
 
 
 
+
+
 document.getElementById("history").addEventListener("click", function(event) {
     // Vérifie si l'élément cliqué est #history lui-même et non un fichier
     if (event.target === this) {
@@ -366,6 +370,11 @@ function updateFolderOptions() {
 function showPopup(fileName) {
     document.getElementById('popup-file-name').textContent = fileName;
     document.getElementById('popup').style.display = 'block';
+}
+
+function showExperimentPopup(fileName){
+    document.getElementById('popup-file-name').textContent = fileName;
+    document.getElementById('popupExp').style.display = 'block';
 }
 
 function closePopup() {
@@ -543,4 +552,42 @@ function closeForm(formId) {
     if (form) {
         form.style.display = 'none';
     }
+}
+
+function addToSelection() {
+    const fileId = document.getElementById('popup-file-name').textContent;
+    if (!simulationSelectedFiles.includes(fileId)) {
+        simulationSelectedFiles.push(fileId);
+        updateSelectedFilesUI();
+    }
+}
+
+function removeFromSelection() {
+    const fileId = document.getElementById('popup-file-name').textContent;
+    simulationSelectedFiles = simulationSelectedFiles.filter(file => file !== fileId);
+    updateSelectedFilesUI();
+}
+
+function updateSelectedFilesUI() {
+    const list = document.getElementById('selected-files-list');
+    list.innerHTML = '';
+    simulationSelectedFiles.forEach(file => {
+        const listItem = document.createElement('li');
+        listItem.textContent = file;
+        list.appendChild(listItem);
+    });
+
+    // Enable or disable the simulate button
+    const simulateButton = document.getElementById('simulate-button');
+    simulateButton.disabled = simulationSelectedFiles.length === 0;
+}
+
+function simulateSelectedFiles() {
+    // const fileId = document.getElementById('popup-file-name').textContent;
+    house = simulationSelectedFiles[0];
+    road = simulationSelectedFiles[1];
+    // Call the backend or perform actions with the selected files
+    alert('Simulation en cours pour les fichiers : ' + simulationSelectedFiles.join(', '));
+    window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
+
 }
