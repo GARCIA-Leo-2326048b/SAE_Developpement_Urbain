@@ -26,11 +26,8 @@ class GlobalLayout
 
         <header>
             <div class="logo">
-                <!-- Exemple de logo SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#957743" stroke-width="5" fill="#e2eba7"/>
-                    <text x="50%" y="55%" text-anchor="middle" fill="#59481d" font-size="24px" font-family="Arial" dy=".3em">MAS</text>
-                </svg>
+                <!--  logo -->
+                <img class="logo-img" src="_assets/includes/logoMAS.png" alt="Logo MAS">
             </div>
             <h1>Recherche de Développement Urbain</h1>
             <section id="header">

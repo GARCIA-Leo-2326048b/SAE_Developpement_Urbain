@@ -16,7 +16,7 @@ class ComparaisonView
         <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script>
-        <script src="/_assets/scripts/redirect.js"></script>
+        <link rel="stylesheet" href="/_assets/styles/comparaison.css">
 
         <!-- Affichage cartes -->
         <div class="map-container">
