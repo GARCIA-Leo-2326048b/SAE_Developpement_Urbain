@@ -84,9 +84,6 @@ try {
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;
-            case 'save_experimentation':
-                (new blog\controllers\ComparaisonController())->saveExperimentation();
-                break;
             default:
                 (new blog\controllers\HomepageController())->execute();
         }

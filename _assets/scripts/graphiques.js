@@ -220,8 +220,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const geoJsonSimName = geoJsonNamesElement.getAttribute('data-geojson-sim');
     const geoJsonVerName = geoJsonNamesElement.getAttribute('data-geojson-ver');
 
-    // Déplacer l'écouteur ici, dans le DOMContentLoaded
-    document.getElementById('saveBtn').addEventListener('click', () => {
+    const saveBtn = document.getElementById('saveBtn');
+    const modal = document.getElementById('saveModal');
+    const closeBtn = modal.querySelector('.close');
+    const saveForm = document.getElementById('saveForm');
+
+    // Ouvrir la modale
+    saveBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
+
+    // Fermer la modale
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Fermer la modale si on clique en dehors
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Confirmer la sauvegarde
+    saveForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const experimentName = document.getElementById('experimentName').value;
+        const folderName = document.getElementById('folderSelect').value;
+
         const charts = [];
         const chartContainers = document.querySelectorAll('.chart-container');
 
@@ -244,6 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableData = getTableData();
 
         const experimentationData = {
+            name: experimentName,
+            folder: folderName,
             charts: charts,
             geoJsonSimName: geoJsonSimName,
             geoJsonVerName: geoJsonVerName,
@@ -252,8 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Sauvegarder dans la base de données (envoi de données à PHP)
         saveExperimentation(experimentationData);
+
+        // Fermer la modale
+        modal.style.display = 'none';
     });
 });
+
 
 function getTableData() {
     const tableRows = document.querySelectorAll('table tr'); // Sélectionne toutes les lignes de tous les tableaux

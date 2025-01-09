@@ -4,13 +4,14 @@ namespace blog\views;
 
 class MesSimulationView
 {
-    private $historique;
-    private $projects;
 
-    public function __construct($project){
+    private $projects;
+    private $experimentations;
+
+    public function __construct($project,$experimentation){
         $this->projects = $project;
         // Utiliser SingletonModel pour obtenir la connexion à la base de données
-        $this->historique = \blog\views\HistoriqueView::getInstance($project);
+        $this->experimentations = $experimentation;
     }
 
 
@@ -25,9 +26,11 @@ class MesSimulationView
                 <div id="simulation-content" class="tab-content active">
                     <h2>Historique des Simulations</h2>
                     <?php
-                        $this->historique->render();
-                    if ($this->projects == null){
-
+                    if ($this->projects != null) {
+                        $historyId = 'history-' . uniqid();
+                        $historique = new \blog\views\HistoriqueView($this->projects);
+                        $historique->render($historyId);
+                    }else{
                     ?>
                     <!-- Contenu de l'historique des simulations -->
                     <p>Aucune simulation enregistrée pour l'instant.</p>
@@ -45,30 +48,32 @@ class MesSimulationView
                     <!-- Contenu de l'historique -->
                     <div id="folder-history">
                         <?php
-                        $folderHistory = HistoriqueView::getInstance([]); // Initialise l'historique
-                        $folderHistory->render(); // Affiche l'arborescence des dossiers
+                        $historyId = 'history-' . uniqid();
+                        $exp = new \blog\views\HistoriqueView($this->experimentations);
+                        $exp->render($historyId);
                         ?>
                     </div>
 
-                    <!-- Formulaire pour Créer un Dossier (masqué par défaut) -->
-                    <form id="createFolderForm" method="POST" style="display: none; margin-top: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
-                        <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; font-size: 1.5em; cursor: pointer;">&times;</button>
+                    <div id="popupExp" class="popup" style="display: none;">
+                        <div class="popup-content">
+                            <h2 id="popup-file-name">File</h2>
+                            <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire pour Créer un Dossier -->
+                    <form id="createFolderFormExp" method="POST" style="display: none; position: relative;">
+                        <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">&times;</button>
                         <h3>Créer un Dossier</h3>
-
-                        <!-- Nom du dossier -->
                         <label for="dossier_name">Nom du dossier :</label>
-                        <input type="text" id="dossier_name" name="dossier_name" required style="margin-bottom: 10px;">
-                        <br>
-
-                        <!-- Dossier parent -->
+                        <input type="text" id="dossier_name" name="dossier_name" required>
+                        <br><br>
                         <label for="dossier_parent1">Sélectionnez le dossier parent :</label>
-                        <select class="folder-selector" id="dossier_parent1" name="dossier_parent" style="margin-bottom: 10px;">
-                            <?php $folderHistory->generateFolderOptions($folderHistory->getFiles()); ?>
+                        <select class="folder-selector" id="dossier_parent1" name="dossier_parent">
+                            <?php $exp->generateFolderOptions($this->projects); ?>
                         </select>
-                        <br>
-
-                        <!-- Bouton de création -->
-                        <button type="button" id="createFolderButton" style="background-color: #28a745; color: white; padding: 5px 10px; border: none; cursor: pointer;">Créer</button>
+                        <br><br>
+                        <button type="button" id="createFolderButton" class="buttons">Créer</button>
                     </form>
                 </div>
 

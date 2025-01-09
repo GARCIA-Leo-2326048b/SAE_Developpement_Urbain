@@ -11,7 +11,7 @@ class GlobalLayout
         $this->title = $title;
         $this->content = $content;
     }
-    function show() {?>
+    public function show() {?>
         <!-- views/layout.php -->
         <!DOCTYPE html>
         <html lang="fr">
@@ -26,12 +26,26 @@ class GlobalLayout
 
         <header>
             <div class="logo">
-                <!-- Exemple de logo SVG -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="40" stroke="#957743" stroke-width="5" fill="#e2eba7"/>
-                    <text x="50%" y="55%" text-anchor="middle" fill="#59481d" font-size="24px" font-family="Arial" dy=".3em">MAS</text>
+                <!-- Logo SVG amélioré -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+                    <!-- Cercle extérieur -->
+                    <circle cx="60" cy="60" r="50" stroke="#59481d" stroke-width="5" fill="none"/>
+
+                    <!-- Cercle intérieur -->
+                    <circle cx="60" cy="60" r="45" fill="#957743"/>
+
+                    <!-- Texte principal -->
+                    <text x="50%" y="52%" text-anchor="middle" fill="#2D3748" font-size="22px" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" dy=".3em">
+                        MAS
+                    </text>
+
+                    <!-- Slogan ou sous-texte -->
+                    <text x="50%" y="66%" text-anchor="middle" fill="#A0AEC0" font-size="12px" font-family="Segoe UI, Arial, sans-serif">
+                        Solutions
+                    </text>
                 </svg>
             </div>
+
             <h1>Recherche de Développement Urbain</h1>
             <section id="header">
                 <a href="?action=accueil">Accueil</a> <a href="?action=affichage">Affichage</a><a href="?action=compare">Comparer</a>
@@ -58,3 +72,4 @@ class GlobalLayout
 
 }
 ?>
+
