@@ -14,10 +14,6 @@ class PreparationSimulation
 
     public function show(): void {
         ob_start(); ?>
-        <div id="mode-switch">
-            <button class="buttons" onclick="switchMode('simulation')">Mode Simulation</button>
-            <button class="buttons" onclick="switchMode('comparaison')">Mode Comparaison</button>
-        </div>
         <div class="container-content">
         <div class="main-content">
             <!-- Barre de défilement pour l'historique -->
