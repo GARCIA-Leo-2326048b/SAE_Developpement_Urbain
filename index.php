@@ -79,8 +79,14 @@ try {
             case 'reloading':
                 (new blog\controllers\Upload())->getArbre();
                 break;
+            case 'reloadingExp':
+                (new blog\controllers\Upload())->getArbreExp();
+                break;
             case 'get_all_folders':
                 (new blog\controllers\Upload())->selectFolder();
+                break;
+            case 'deletFileExp':
+                (new blog\controllers\ComparaisonController())->deleteExp();
                 break;
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();

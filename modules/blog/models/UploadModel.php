@@ -308,13 +308,17 @@ class UploadModel {
         foreach ($files as $file) {
             $dossierId = $file['dossier_id'] ?? null;
             if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
-                $folderIndex[$dossierId]['files'][] = $file['nom_xp'];
+                // Ajouter le fichier dans le dossier avec la propriété "exp"
+                $folderIndex[$dossierId]['files'][] = [
+                    'name' => $file['nom_xp'],
+                    'exp' => 'oui'
+                ];
             } else {
                 // Ajouter les fichiers sans dossier directement dans l'arborescence
                 $folderTree[] = [
                     'name' => $file['nom_xp'],
                     'type' => 'file',
-                    'exp'  => 'oui'
+                    'exp' => 'oui'
                 ];
             }
         }
@@ -343,11 +347,11 @@ class UploadModel {
     public function getFolderHierarchy($project, $userId) {
         // Récupérer les dossiers
         $queryFolders = "
-        SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
-        FROM organisation 
-        WHERE id_utilisateur = :userId
-        and projet = :project
-        ORDER BY dossierParent, id_dossier";
+    SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
+    FROM organisation 
+    WHERE id_utilisateur = :userId
+    AND projet = :project
+    ORDER BY dossierParent, id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
         $stmtFolders->bindParam(':userId', $userId);
         $stmtFolders->bindParam(':project', $project);
@@ -359,7 +363,7 @@ class UploadModel {
     SELECT f.file_name, f.dossier as dossier_id
     FROM uploadGJ f
     WHERE user = :userId
-    and projet = :project";
+    AND projet = :project";
         $stmtFiles = $this->db->prepare($queryFiles);
         $stmtFiles->bindParam(':userId', $userId);
         $stmtFiles->bindParam(':project', $project);
@@ -369,7 +373,6 @@ class UploadModel {
         // Construire la hiérarchie
         $folderTree = [];
         $folderIndex = [];
-
 
         // Ajouter les dossiers au tableau d'index
         foreach ($folders as $folder) {
@@ -384,30 +387,33 @@ class UploadModel {
         // Ajouter les fichiers dans les dossiers correspondants
         foreach ($files as $file) {
             $dossierId = $file['dossier_id'] ?? null;
+
             if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
-                $folderIndex[$dossierId]['files'][] = $file['file_name'];
+                // Ajouter le fichier dans le dossier avec sa propriété "exp"
+                $folderIndex[$dossierId]['files'][] = [
+                    'name' => $file['file_name'],
+                    'exp' =>  'non'
+                ];
             } else {
                 // Ajouter les fichiers sans dossier directement dans l'arborescence
-
                 $folderTree[] = [
                     'name' => $file['file_name'],
-                    'type' => 'file'
+                    'type' => 'file',
+                    'exp' =>  'non'
                 ];
             }
         }
 
-
-
-        foreach ($folderIndex as $folderId => &$f){
-            if(isset($f['parent_id']) and !($f['parent_id'] === 'root')){
-                $folderIndex[$f['parent_id']]['children'][] = &$f;
+        // Ajouter les dossiers enfants dans leurs dossiers parents
+        foreach ($folderIndex as $folderId => &$folder) {
+            if (isset($folder['parent_id']) && $folder['parent_id'] !== 'root') {
+                $folderIndex[$folder['parent_id']]['children'][] = &$folder;
             }
         }
 
-        // Construire l'arborescence hiérarchique
+        // Ajouter les dossiers racines à l'arborescence principale
         foreach ($folderIndex as $folderId => &$folder) {
             if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
-                // Ajouter à la racine
                 $folderTree[] = &$folder;
             } else {
                 error_log("Parent ID introuvable pour : " . $folder['name']);

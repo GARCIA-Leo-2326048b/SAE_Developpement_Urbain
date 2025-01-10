@@ -226,6 +226,14 @@ class Upload
         return $folderHistory->render($historyId);
     }
 
+    public function getArbreExp()
+    {
+        $files = $this->uploadModel->getExperimentation($this->currentUserId,$_SESSION['current_project_id']);
+        $folderHistory = new \blog\views\HistoriqueView($files);
+        $historyId = 'history-' . uniqid();
+        return $folderHistory->render($historyId);
+    }
+
     public function selectFolder()
     {
         header($this->header);

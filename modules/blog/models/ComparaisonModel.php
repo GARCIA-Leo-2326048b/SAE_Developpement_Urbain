@@ -2,6 +2,7 @@
 
 namespace blog\models;
 use geoPHP;
+use PDO;
 use proj4php\Point;
 use proj4php\Proj;
 use proj4php\Proj4php;
@@ -43,6 +44,23 @@ class ComparaisonModel
             error_log('Erreur lors de la sauvegarde : ' . print_r($stmt->errorInfo(), true));
             return false;
         }
+    }
+
+    public function deleteFileExp($filename,$project)
+    {
+        $userId = $_SESSION['user_id'];
+
+        // Préparer la requête SQL pour supprimer une expérimentation spécifique
+        $sql = "DELETE FROM experimentation WHERE nom_xp = :filename AND id_utilisateur = :user_id AND projet = :project";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':filename', $filename);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':project', $project);
+
+        $u = $stmt->execute();
+        $affectedRows = $stmt->rowCount();
+        error_log('Lignes affectées : ' . $affectedRows);
+        return $u;
     }
 
 

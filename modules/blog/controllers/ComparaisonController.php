@@ -36,8 +36,8 @@ class ComparaisonController{
 
         // Récupérer le nom, le dossier, et le projet depuis la requête AJAX
         $name = $data['name'] ?? 'Nom par défaut';
-        $dossier = $data['dossier'] ?? 'Dossier par défaut';
-        $project = $data['project'] ?? 'Projet par défaut';
+        $dossier = $data['folder'] ?? 'root';
+        $project = $_SESSION['current_project_id'];
 
         // Appeler la méthode `saveExperimentation` du modèle
         try {
@@ -47,6 +47,17 @@ class ComparaisonController{
         } catch (Exception $e) {
             error_log('Erreur lors de la sauvegarde : ' . $e->getMessage());
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteExp()
+    {
+        $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
+
+        if ($this->comparaisonModel->deleteFileExp($fileName,$_SESSION['current_project_id'])) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
         }
     }
 

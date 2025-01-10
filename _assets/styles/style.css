@@ -940,4 +940,9 @@ form h4 {
     transform: scale(1.1); /* Agrandissement au survol */
     background-color: #0056b3; /* Couleur légèrement plus sombre */
 }
+/* Style pour l'image du logo */
+.logo-img {
+    width: 10em;
+    height: auto;
+}
 
