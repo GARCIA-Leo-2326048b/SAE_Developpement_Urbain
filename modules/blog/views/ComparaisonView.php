@@ -21,6 +21,7 @@ class ComparaisonView
         <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script>
+        <script src="/_assets/scripts/comparaisonCarte.js"></script>
         <link rel="stylesheet" href="/_assets/styles/comparaison.css">
 
         <!-- Affichage cartes -->
@@ -32,6 +33,9 @@ class ComparaisonView
 
         <!-- Div modale pour la carte Simulation -->
         <div id="mapModalSimulation" class="modal" style="display: none;">
+            <?php
+            $this->mapControls('mapSimulation');
+            ?>
             <div class="modal-content">
                 <span class="close" id="closeSimulation">&times;</span>
                 <div id="mapSimulation" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
@@ -40,6 +44,9 @@ class ComparaisonView
 
         <!-- Div modale pour la carte Vérité terrain -->
         <div id="mapModalVerite" class="modal" style="display: none;">
+            <?php
+            $this->mapControls('mapVerite');
+            ?>
             <div class="modal-content">
                 <span class="close" id="closeVerite">&times;</span>
                 <div id="mapVerite" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
@@ -47,70 +54,10 @@ class ComparaisonView
         </div>
 
         <script>
-            // Fonction pour masquer les cartes en arrière-plan
-            function toggleBackgroundMaps(hide) {
-                const mapContainer = document.querySelector('.map-container');
-                if (mapContainer) {
-                    if (hide) {
-                        mapContainer.classList.add('hidden');
-                    } else {
-                        mapContainer.classList.remove('hidden');
-                    }
-                }
-            }
-
-            // Fonction pour initialiser la carte
-            function initializeModalMap(geoJsonHouse, geoJsonRoad, mapId) {
-                if (!window[mapId + 'Initialized']) {
-                    initializeMap(geoJsonHouse, geoJsonRoad, null, mapId);
-                    window[mapId + 'Initialized'] = true; // Marque la carte comme initialisée
-                }
-            }
-
-            // Gestionnaire pour afficher la modale de la carte Simulation
-            document.getElementById('showMapSimulation').addEventListener('click', function () {
-                const modal = document.getElementById('mapModalSimulation');
-                modal.style.display = 'block'; // Affiche la modale
-                toggleBackgroundMaps(true); // Masque les cartes en arrière-plan
-                initializeModalMap(<?php echo $geoJsonHouseSim; ?>, <?php echo $geoJsonRoadSim; ?>, 'mapSimulation');
-            });
-
-            // Gestionnaire pour afficher la modale de la carte Vérité terrain
-            document.getElementById('showMapVerite').addEventListener('click', function () {
-                const modal = document.getElementById('mapModalVerite');
-                modal.style.display = 'block'; // Affiche la modale
-                toggleBackgroundMaps(true); // Masque les cartes en arrière-plan
-                initializeModalMap(<?php echo $geoJsonHouseVer; ?>, <?php echo $geoJsonRoadVer; ?>, 'mapVerite');
-            });
-
-            // Gestionnaire pour fermer la modale de la carte Simulation
-            document.getElementById('closeSimulation').addEventListener('click', function () {
-                const modal = document.getElementById('mapModalSimulation');
-                modal.style.display = 'none'; // Masque la modale
-                toggleBackgroundMaps(false); // Affiche à nouveau les cartes en arrière-plan
-            });
-
-            // Gestionnaire pour fermer la modale de la carte Vérité terrain
-            document.getElementById('closeVerite').addEventListener('click', function () {
-                const modal = document.getElementById('mapModalVerite');
-                modal.style.display = 'none'; // Masque la modale
-                toggleBackgroundMaps(false); // Affiche à nouveau les cartes en arrière-plan
-            });
-
-            // Fermer la modale si on clique en dehors de son contenu
-            window.addEventListener('click', function (event) {
-                const modalSimulation = document.getElementById('mapModalSimulation');
-                const modalVerite = document.getElementById('mapModalVerite');
-                if (event.target === modalSimulation) {
-                    modalSimulation.style.display = 'none'; // Masque la modale
-                    toggleBackgroundMaps(false); // Affiche à nouveau les cartes en arrière-plan
-                }
-                if (event.target === modalVerite) {
-                    modalVerite.style.display = 'none'; // Masque la modale
-                    toggleBackgroundMaps(false); // Affiche à nouveau les cartes en arrière-plan
-                }
-            });
-
+            window.geoJsonHouseSim = <?php echo $geoJsonHouseSim; ?>;
+            window.geoJsonRoadSim = <?php echo $geoJsonRoadSim; ?>;
+            window.geoJsonHouseVer = <?php echo $geoJsonHouseVer; ?>;
+            window.geoJsonRoadVer = <?php echo $geoJsonRoadVer; ?>;
         </script>
 
 
@@ -119,14 +66,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonHouseSim ?>, <?php echo $geoJsonRoadSim ?>, null, 'mapSim');
+                    const mapSim = new MapManager(<?php echo $geoJsonHouseSim ?>, <?php echo $geoJsonRoadSim ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonHouseVer ?>, <?php echo $geoJsonRoadVer ?>, null, 'mapVer');
+                    const mapVer = new MapManager(<?php echo $geoJsonHouseVer ?>, <?php echo $geoJsonRoadVer ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -270,4 +217,36 @@ class ComparaisonView
             <td>{$errorValue}</td>
           </tr>";
     }
+
+    private function mapControls($mapId){?>
+
+        <div id="controls">
+            <h3>Contrôles de la carte</h3>
+
+            <!-- Sélectionner la couche de fond -->
+            <div>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToSatellite()">Satellite</button>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToStreets()">Streets</button>
+            </div>
+
+            <!-- Sélectionner la couche -->
+            <div id="layerButtons<?php echo $mapId ?>"></div>
+
+            <!-- Contrôle de l'opacité -->
+            <h4>Opacité :</h4>
+            <input type="range" id="opacitySlider<?php echo $mapId ?>" min="0" max="1" step="0.1" value="1" onchange="mapManagers['<?php echo $mapId ?>'].updateLayerOpacity()">
+
+            <div>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].supprimerCouche()">Supprimer la couche sélectionnée</button>
+            </div>
+
+            <!-- Bouton pour uploader un fichier GeoTIFF -->
+            <div>
+                <h4>Uploader un fichier GeoTIFF :</h4>
+                <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
+            </div>
+        </div>
+
+    <?php }
+
 }
