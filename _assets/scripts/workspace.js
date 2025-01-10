@@ -209,7 +209,7 @@ $(document).ready(function() {
 });
 let selectedFolderName = null;
 let selectedFiles = [];
-let simulationSelectedFiles = [];
+let selectionFiles = [];
 let currentMode = 'simulation';
 
 const toggleButton = document.getElementById('toggle-create-form');
@@ -556,23 +556,34 @@ function closeForm(formId) {
 
 function addToSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
-    if (!simulationSelectedFiles.includes(fileId)) {
-        simulationSelectedFiles.push(fileId);
-        updateSelectedFilesUI();
+    if (!selectionFiles.includes(fileId)) {
+        selectionFiles.push(fileId);
+        if (window.location.href === 'https://developpement-urbain.alwaysdata.net/index.php?action=new_simulation') {
+            updateSimulationSelectedFilesUI();
+            console.log('erreurrrrr');
+        }
+        else {
+            updateComparisonSelectedFilesUI();
+            console.log('ca marche')
+        }
         closePopup();
     }
+
 }
 
 function removeFromSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
-    simulationSelectedFiles = simulationSelectedFiles.filter(file => file !== fileId);
-    updateSelectedFilesUI();
+    selectionFiles = selectionFiles.filter(file => file !== fileId);
+    if (window.location.href === 'index.php?action=new_simulation') {
+        updateSimulationSelectedFilesUI();
+    }
+    else { updateComparisonSelectedFilesUI();}
 }
 
-function updateSelectedFilesUI() {
+function updateSimulationSelectedFilesUI() {
     const list = document.getElementById('selected-files-list');
     list.innerHTML = '';
-    simulationSelectedFiles.forEach(file => {
+    selectionFiles.forEach(file => {
         const listItem = document.createElement('li');
         listItem.textContent = file;
         list.appendChild(listItem);
@@ -580,14 +591,35 @@ function updateSelectedFilesUI() {
 
     // Enable or disable the simulate button
     const simulateButton = document.getElementById('simulate-button');
-    simulateButton.disabled = simulationSelectedFiles.length === 0;
+    simulateButton.disabled = selectionFiles.length === 0;
+}
+
+function updateComparisonSelectedFilesUI() {
+    const list = document.getElementById('selected-files-list');
+    list.innerHTML = '';
+    selectionFiles.forEach(file => {
+        const listItem = document.createElement('li');
+        listItem.textContent = file;
+        list.appendChild(listItem);
+    });
+
+    // Enable or disable the simulate button
+    const compareButton = document.getElementById('compare-button');
+    compareButton.disabled = selectionFiles.length === 0;
 }
 
 function simulateSelectedFiles() {
     // const fileId = document.getElementById('popup-file-name').textContent;
-    house = simulationSelectedFiles[0];
-    road = simulationSelectedFiles[1];
+    house = selectionFiles[0];
+    road = selectionFiles[1];
     // Call the backend or perform actions with the selected files
     window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 
+}
+
+function compareSelectedFiles(){
+    house = selectionFiles[0];
+    road = selectionFiles[1];
+    // Call the backend or perform actions with the selected files
+    window.location.href = 'index.php?action=compare&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 }

@@ -50,16 +50,18 @@ class ComparaisonController{
         }
     }
 
-    public function execute($geoJsonSimName, $geoJsonVerName,$experimentId = null){
+    public function execute($geoJsonHouseSimName, $geoJsonHouseVerName,$geoJsonRoadSimName,$geoJsonRoadVerName,$experimentId = null){
 
 
         // Charger les GeoJSON depuis la base de données
-        $geoJsonSim = $this->GeoJsonModel->fetchGeoJson($geoJsonSimName);
-        $geoJsonVer = $this->GeoJsonModel->fetchGeoJson($geoJsonVerName);
+        $geoJsonHouseSim = $this->GeoJsonModel->fetchGeoJson($geoJsonHouseSimName);
+        $geoJsonHouseVer= $this->GeoJsonModel->fetchGeoJson($geoJsonHouseVerName);
+        $geoJsonRoadSim = $this->GeoJsonModel->fetchGeoJson($geoJsonRoadSimName);
+        $geoJsonRoadVer = $this->GeoJsonModel->fetchGeoJson($geoJsonRoadVerName);
 
         // Projeter les GeoJSON dans le même système de coordonnées
-        $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonSim);
-        $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonVer);
+        $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseSim);
+        $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseVer);
 
         // Calculer les statistiques pour chaque GeoJSON
         $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSimProj));
@@ -93,7 +95,7 @@ class ComparaisonController{
             //$this->view->showComparisonWithExperiment($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName, $experimentData);
         } else {
             // Si aucun ID n'est fourni, juste afficher les résultats
-            $this->view->showComparison($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName);
+            $this->view->showComparison($results,  $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer);
         }
 
     }

@@ -63,7 +63,7 @@ function initializeMap(house = null, road = null, tiffUrl = null,idMap = 'map') 
     }
 
     // Ajuster les limites de la carte si des couches sont présentes
-    if (house || road) {
+    if (house) {
         map.fitBounds(L.featureGroup([houseLayer]).getBounds());
     }
 }
@@ -266,3 +266,5 @@ function ajouterGeoTiff(tiffUrl, layerName) {
         console.error("URL du GeoTIFF manquant.");
     }
 }
+
+

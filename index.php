@@ -26,7 +26,12 @@ try {
                 }
                 break;
             case 'compare':
-                (new blog\controllers\ComparaisonController())->execute('Household_3-2019.geojson','Buildings2019_ABM');
+                $houseSim = $_SESSION['houseSim'] ?? null;
+                $roadSim = $_SESSION['roadSim'] ?? null;
+                $houseVer = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
+                $roadVer = filter_input(INPUT_GET, 'road');
+
+                (new blog\controllers\ComparaisonController())->execute($houseSim,$houseVer,$roadSim,$roadVer);
                 break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
