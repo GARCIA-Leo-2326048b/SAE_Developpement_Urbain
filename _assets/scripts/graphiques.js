@@ -324,3 +324,21 @@ function saveExperimentation(experimentationData) {
         })
         .catch(error => console.error('Erreur:', error));
 }
+
+function recreateCharts(experimentationData) {
+    const { charts, geoJsonSimName, geoJsonVerName, tableData } = experimentationData;
+
+    // Réinsertion des graphiques
+    const chartsContainer = document.getElementById('chartsContainer');
+
+    // Nettoyer les anciens graphiques avant d'ajouter les nouveaux
+    chartsContainer.innerHTML = '';
+
+    charts.forEach(chartData => {
+        // Réutiliser createNewChart pour chaque graphique
+        createNewChart(chartData); // Passer l'objet chartData pour recréer le graphique
+    });
+
+    // Vous pouvez également recréer ou afficher les données du tableau et les fichiers GeoJSON si nécessaire
+    // Ex: afficher `geoJsonSimName`, `geoJsonVerName`, et `tableData`
+}

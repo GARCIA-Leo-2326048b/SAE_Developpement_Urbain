@@ -64,24 +64,58 @@ class ComparaisonModel
     }
 
 
-    public function loadExperimentation($experimentId)
-    {
-        // Récupérer l'expérience depuis la base de données
-        $sql = "SELECT * FROM experimentation WHERE id = :experimentId";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':experimentId', $experimentId);
+    public function getExperimentationById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM experimentations WHERE id = :id");
+        $stmt->bindParam(':id', $id);
         $stmt->execute();
-        $experiment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($experiment) {
-            $chartsData = json_decode($experiment['data'], true);
+        // Si l'expérimentation existe, on la retourne
+        if ($stmt->rowCount() > 0) {
+            $experiment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Retourner les données des graphiques
-            return $chartsData;
+            // Récupérer les charts, les geoJson et les données du tableau
+            $experiment['charts'] = $this->getChartsByExperimentationId($id);
+            $experiment['geoJsonSimName'] = $this->getGeoJsonSimName($id);
+            $experiment['geoJsonVerName'] = $this->getGeoJsonVerName($id);
+            $experiment['tableData'] = $this->getTableDataByExperimentationId($id);
+
+            return $experiment;
         }
+
         return null;
     }
 
+    private function getChartsByExperimentationId($id) {
+        // Exemple pour récupérer les charts depuis la base de données
+        $stmt = $this->db->prepare("SELECT * FROM charts WHERE experimentation_id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function getGeoJsonSimName($id) {
+        // Récupérer le nom du fichier GeoJSON pour la simulation
+        $stmt = $this->db->prepare("SELECT geoJsonSimName FROM experimentations WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    private function getGeoJsonVerName($id) {
+        // Récupérer le nom du fichier GeoJSON pour la vérité terrain
+        $stmt = $this->db->prepare("SELECT geoJsonVerName FROM experimentations WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    private function getTableDataByExperimentationId($id) {
+        // Exemple pour récupérer les données du tableau
+        $stmt = $this->db->prepare("SELECT * FROM table_data WHERE experimentation_id = :id");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     public function getEPSGCode($geoJson)
     {

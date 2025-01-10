@@ -26,24 +26,8 @@ class GlobalLayout
 
         <header>
             <div class="logo">
-                <!-- Logo SVG amélioré -->
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-                    <!-- Cercle extérieur -->
-                    <circle cx="60" cy="60" r="50" stroke="#59481d" stroke-width="5" fill="none"/>
-
-                    <!-- Cercle intérieur -->
-                    <circle cx="60" cy="60" r="45" fill="#957743"/>
-
-                    <!-- Texte principal -->
-                    <text x="50%" y="52%" text-anchor="middle" fill="#2D3748" font-size="22px" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" dy=".3em">
-                        MAS
-                    </text>
-
-                    <!-- Slogan ou sous-texte -->
-                    <text x="50%" y="66%" text-anchor="middle" fill="#A0AEC0" font-size="12px" font-family="Segoe UI, Arial, sans-serif">
-                        Solutions
-                    </text>
-                </svg>
+                <!--  logo -->
+                <img class="logo-img" src="_assets/includes/logoMAS.png" alt="Logo MAS">
             </div>
 
             <h1>Recherche de Développement Urbain</h1>
@@ -72,4 +56,3 @@ class GlobalLayout
 
 }
 ?>
-

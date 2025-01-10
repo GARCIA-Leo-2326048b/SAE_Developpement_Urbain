@@ -21,7 +21,7 @@ class ComparaisonView
         <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script>
-        <script src="/_assets/scripts/redirect.js"></script>
+        <link rel="stylesheet" href="/_assets/styles/comparaison.css">
 
         <!-- Affichage cartes -->
         <div class="map-container">
@@ -40,14 +40,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonSim ?>, '', 'mapSim');
+                    initializeMap(<?php echo $geoJsonSim ?>, null, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonVer ?>, '', 'mapVer');
+                    initializeMap(<?php echo $geoJsonVer ?>, null, null, 'mapVer');
                 </script>
             </div>
         </div>

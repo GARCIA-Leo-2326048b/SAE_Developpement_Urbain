@@ -5,65 +5,20 @@ namespace blog\views;
 class PreparationSimulation
 {
     private $files;
-    private $historiqueView;
-
     public function __construct($files) {
         $this->files = $files;
-        $this->historiqueView = new \blog\views\HistoriqueView($this->files);
     }
 
     public function show(): void {
         ob_start(); ?>
-        <div id="mode-switch">
-            <button class="buttons" onclick="switchMode('simulation')">Mode Simulation</button>
-            <button class="buttons" onclick="switchMode('comparaison')">Mode Comparaison</button>
-        </div>
         <div class="container-content">
         <div class="main-content">
-            <!-- Barre de défilement pour l'historique -->
-            <aside id="history" >
-                <h2>Historique des fichiers</h2>
-                    <?php
-                    $historyId = 'history-' . uniqid();
-                    $this->historiqueView->render($historyId);?>
-            </aside>
+            <?php
+            if(isset($_SESSION['current_project_id'])){
 
-            <section id="import">
-                <?php
-                if(isset($_SESSION['current_project_id'])){
-                $formView = new FormView($this->files);
-                $formView->renderAllForms();
+
+                (new FileSelectorView($this->files))->show();
                 ?>
-
-                <button onclick="createNewFolder()"><i class="fas fa-folder-plus"></i>  Nouveau dossier</button>
-
-
-                <!-- Formulaire pour Créer un Dossier -->
-                <?php
-                $folderHistory =  $this->historiqueView;
-                ?>
-                <form id="createFolderForm" method="POST" style="display: none; position: relative;">
-                    <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">&times;</button>
-                    <h3>Créer un Dossier</h3>
-                    <label for="dossier_name">Nom du dossier :</label>
-                    <input type="text" id="dossier_name" name="dossier_name" required>
-                    <br><br>
-                    <label for="dossier_parent1">Sélectionnez le dossier parent :</label>
-                    <select class="folder-selector" id="dossier_parent1" name="dossier_parent">
-                        <?php $folderHistory->generateFolderOptions($folderHistory->getFiles()); ?>
-                    </select>
-                    <br><br>
-                    <button type="button" id="createFolderButton">Créer</button>
-                </form>
-
-                <!-- Menu contextuel pour la suppression -->
-                <div id="context-menu" class="context-menu" style="display: none;">
-                    <ul>
-                        <li>
-                            <button onclick="deleteFolder()">Supprimer le dossier</button>
-                        </li>
-                    </ul>
-                </div>
 
                 <!-- Zone de sélection des fichiers -->
                 <div id="file-selection">
@@ -83,16 +38,11 @@ class PreparationSimulation
                         <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
                     </div>
                 </div>
-
-                <!-- Bouton Comparer (visible uniquement en mode Comparaison) -->
-                <div class="compare-section" style="display: none;">
-                    <button class="compare-button" onclick="compare()" disabled>Comparer</button>
-                </div>
         </div>
 
         </div>
         <?php
-        }else{?>
+                } else { ?>
             <p>Veuillez Choisir ou crée un projet</p>
         <?php
         }

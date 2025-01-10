@@ -407,7 +407,7 @@ function closePopup(element) {
 function performAction() {
     const fileId = document.getElementById('popup-file-name').textContent;
 
-        window.location.href = 'index.php?action=affichage&file_id=' + encodeURIComponent(fileId);
+        window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(fileId);
 
 }
 
@@ -624,6 +624,7 @@ function addToSelection() {
     if (!simulationSelectedFiles.includes(fileId)) {
         simulationSelectedFiles.push(fileId);
         updateSelectedFilesUI();
+        closePopup();
     }
 }
 
@@ -652,7 +653,6 @@ function simulateSelectedFiles() {
     house = simulationSelectedFiles[0];
     road = simulationSelectedFiles[1];
     // Call the backend or perform actions with the selected files
-    alert('Simulation en cours pour les fichiers : ' + simulationSelectedFiles.join(', '));
     window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 
 }

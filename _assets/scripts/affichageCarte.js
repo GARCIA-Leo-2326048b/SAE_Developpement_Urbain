@@ -7,8 +7,8 @@ let overlayMaps = {}; // Couches superposées
 let layerControl = null; // Référence au contrôle des couches
 let genericLayer = null; // Référence à la couche GeoJSON générique
 
-function initializeMap(house, road, tiffUrl,idMap = 'map') {
-    map = L.map('map').setView([0, 0], 16);
+function initializeMap(house = null, road = null, tiffUrl = null,idMap = 'map') {
+    map = L.map(idMap).setView([0, 0], 16);
 
     // Création des couches de fond de carte
     satelliteLayer = L.tileLayer(`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${key}`, {
@@ -40,8 +40,7 @@ function initializeMap(house, road, tiffUrl,idMap = 'map') {
         overlayMaps["Routes"] = roadLayer;
     }
 
-    updateLayerControl();
-    updateLayerButtons();
+
 
     // Chargement du GeoTIFF uniquement si l'URL est fournie
     // Chargement du GeoTIFF
@@ -64,7 +63,7 @@ function initializeMap(house, road, tiffUrl,idMap = 'map') {
     }
 
     // Ajuster les limites de la carte si des couches sont présentes
-    if (house || road || vegetation) {
+    if (house || road) {
         map.fitBounds(L.featureGroup([houseLayer]).getBounds());
     }
 }
