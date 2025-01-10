@@ -342,3 +342,36 @@ function recreateCharts(experimentationData) {
     // Vous pouvez également recréer ou afficher les données du tableau et les fichiers GeoJSON si nécessaire
     // Ex: afficher `geoJsonSimName`, `geoJsonVerName`, et `tableData`
 }
+
+// Fonction pour reformater les données reçues de PHP
+function reformatDataForComparison(tableData) {
+    // Initialisation des arrays pour les différentes catégories
+    const graphSim = [];
+    const graphVer = [];
+    const errors = [];
+
+    // On parcourt les lignes du tableau en sautant la première ligne (entêtes)
+    for (let i = 1; i < tableData.length; i++) {
+        const row = tableData[i];
+
+        // Si la ligne est valide
+        if (row.length === 4) {
+            const label = row[0];
+            const simValue = parseFloat(row[1]);  // Simulation
+            const verValue = parseFloat(row[2]);  // Vérité terrain
+            const errorValue = parseFloat(row[3]); // Erreur
+
+            // Ajouter les données dans les arrays correspondants
+            graphSim.push({ label: label, y: simValue });
+            graphVer.push({ label: label, y: verValue });
+            errors.push({ label: "Error " + label, y: errorValue });
+        }
+    }
+
+    // Retourner un objet avec les données formatées
+    return {
+        graphSim: graphSim,
+        graphVer: graphVer,
+        errors: errors
+    };
+}

@@ -18,42 +18,46 @@ class HistoriqueView
             if (isset($folder['type']) && $folder['type'] === 'file') {
                 // Vérifier si le fichier est une expérimentation
                 if (isset($folder['exp']) && $folder['exp'] === 'oui') {
-                    // Pop-up pour les fichiers d'expérimentation
-                    echo "<button class='history-file experiment-file' onclick=\"showExperimentPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                    // Pop-up pour les fichiers d'expérimentation avec l'ID
+                    echo "<button class='history-file experiment-file' 
+                      onclick=\"showExperimentPopup('" . htmlspecialchars($folder['name']) . "', '" . htmlspecialchars($folder['id'] ?? '') . "')\">"
                         . htmlspecialchars($folder['name']) . "</button>";
                 } else {
                     // Pop-up classique pour les fichiers
-                    echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                    echo "<button class='history-file' 
+                      onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
                         . htmlspecialchars($folder['name']) . "</button>";
                 }
             } else {
                 // Utilisation de l'ID unique ici pour chaque dossier
                 $folderId = $historyId . '-' . htmlspecialchars($folder['name']);
                 echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
-              oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")'
-              onclick='toggleFolder(\"" . $folderId . "\")'>
-              <i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
+                  oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")'
+                  onclick='toggleFolder(\"" . $folderId . "\")'>
+                  <i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
 
                 if (!empty($folder['files'])) {
-                    // Ajouter le préfixe unique ici pour les fichiers
+                    // Ajouter les fichiers dans une liste
                     echo "<ul id='" . $folderId . "-files' style='display: none;'>";
                     foreach ($folder['files'] as $file) {
                         // Vérifier si le fichier est une expérimentation
                         if (isset($file['exp']) && $file['exp'] === 'oui') {
-                            echo "<li><button class='history-file experiment-file' onclick=\"showExperimentPopup('" . htmlspecialchars($file) . "')\">"
-                                . htmlspecialchars($file) . "</button></li>";
+                            echo "<li><button class='history-file experiment-file' 
+                              onclick=\"showExperimentPopup('" . htmlspecialchars($file['name']) . "', '" . htmlspecialchars($file['id'] ?? '') . "')\">"
+                                . htmlspecialchars($file['name']) . "</button></li>";
                         } else {
-                            echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file) . "')\">"
-                                . htmlspecialchars($file) . "</button></li>";
+                            echo "<li><button class='history-file' 
+                              onclick=\"showPopup('" . htmlspecialchars($file['name']) . "')\">"
+                                . htmlspecialchars($file['name']) . "</button></li>";
                         }
                     }
                     echo $ulCloseTag;
                 }
 
                 if (!empty($folder['children'])) {
-                    // Ajouter le préfixe unique ici pour les enfants
+                    // Afficher les dossiers enfants
                     echo "<ul id='" . $folderId . "-children' style='display: none;'>";
-                    $this->displayFolderTree($folder['children'], $historyId);  // Recurse en passant l'ID unique
+                    $this->displayFolderTree($folder['children'], $historyId);  // Recurse pour afficher les enfants
                     echo $ulCloseTag;
                 }
             }
@@ -63,6 +67,8 @@ class HistoriqueView
     }
 
 
+
+
     public function render($historyId): void {
         // Encapsule le contenu dans un div
         echo "<div id='history-files'>";
@@ -70,7 +76,12 @@ class HistoriqueView
         echo "</div>";
     }
 
-    public function generateFolderOptions($folders, $prefix = ''): void {
+    public function generateFolderOptions($folders, $prefix = ''): void
+    {
+        // Ajouter l'option par défaut "racine" ou "root"
+        echo "<option value='root'>Choisir..</option>";
+
+        // Parcourir les dossiers et générer les options
         foreach ($folders as $folder) {
             if (!isset($folder['type']) || $folder['type'] !== 'file') {
                 echo "<option value='" . htmlspecialchars($folder['name']) . "'>" . $prefix . htmlspecialchars($folder['name']) . "</option>";

@@ -97,7 +97,7 @@ class AffichageView
                     <button class="popup-button" id="actionButton" onclick="addToSelection()">Ajouter à la selection</button>
                     <button class="popup-button" id="actionButton" onclick="removeFromSelection()">Retirer de la selection</button>
                     <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
-                    <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
+                    <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
                 </div>
             </div>
         </div>

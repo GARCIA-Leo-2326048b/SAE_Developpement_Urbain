@@ -211,6 +211,7 @@ let selectedFolderName = null;
 let selectedFiles = [];
 let selectionFiles = [];
 let currentMode = 'simulation';
+let actualpopup = null;
 
 const toggleButton = document.getElementById('toggle-create-form');
 const createForm = document.getElementById('create-project-form');
@@ -321,22 +322,24 @@ function toggleFolder(folderId) {
 }
 
 
-
-
-
-document.getElementById("history").addEventListener("click", function(event) {
-    // Vérifie si l'élément cliqué est #history lui-même et non un fichier
-    if (event.target === this) {
-        createNewFolder();
-    }
-});
-
 function updateHistory() {
     fetch('index.php?action=reloading')
         .then(response => response.text()) // Change to .text() to handle HTML response
         .then(data => {
             console.log(data);
             const historyFiles = document.getElementById('history-files');
+            historyFiles.innerHTML = data; // Update the history with the new HTML
+        })
+        .catch(error => {
+            console.error("Erreur lors de la mise à jour de l'historique :", error);
+        });
+}
+function updateHistoryExp() {
+    fetch('index.php?action=reloadingExp')
+        .then(response => response.text()) // Change to .text() to handle HTML response
+        .then(data => {
+            console.log(data);
+            const historyFiles = document.getElementById('exphistory');
             historyFiles.innerHTML = data; // Update the history with the new HTML
         })
         .catch(error => {
@@ -354,10 +357,10 @@ function updateFolderOptions() {
             const $select = $('#dossier_parent1');
             const $select2 = $('#dossier_parent');
             $select2.empty(); // Vide le contenu actuel du select
-            $select2.append('<option value="root">Racine</option>'); // Ajoute l'option "Racine"
+            $select2.append('<option value="root">Choisir..</option>'); // Ajoute l'option "Racine"
             $select2.append(data); // Insère directement les options reçues du serveur
             $select.empty(); // Vide le contenu actuel du select
-            $select.append('<option value="root">Racine</option>'); // Ajoute l'option "Racine"
+            $select.append('<option value="root">Choisir..</option>'); // Ajoute l'option "Racine"
             $select.append(data); // Insère directement les options reçues du serveur
 
             console.log($select.html());
@@ -368,16 +371,39 @@ function updateFolderOptions() {
 }
 
 function showPopup(fileName) {
-    document.getElementById('popup-file-name').textContent = fileName;
-    document.getElementById('popup').style.display = 'block';
+    const popup1 = document.getElementById('popup');
+    const popupFileName1 = document.getElementById('popup-file-name');
+    const popup2 = document.getElementById('popup2');
+    const popupFileName2 = document.getElementById('popup-file-nameS');
+
+    if (popup1 && popupFileName1) { // Vérifie si le premier popup et son élément de texte existent
+        popupFileName1.textContent = fileName;
+        popup1.style.display = 'block';
+    } else if (popup2 && popupFileName2) { // Sinon, vérifie si le second popup et son élément de texte existent
+        popupFileName2.textContent = fileName;
+        popup2.style.display = 'block';
+    } else {
+        console.error('Aucun popup disponible pour afficher : ' + fileName);
+    }
 }
 
-function showExperimentPopup(fileName){
-    document.getElementById('popup-file-name').textContent = fileName;
+function showExperimentPopup(fileName,id){
+    document.getElementById('popup-file-nameExp').textContent = fileName;
+    document.getElementById('experimentId').value = id;
     document.getElementById('popupExp').style.display = 'block';
 }
 
-function closePopup() {
+function closePopup(element) {
+    // Remonter jusqu'au parent avec la classe 'popup'
+    const popup = element.closest('.popup');
+    actualpopup = element;
+    if (popup) {
+        popup.style.display = 'none';
+    } else {
+        console.error('Aucun élément parent avec la classe "popup" trouvé.');
+    }
+}
+function closePopupS(){
     document.getElementById('popup').style.display = 'none';
 }
 
@@ -441,7 +467,49 @@ function deleteFile() {
                 });
         }
     });
-    closePopup();
+}
+function deleteFileExp() {
+    const fileName = document.getElementById('popup-file-nameExp').textContent;
+    console.log(fileName);
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`index.php?action=deletFileExp&fileName=${fileName}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({fileName: fileName})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Your file has been deleted.",
+                            icon: "success"
+                        });
+                        updateHistoryExp();
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Erreur lors de la suppression de " + fileName,
+                            footer: '<a href="#">Why do I have this issue?</a>'
+                        });
+
+                    }
+                });
+        }
+    });
+    closePopup(actualpopup);
 }
 
 
@@ -616,6 +684,30 @@ function simulateSelectedFiles() {
     window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 
 }
+
+//reload
+function reloadExp() {
+    // Récupérer l'élément et vérifier qu'il existe
+    const experimentElement = document.getElementById('experimentId');
+    if (!experimentElement) {
+        console.error("L'élément 'experimentId' est introuvable dans le DOM.");
+        return;
+    }
+
+    // Récupérer la valeur de l'ID
+    const experimentId = experimentElement.value.trim();
+    if (!experimentId) {
+        console.error("L'ID de l'expérimentation est vide.");
+        alert("Impossible de recharger : l'ID de l'expérimentation est manquant.");
+        return;
+    }
+
+    // Rediriger vers l'URL avec l'ID encodé
+    window.location.href = 'index.php?action=reloadExp&id=' + encodeURIComponent(experimentId);
+
+    console.log("Reloading experiment with ID:", experimentId);
+}
+
 
 function compareSelectedFiles(){
     house = selectionFiles[0];
