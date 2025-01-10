@@ -36,8 +36,8 @@ class ComparaisonController{
 
         // Récupérer le nom, le dossier, et le projet depuis la requête AJAX
         $name = $data['name'] ?? 'Nom par défaut';
-        $dossier = $data['dossier'] ?? 'Dossier par défaut';
-        $project = $data['project'] ?? 'Projet par défaut';
+        $dossier = $data['folder'] ?? 'root';
+        $project = $_SESSION['current_project_id'];
 
         // Appeler la méthode `saveExperimentation` du modèle
         try {
@@ -50,38 +50,22 @@ class ComparaisonController{
         }
     }
 
-    public function execute($geoJsonHouseSimName, $geoJsonHouseVerName ,$geoJsonRoadSimName = null,$geoJsonRoadVerName = null,$experimentId = null){
+    public function deleteExp()
+    {
+        $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
 
-
-        // Charger les GeoJSON depuis la base de données
-        $geoJsonHouseSim = $this->GeoJsonModel->fetchGeoJson($geoJsonHouseSimName);
-        $geoJsonHouseVer= $this->GeoJsonModel->fetchGeoJson($geoJsonHouseVerName);
-        if ($geoJsonHouseSimName && $geoJsonHouseVerName){
-            $geoJsonRoadSim = $this->GeoJsonModel->fetchGeoJson($geoJsonHouseSimName);
-            $geoJsonRoadVer = $this->GeoJsonModel->fetchGeoJson($geoJsonHouseVerName);
+        if ($this->comparaisonModel->deleteFileExp($fileName,$_SESSION['current_project_id'])) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
         }
+    }
 
 
-        // Projeter les GeoJSON dans le même système de coordonnées
-        $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseSim);
-        $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseVer);
+    public function execute($geoJsonSimName, $geoJsonVerName,$experimentId = null){
 
-        // Calculer les statistiques pour chaque GeoJSON
-        $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSimProj));
-        $valuesVer = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonVerProj));
 
-        $areaStatsSim = $this->comparaisonModel->getStat($valuesSim['areas']);
-        $areaStatsVer = $this->comparaisonModel->getStat($valuesVer['areas']);
 
-        // Calculer les Shape Index pour simulation et vérité terrain
-        $shapeIndexesSim = $this->comparaisonModel->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
-        $shapeIndexesVer = $this->comparaisonModel->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
-
-        // Calculer les statistiques pour les Shape Index
-        $shapeIndexStatsSim = $this->comparaisonModel->getStat($shapeIndexesSim);
-        $shapeIndexStatsVer = $this->comparaisonModel->getStat($shapeIndexesVer);
-
-        $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
 
         // PHP : Gestion des redirections après soumission du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['geoJsonName'])) {
@@ -93,12 +77,51 @@ class ComparaisonController{
         }
         if ($experimentId) {
             // Charger l'expérience si un ID est fourni
+            // Charger l'expérience si un ID est fourni
             $experimentData = $this->comparaisonModel->loadExperimentation($experimentId);
-            // Passer l'expérience à la vue si nécessaire
-            //$this->view->showComparisonWithExperiment($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName, $experimentData);
+
+            // Extraire les données du tableau associatif
+            $nomXp = $experimentData['nom_xp'] ?? null;
+            $geoJsonSim = $experimentData['geoJsonSim'] ?? null;
+            $geoJsonVer = $experimentData['geoJsonVer'] ?? null;
+            $geoJsonSimName = $experimentData['geoJsonSimName'] ?? null;
+            $geoJsonVerName = $experimentData['geoJsonVerName'] ?? null;
+            $charts = $experimentData['charts'] ?? null;
+            $tableData = $experimentData['tableData'] ?? null;
+            var_dump($tableData);
+
+            // Reformater les données pour les passer à la vue
+            $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
+
+            // Passer chaque donnée individuellement à la vue
+            $this->view->showComparison($formattedData, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName);
         } else {
+            // Charger les GeoJSON depuis la base de données
+            $geoJsonSim = $this->GeoJsonModel->fetchGeoJson($geoJsonSimName);
+            $geoJsonVer = $this->GeoJsonModel->fetchGeoJson($geoJsonVerName);
+
+            // Projeter les GeoJSON dans le même système de coordonnées
+            $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonSim);
+            $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonVer);
+
+            // Calculer les statistiques pour chaque GeoJSON
+            $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSimProj));
+            $valuesVer = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonVerProj));
+
+            $areaStatsSim = $this->comparaisonModel->getStat($valuesSim['areas']);
+            $areaStatsVer = $this->comparaisonModel->getStat($valuesVer['areas']);
+
+            // Calculer les Shape Index pour simulation et vérité terrain
+            $shapeIndexesSim = $this->comparaisonModel->getShapeIndexStats(['areas' => $valuesSim['areas'], 'perimeters' => $valuesSim['perimeters']]);
+            $shapeIndexesVer = $this->comparaisonModel->getShapeIndexStats(['areas' => $valuesVer['areas'], 'perimeters' => $valuesVer['perimeters']]);
+
+            // Calculer les statistiques pour les Shape Index
+            $shapeIndexStatsSim = $this->comparaisonModel->getStat($shapeIndexesSim);
+            $shapeIndexStatsVer = $this->comparaisonModel->getStat($shapeIndexesVer);
+
+            $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
             // Si aucun ID n'est fourni, juste afficher les résultats
-            $this->view->showComparison($results,  $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim , $geoJsonRoadVer ,$geoJsonRoadSimName,$geoJsonRoadVerName);
+            $this->view->showComparison($results, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName);
         }
 
     }

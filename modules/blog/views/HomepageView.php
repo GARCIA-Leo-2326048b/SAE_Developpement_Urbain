@@ -15,7 +15,6 @@ class HomepageView {
             <div  class="container">
                 <?php
                 if(isset($_SESSION['suid'])) {
-                    var_dump($_SESSION['suid']);
                     ?>
                     <div class="welcome-message">
                         Bienvenue, <?php echo htmlspecialchars($_SESSION['user_id']); ?> !

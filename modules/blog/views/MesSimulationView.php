@@ -42,11 +42,11 @@ class MesSimulationView
                     <h2 style="display: flex; align-items: center; justify-content: space-between;">
                         Historique des Expériences
                         <!-- Bouton pour ajouter un dossier -->
-                        <button onclick="createNewFolder()" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">+</button>
+                        <button onclick="location.href='?action=new_simulation'" style="font-size: 1.2em; padding: 5px 10px; cursor: pointer;">+</button>
                     </h2>
 
                     <!-- Contenu de l'historique -->
-                    <div id="folder-history">
+                    <div id="exphistory">
                         <?php
                         $historyId = 'history-' . uniqid();
                         $exp = new \blog\views\HistoriqueView($this->experimentations);
@@ -54,27 +54,6 @@ class MesSimulationView
                         ?>
                     </div>
 
-                    <div id="popupExp" class="popup" style="display: none;">
-                        <div class="popup-content">
-                            <h2 id="popup-file-name">File</h2>
-                            <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- Formulaire pour Créer un Dossier -->
-                    <form id="createFolderFormExp" method="POST" style="display: none; position: relative;">
-                        <button type="button" onclick="closeCreateFolderForm()" style="position: absolute; top: 5px; right: 5px; background: none; border: none; cursor: pointer;">&times;</button>
-                        <h3>Créer un Dossier</h3>
-                        <label for="dossier_name">Nom du dossier :</label>
-                        <input type="text" id="dossier_name" name="dossier_name" required>
-                        <br><br>
-                        <label for="dossier_parent1">Sélectionnez le dossier parent :</label>
-                        <select class="folder-selector" id="dossier_parent1" name="dossier_parent">
-                            <?php $exp->generateFolderOptions($this->projects); ?>
-                        </select>
-                        <br><br>
-                        <button type="button" id="createFolderButton" class="buttons">Créer</button>
-                    </form>
                 </div>
 
             </div>
@@ -82,16 +61,28 @@ class MesSimulationView
 
 
         <!-- Pop-up pour les actions selon le mode -->
-        <div id="popup" class="popup" style="display: none;">
+        <div id="popup2" class="popup" style="display: none;">
             <div class="popup-content">
-                <h2 id="popup-file-name">File</h2>
-                <button class="popup-button" id="actionButton" onclick="performAction()">Simuler</button>
+                <h2 id="popup-file-nameS">File</h2>
+                <!-- Champ caché pour stocker l'ID de l'expérimentation -->
+                <input type="hidden" id="experimentId" value="">
+                <button class="popup-button" id="actionButton" onclick="performAction()">Afficher</button>
                 <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
-                <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
+                <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
             </div>
         </div>
 
-    <?php (new GlobalLayout('Accueil', ob_get_clean()))->show();
+        <div id="popupExp" class="popup" style="display: none;">
+            <div class="popup-content">
+                <h2 id="popup-file-nameExp">File</h2>
+                <button class="popup-button" id="actionButton" onclick="reloadExp()">Continuer</button>
+                <button class="popup-button" onclick="deleteFileExp()"><i class="fas fa-trash-alt"></i> </button>
+                <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
+            </div>
+        </div>
+
+
+        <?php (new GlobalLayout('Accueil', ob_get_clean()))->show();
     }
 
 }
