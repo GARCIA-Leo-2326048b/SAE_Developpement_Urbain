@@ -591,3 +591,10 @@ function simulateSelectedFiles() {
     window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 
 }
+
+function compareSelectedFiles(){
+    house = simulationSelectedFiles[0];
+    road = simulationSelectedFiles[1];
+    // Call the backend or perform actions with the selected files
+    window.location.href = 'index.php?action=compare&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
+}

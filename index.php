@@ -21,12 +21,19 @@ try {
                 if ($house || $road) {
                     // Passer le paramètre 'file_name' au contrôleur pour traitement
                     (new blog\controllers\AffichageController())->execute($house, $road);
+                    // Stocker les fichiers de simulation en session pour réutilisation
+                    $_SESSION['houseSim'] = $house;
+                    $_SESSION['roadSim'] = $road;
                 } else {
                     echo "Aucun fichier sélectionné.";
                 }
                 break;
             case 'compare':
-                (new blog\controllers\ComparaisonController())->execute('Household_3-2019.geojson','Buildings2019_ABM');
+                $houseSim = $_SESSION['houseSim'] ?? null;
+                $roadSim = $_SESSION['roadSim'] ?? null;
+                $houseVer = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
+                $roadVer = filter_input(INPUT_GET, 'road');
+                (new blog\controllers\ComparaisonController())->execute($houseSim,$roadSim,$houseVer,$roadVer);
                 break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();

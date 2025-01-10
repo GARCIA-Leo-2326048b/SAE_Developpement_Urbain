@@ -9,7 +9,7 @@ class ComparaisonView
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
-    public function showComparison($results, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName): void
+    public function showComparison($results, $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer,$geoJsonRoadSimName,$geoJsonRoadVerName): void
     {
         ob_start();
         ?>
@@ -27,12 +27,12 @@ class ComparaisonView
         <div class="map-container">
             <form method="POST" action="">
                 <!-- Formulaire pour la Carte Simulation -->
-                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonSimName; ?>">
+                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonHouseSimName; ?>">
                 <h4><button type="submit">Carte Simulation</button></h4>
             </form>
             <!-- Formulaire pour la Carte Vérité Terrain -->
             <form method="POST" action="">
-                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonVerName; ?>">
+                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonHouseVerName; ?>">
                 <h4><button type="submit">Carte Vérité Terrain</button></h4>
             </form>
         </div>
@@ -40,14 +40,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonSim ?>, null, null, 'mapSim');
+                    initializeMap(<?php echo $geoJsonHouseSim ?>, <?php echo $geoJsonRoadSim ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonVer ?>, null, null, 'mapVer');
+                    initializeMap(<?php echo $geoJsonHouseVer ?>, <?php echo $geoJsonRoadVer ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -151,8 +151,8 @@ class ComparaisonView
         <div id="chartsContainer"></div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
         <div id="geoJsonNames"
-             data-geojson-sim="<?php echo $geoJsonSimName; ?>"
-             data-geojson-ver="<?php echo $geoJsonVerName; ?>">
+             data-geojson-sim="<?php echo $geoJsonHouseSimName; ?>"
+             data-geojson-ver="<?php echo $geoJsonHouseVerName; ?>">
         </div>
         <button type="submit" id="saveBtn">Sauvegarder</button>
 
