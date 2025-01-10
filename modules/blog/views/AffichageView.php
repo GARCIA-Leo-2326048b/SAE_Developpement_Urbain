@@ -1,9 +1,16 @@
 <?php
 
 namespace blog\views;
-
 class AffichageView
 {
+    private $files;
+
+    private $fileSelectorView;
+    public function __construct($files) {
+        $this->files = $files;
+        $this->fileSelectorView = new FileSelectorView($this->files);
+    }
+
     function show($house = null, $road = null, $vegetation = null, $tiffPath = null): void
     {
         ob_start();
@@ -45,7 +52,9 @@ class AffichageView
 
         <script>
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
-            initializeMap(<?php echo $house ?: 'null'; ?>, <?php echo $road ?: 'null'; ?>, "<?php echo $tiffPath ?: ''; ?>");
+            initializeMap();
+            ajouterGeoJson(<?php echo $house ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
+            ajouterGeoJson(<?php echo $road ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
 
             // Gestion de l'upload et affichage du fichier GeoTIFF
             document.getElementById('uploadGeoTiff').addEventListener('change', async (event) => {
@@ -78,9 +87,45 @@ class AffichageView
                 }
             });
 
+
+            function toggleFileSelector() {
+                const container = document.getElementById('fileSelectorContainer');
+                container.style.display = container.style.display === 'none' ? 'block' : 'none';
+            }
+
+            function closeFileSelector() {
+                document.getElementById('fileSelectorContainer').style.display = 'none';
+            }
+
         </script>
-        <div class="compare-section" >
-            <button class="compare-button" onclick="compare()" >Comparer</button>
+
+        <div class="compare-section">
+            <button class="compare-button" onclick="toggleFileSelector()">Comparer la simulation aux données réelles</button>
+        </div>
+
+        <!-- Conteneur caché pour FileSelectorView -->
+        <div id="fileSelectorContainer" style="display: none; position: fixed; top: 10%; left: 10%; width: 80%; height: 80%; background: #fff; overflow: auto; z-index: 1000;">
+            <button onclick="closeFileSelector()" style="position: absolute; top: 5px; right: 5px;">&times;</button>
+            <?php $this->fileSelectorView->show(); ?>
+
+            <!-- Zone de sélection des fichiers -->
+            <div id="file-selection">
+                <h2>Fichiers sélectionnés</h2>
+                <ul id="selected-files-list"></ul>
+                <button id="simulate-button" onclick="simulateSelectedFiles()" disabled>Comparer au fichier sélectionné</button>
+            </div>
+
+            <!-- Pop-up pour les actions selon le mode -->
+            <div id="popup" class="popup" style="display: none;">
+                <div class="popup-content">
+                    <h2 id="popup-file-name">File</h2>
+                    <button class="popup-button" id="actionButton" onclick="performAction()">Simuler</button>
+                    <button class="popup-button" id="actionButton" onclick="addToSelection()">Ajouter à la selection</button>
+                    <button class="popup-button" id="actionButton" onclick="removeFromSelection()">Retirer de la selection</button>
+                    <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
+                    <button class="popup-close" onclick="closePopup()"><i class="fas fa-window-close"></i></button>
+                </div>
+            </div>
         </div>
 
         <?php

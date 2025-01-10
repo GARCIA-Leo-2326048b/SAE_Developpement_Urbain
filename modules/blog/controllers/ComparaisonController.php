@@ -50,7 +50,7 @@ class ComparaisonController{
         }
     }
 
-    public function compare($geoJsonSimName, $geoJsonVerName,$experimentId = null){
+    public function execute($geoJsonSimName, $geoJsonVerName,$experimentId = null){
 
 
         // Charger les GeoJSON depuis la base de données
@@ -83,7 +83,7 @@ class ComparaisonController{
             $geoJsonName = htmlspecialchars($_POST['geoJsonName']);
 
             // Redirige vers une nouvelle page en utilisant la méthode GET
-            header("Location: https://developpement-urbain.alwaysdata.net/index.php?action=affichage&file_name=$geoJsonName");
+            header("Location: https://developpement-urbain.alwaysdata.net/index.php?action=affichage&house=$geoJsonName");
             exit;
         }
         if ($experimentId) {

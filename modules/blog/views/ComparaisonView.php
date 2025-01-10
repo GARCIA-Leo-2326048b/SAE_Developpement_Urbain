@@ -40,14 +40,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonSim ?>, '', 'mapSim');
+                    initializeMap(<?php echo $geoJsonSim ?>, null, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonVer ?>, '', 'mapVer');
+                    initializeMap(<?php echo $geoJsonVer ?>, null, null, 'mapVer');
                 </script>
             </div>
         </div>
