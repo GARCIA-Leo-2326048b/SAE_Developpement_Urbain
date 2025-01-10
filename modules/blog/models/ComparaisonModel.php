@@ -64,8 +64,8 @@ class ComparaisonModel
     }
 
 
-    public function getExperimentationById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM experimentations WHERE id = :id");
+    public function loadExperimentation($id) {
+        $stmt = $this->db->prepare("SELECT * FROM experimentation WHERE id_xp = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
@@ -75,6 +75,8 @@ class ComparaisonModel
 
             // Récupérer les charts, les geoJson et les données du tableau
             $experiment['charts'] = $this->getChartsByExperimentationId($id);
+            $experiment['geoJsonSim'] = $this->getGeoJsonSim($id);
+            $experiment['geoJsonVer'] = $this->getGeoJsonVer($id);
             $experiment['geoJsonSimName'] = $this->getGeoJsonSimName($id);
             $experiment['geoJsonVerName'] = $this->getGeoJsonVerName($id);
             $experiment['tableData'] = $this->getTableDataByExperimentationId($id);
@@ -85,9 +87,69 @@ class ComparaisonModel
         return null;
     }
 
+    // Fonction pour reformater les données avant de les envoyer à la vue
+    public function reformaterDonnees($tableData) {
+
+        // Décoder la chaîne JSON en tableau PHP
+        $tableDataF = json_decode($tableData[0]['table_data'], true);// true pour obtenir un tableau associatif
+
+// Vérifier si le décodage a fonctionné
+        if (json_last_error() === JSON_ERROR_NONE) {
+            var_dump($tableDataF); // Affiche le tableau décodé pour vérifier la structure
+        } else {
+            echo "Erreur lors du décodage JSON";
+        }
+        // Initialisation des tableaux pour Simulation, Vérité terrain et Erreur
+        $graphSim = [];
+        $graphVer = [];
+        $errors = [];
+
+        // Parcourir les lignes du tableau et reformater les données
+        foreach ($tableDataF as $row) {
+            if (count($row) == 4) {
+                $label = $row[0];  // Le nom de la statistique
+                $simValue = (float)$row[1];  // Simulation
+                $verValue = (float)$row[2];  // Vérité terrain
+                $errorValue = (float)$row[3]; // Erreur
+
+                // Ajouter les données dans les tableaux
+                $graphSim[] = ["label" => $label, "y" => round($simValue, 2)];
+                $graphVer[] = ["label" => $label, "y" => round($verValue, 2)];
+                $errors[] = ["label" => "Error " . $label, "y" => round($errorValue, 2)];
+            }
+        }
+
+        // Retourner les données reformattées sous forme de tableau PHP, sans json_encode
+        return [
+            'graphSim' => $graphSim,
+            'graphVer' => $graphVer,
+            'errors' => $errors
+        ];
+    }
+
+
+
+    private function getGeoJsonSim($id)
+    {
+        // Récupérer les geojson
+        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ,experimentation WHERE id_xp = :id AND file_name = nom_sim");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function getGeoJsonVer($id)
+    {
+        // Récupérer les geojson
+        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ,experimentation WHERE id_xp = :id AND file_name = nom_ver");
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     private function getChartsByExperimentationId($id) {
         // Exemple pour récupérer les charts depuis la base de données
-        $stmt = $this->db->prepare("SELECT * FROM charts WHERE experimentation_id = :id");
+        $stmt = $this->db->prepare("SELECT data_xp FROM experimentation WHERE id_xp = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -95,7 +157,7 @@ class ComparaisonModel
 
     private function getGeoJsonSimName($id) {
         // Récupérer le nom du fichier GeoJSON pour la simulation
-        $stmt = $this->db->prepare("SELECT geoJsonSimName FROM experimentations WHERE id = :id");
+        $stmt = $this->db->prepare("SELECT nom_sim FROM experimentation WHERE id_xp = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetchColumn();
@@ -103,7 +165,7 @@ class ComparaisonModel
 
     private function getGeoJsonVerName($id) {
         // Récupérer le nom du fichier GeoJSON pour la vérité terrain
-        $stmt = $this->db->prepare("SELECT geoJsonVerName FROM experimentations WHERE id = :id");
+        $stmt = $this->db->prepare("SELECT nom_ver FROM experimentation WHERE id_xp = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetchColumn();
@@ -111,7 +173,7 @@ class ComparaisonModel
 
     private function getTableDataByExperimentationId($id) {
         // Exemple pour récupérer les données du tableau
-        $stmt = $this->db->prepare("SELECT * FROM table_data WHERE experimentation_id = :id");
+        $stmt = $this->db->prepare("SELECT table_data FROM experimentation WHERE id_xp = :id");
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -276,10 +338,6 @@ class ComparaisonModel
         $maxMinDistance2 = $this->calculateMaxMinDistance($points2, $points1);
 
         return max($maxMinDistance1, $maxMinDistance2);
-    }
-    public function calculateError($results)
-    {
-
     }
 
     public function grapheDonnees($areaStatsSim, $areaStatsVer, $shapeIndexStatsSim, $shapeIndexStatsVer): array

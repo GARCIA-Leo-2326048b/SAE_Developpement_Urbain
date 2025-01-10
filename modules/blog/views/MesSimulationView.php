@@ -64,6 +64,8 @@ class MesSimulationView
         <div id="popup2" class="popup" style="display: none;">
             <div class="popup-content">
                 <h2 id="popup-file-nameS">File</h2>
+                <!-- Champ caché pour stocker l'ID de l'expérimentation -->
+                <input type="hidden" id="experimentId" value="">
                 <button class="popup-button" id="actionButton" onclick="performAction()">Afficher</button>
                 <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>
                 <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>

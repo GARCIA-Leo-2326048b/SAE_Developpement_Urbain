@@ -18,12 +18,14 @@ class HistoriqueView
             if (isset($folder['type']) && $folder['type'] === 'file') {
                 // Vérifier si le fichier est une expérimentation
                 if (isset($folder['exp']) && $folder['exp'] === 'oui') {
-                    // Pop-up pour les fichiers d'expérimentation
-                    echo "<button class='history-file experiment-file' onclick=\"showExperimentPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                    // Pop-up pour les fichiers d'expérimentation avec l'ID
+                    echo "<button class='history-file experiment-file' 
+                      onclick=\"showExperimentPopup('" . htmlspecialchars($folder['name']) . "', '" . htmlspecialchars($folder['id'] ?? '') . "')\">"
                         . htmlspecialchars($folder['name']) . "</button>";
                 } else {
                     // Pop-up classique pour les fichiers
-                    echo "<button class='history-file' onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
+                    echo "<button class='history-file' 
+                      onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
                         . htmlspecialchars($folder['name']) . "</button>";
                 }
             } else {
@@ -40,10 +42,12 @@ class HistoriqueView
                     foreach ($folder['files'] as $file) {
                         // Vérifier si le fichier est une expérimentation
                         if (isset($file['exp']) && $file['exp'] === 'oui') {
-                            echo "<li><button class='history-file experiment-file' onclick=\"showExperimentPopup('" . htmlspecialchars($file['name']) . "')\">"
+                            echo "<li><button class='history-file experiment-file' 
+                              onclick=\"showExperimentPopup('" . htmlspecialchars($file['name']) . "', '" . htmlspecialchars($file['id'] ?? '') . "')\">"
                                 . htmlspecialchars($file['name']) . "</button></li>";
                         } else {
-                            echo "<li><button class='history-file' onclick=\"showPopup('" . htmlspecialchars($file['name']) . "')\">"
+                            echo "<li><button class='history-file' 
+                              onclick=\"showPopup('" . htmlspecialchars($file['name']) . "')\">"
                                 . htmlspecialchars($file['name']) . "</button></li>";
                         }
                     }
@@ -61,6 +65,7 @@ class HistoriqueView
         }
         echo $ulCloseTag;
     }
+
 
 
 

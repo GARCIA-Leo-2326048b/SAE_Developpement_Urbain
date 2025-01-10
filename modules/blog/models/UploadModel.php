@@ -279,7 +279,7 @@ class UploadModel {
 
         // Récupérer les fichiers
         $queryFiles = "
-    SELECT e.nom_xp, e.dossier as dossier_id
+    SELECT e.id_xp,e.nom_xp, e.dossier as dossier_id
     FROM experimentation e
     WHERE id_utilisateur = :userId
     AND projet = :project";
@@ -310,12 +310,14 @@ class UploadModel {
             if ($dossierId && isset($folderIndex[$dossierId]) && $dossierId !== 'root') {
                 // Ajouter le fichier dans le dossier avec la propriété "exp"
                 $folderIndex[$dossierId]['files'][] = [
+                    'id' => $file['id_xp'],
                     'name' => $file['nom_xp'],
                     'exp' => 'oui'
                 ];
             } else {
                 // Ajouter les fichiers sans dossier directement dans l'arborescence
                 $folderTree[] = [
+                    'id' => $file['id_xp'],
                     'name' => $file['nom_xp'],
                     'type' => 'file',
                     'exp' => 'oui'

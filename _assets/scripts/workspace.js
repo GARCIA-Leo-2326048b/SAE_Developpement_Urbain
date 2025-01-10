@@ -387,9 +387,11 @@ function showPopup(fileName) {
     }
 }
 
-function showExperimentPopup(fileName){
+function showExperimentPopup(fileName,id){
     document.getElementById('popup-file-nameExp').textContent = fileName;
+    document.getElementById('experimentId').value = id;
     document.getElementById('popupExp').style.display = 'block';
+
 }
 
 function closePopup(element) {
@@ -402,7 +404,9 @@ function closePopup(element) {
         console.error('Aucun élément parent avec la classe "popup" trouvé.');
     }
 }
-
+function closePopupS(){
+    document.getElementById('popup').style.display = 'none';
+}
 
 function performAction() {
     const fileId = document.getElementById('popup-file-name').textContent;
@@ -658,7 +662,24 @@ function simulateSelectedFiles() {
 }
 
 //reload
-function reloadExp(){
+function reloadExp() {
+    // Récupérer l'élément et vérifier qu'il existe
+    const experimentElement = document.getElementById('experimentId');
+    if (!experimentElement) {
+        console.error("L'élément 'experimentId' est introuvable dans le DOM.");
+        return;
+    }
 
+    // Récupérer la valeur de l'ID
+    const experimentId = experimentElement.value.trim();
+    if (!experimentId) {
+        console.error("L'ID de l'expérimentation est vide.");
+        alert("Impossible de recharger : l'ID de l'expérimentation est manquant.");
+        return;
+    }
 
+    // Rediriger vers l'URL avec l'ID encodé
+    window.location.href = 'index.php?action=reloadExp&id=' + encodeURIComponent(experimentId);
+
+    console.log("Reloading experiment with ID:", experimentId);
 }
