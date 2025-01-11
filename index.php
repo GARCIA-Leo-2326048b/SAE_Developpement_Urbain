@@ -27,21 +27,14 @@ try {
                     $_SESSION['roadSim'] = $road;
 
                 break;
-
             case 'compare':
-                // Récupérer les fichiers de simulation depuis la session
                 $houseSim = $_SESSION['houseSim'] ?? null;
-               // $roadSim = $_SESSION['roadSim'] ?? null;
+                $roadSim = $_SESSION['roadSim'] ?? null;
+                $houseVer = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
+                $roadVer = filter_input(INPUT_GET, 'road');
 
-                // Récupérer les fichiers de vérité terrain depuis l'URL
-                $houseVer = filter_input(INPUT_GET, 'house'); // Nom du fichier GeoJSON maison (vérité terrain)
-                //$roadVer = filter_input(INPUT_GET, 'road');  // Nom du fichier GeoJSON route (vérité terrain)
-
-                    // Passer les fichiers au contrôleur pour comparaison
-                    (new blog\controllers\ComparaisonController())->execute($houseSim, $houseVer);
-
+                (new blog\controllers\ComparaisonController())->execute($houseSim,$houseVer,$roadSim,$roadVer);
                 break;
-
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;

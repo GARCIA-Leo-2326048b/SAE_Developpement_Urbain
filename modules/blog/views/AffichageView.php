@@ -28,19 +28,19 @@ class AffichageView
 
             <!-- Sélectionner la couche de fond -->
             <div>
-                <button onclick="switchToSatellite()">Satellite</button>
-                <button onclick="switchToStreets()">Streets</button>
+                <button onclick="map.switchToSatellite()">Satellite</button>
+                <button onclick="map.switchToStreets()">Streets</button>
             </div>
 
             <!-- Sélectionner la couche -->
-            <div id="layerButtons"></div>
+            <div id="layerButtonsmap"></div>
 
             <!-- Contrôle de l'opacité -->
             <h4>Opacité :</h4>
-            <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="1" onchange="updateLayerOpacity()">
+            <input type="range" id="opacitySlidermap" min="0" max="1" step="0.1" value="1" onchange="map.updateLayerOpacity()">
 
             <div>
-                <button onclick="supprimerCouche()">Supprimer la couche sélectionnée</button>
+                <button onclick="map.supprimerCouche()">Supprimer la couche sélectionnée</button>
             </div>
 
             <!-- Bouton pour uploader un fichier GeoTIFF -->
@@ -48,45 +48,14 @@ class AffichageView
                 <h4>Uploader un fichier GeoTIFF :</h4>
                 <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
             </div>
+
         </div>
 
         <script>
             // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
-            initializeMap();
-            ajouterGeoJson(<?php echo $house ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
-            ajouterGeoJson(<?php echo $road ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
-
-            // Gestion de l'upload et affichage du fichier GeoTIFF
-            document.getElementById('uploadGeoTiff').addEventListener('change', async (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    if (tiffLayer) {
-                        map.removeLayer(tiffLayer);
-                    }
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const arrayBuffer = e.target.result;
-                        const georaster = await parseGeoraster(arrayBuffer); // Utilisation de georaster pour lire le fichier
-                        tiffLayer = new GeoRasterLayer({
-                            georaster: georaster,
-                            opacity: 1,
-                            resolution: 64
-                        }).addTo(map);
-                        //recuperer le nom du fichier
-                        const layerName = file.name; // Nom de la couche basé sur le nom du fichier
-                        // Ajouter la couche à overlayMaps avec le nom de la couche
-                        overlayMaps[layerName] = tiffLayer;
-
-                        // Met à jour le contrôle des couches
-                        updateLayerControl();
-
-                        // Met à jour les boutons dynamiquement
-                        updateLayerButtons();
-                    };
-                    reader.readAsArrayBuffer(file);
-                }
-            });
-
+            const map = new MapManager(null,null,null,'map');
+            map.addHouseLayer(<?php echo $house ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
+            map.addRoadLayer(<?php echo $road ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
 
             function toggleFileSelector() {
                 const container = document.getElementById('fileSelectorContainer');
@@ -96,6 +65,11 @@ class AffichageView
             function closeFileSelector() {
                 document.getElementById('fileSelectorContainer').style.display = 'none';
             }
+
+
+
+
+
 
         </script>
 

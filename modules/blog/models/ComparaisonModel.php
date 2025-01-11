@@ -16,18 +16,22 @@ class ComparaisonModel
         // Connexion à la base de données via SingletonModel
         $this->db = SingletonModel::getInstance()->getConnection();
     }
-    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer,$name,$dossier,$project)
+    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer, $name, $dossier, $project)
     {
         $userId = $_SESSION['user_id'];
-//        $name = 'Nom de l\'expérience'; // Vous pouvez remplacer ceci par un nom dynamique si nécessaire
 
-        // Convertir les données en JSON pour les stocker dans la base de données
-        $chartsJson = json_encode($data['charts']); // Données des graphiques
-        $tableDataJson = json_encode($data['tableData']); // Données du tableau
+        // Encoder et valider les données JSON
+        try {
+            $chartsJson = json_encode($data['charts'], JSON_THROW_ON_ERROR);
+            $tableDataJson = json_encode($data['tableData'], JSON_THROW_ON_ERROR);
+        } catch (Exception $e) {
+            error_log('Erreur lors de l\'encodage JSON : ' . $e->getMessage());
+            return false;
+        }
 
         // Sauvegarder dans la base de données
-        $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur,dossier,projet) 
-            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id, :dossier,:project)";
+        $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur, dossier, projet) 
+            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id, :dossier, :project)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':user_id', $userId);
         $stmt->bindParam(':name', $name);
