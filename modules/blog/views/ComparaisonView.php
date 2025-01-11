@@ -9,7 +9,7 @@ class ComparaisonView
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
-    public function showComparison($results, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$chart): void
+    public function showComparison($results, $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer): void
     {
         ob_start();
         ?>
@@ -21,33 +21,59 @@ class ComparaisonView
         <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script>
+        <script src="/_assets/scripts/comparaisonCarte.js"></script>
         <link rel="stylesheet" href="/_assets/styles/comparaison.css">
 
         <!-- Affichage cartes -->
-        <div class="map-container">
-            <form method="POST" action="">
-                <!-- Formulaire pour la Carte Simulation -->
-                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonSimName; ?>">
-                <h4><button type="submit">Carte Simulation</button></h4>
-            </form>
-            <!-- Formulaire pour la Carte Vérité Terrain -->
-            <form method="POST" action="">
-                <input type="hidden" name="geoJsonName" value="<?php echo $geoJsonVerName; ?>">
-                <h4><button type="submit">Carte Vérité Terrain</button></h4>
-            </form>
+        <!-- Bouton pour afficher la carte Simulation -->
+        <button id="showMapSimulation">Afficher la carte Simulation</button>
+
+        <!-- Bouton pour afficher la carte Vérité terrain -->
+        <button id="showMapVerite">Afficher la carte Vérité terrain</button>
+
+        <!-- Div modale pour la carte Simulation -->
+        <div id="mapModalSimulation" class="modal" style="display: none;">
+            <?php
+            $this->mapControls('mapSimulation');
+            ?>
+            <div class="modal-content">
+                <span class="close" id="closeSimulation">&times;</span>
+                <div id="mapSimulation" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
+            </div>
         </div>
+
+        <!-- Div modale pour la carte Vérité terrain -->
+        <div id="mapModalVerite" class="modal" style="display: none;">
+            <?php
+            $this->mapControls('mapVerite');
+            ?>
+            <div class="modal-content">
+                <span class="close" id="closeVerite">&times;</span>
+                <div id="mapVerite" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
+            </div>
+        </div>
+
+        <script>
+            window.geoJsonHouseSim = <?php echo $geoJsonHouseSim; ?>;
+            window.geoJsonRoadSim = <?php echo $geoJsonRoadSim; ?>;
+            window.geoJsonHouseVer = <?php echo $geoJsonHouseVer; ?>;
+            window.geoJsonRoadVer = <?php echo $geoJsonRoadVer; ?>;
+        </script>
+
+
+
         <div class="map-container">
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonSim ?>, null, null, 'mapSim');
+                    const mapSim = new MapManager(<?php echo $geoJsonHouseSim ?>, <?php echo $geoJsonRoadSim ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    initializeMap(<?php echo $geoJsonVer ?>, null, null, 'mapVer');
+                    const mapVer = new MapManager(<?php echo $geoJsonHouseVer ?>, <?php echo $geoJsonRoadVer ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -154,8 +180,8 @@ class ComparaisonView
         </div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
         <div id="geoJsonNames"
-             data-geojson-sim="<?php echo $geoJsonSimName; ?>"
-             data-geojson-ver="<?php echo $geoJsonVerName; ?>">
+             data-geojson-sim="<?php echo $geoJsonHouseSimName; ?>"
+             data-geojson-ver="<?php echo $geoJsonHouseVerName; ?>">
         </div>
         <button type="submit" id="saveBtn">Sauvegarder</button>
 
@@ -194,4 +220,36 @@ class ComparaisonView
             <td>{$errorValue}</td>
           </tr>";
     }
+
+    private function mapControls($mapId){?>
+
+        <div id="controls">
+            <h3>Contrôles de la carte</h3>
+
+            <!-- Sélectionner la couche de fond -->
+            <div>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToSatellite()">Satellite</button>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToStreets()">Streets</button>
+            </div>
+
+            <!-- Sélectionner la couche -->
+            <div id="layerButtons<?php echo $mapId ?>"></div>
+
+            <!-- Contrôle de l'opacité -->
+            <h4>Opacité :</h4>
+            <input type="range" id="opacitySlider<?php echo $mapId ?>" min="0" max="1" step="0.1" value="1" onchange="mapManagers['<?php echo $mapId ?>'].updateLayerOpacity()">
+
+            <div>
+                <button onclick="mapManagers['<?php echo $mapId ?>'].supprimerCouche()">Supprimer la couche sélectionnée</button>
+            </div>
+
+            <!-- Bouton pour uploader un fichier GeoTIFF -->
+            <div>
+                <h4>Uploader un fichier GeoTIFF :</h4>
+                <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
+            </div>
+        </div>
+
+    <?php }
+
 }
