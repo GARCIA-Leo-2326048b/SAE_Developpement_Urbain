@@ -9,7 +9,7 @@ class ComparaisonView
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
-    public function showComparison($results, $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer): void
+    public function showComparison($results, $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer,$charts = null): void
     {
         ob_start();
         ?>
@@ -175,7 +175,7 @@ class ComparaisonView
 
         <!-- Conteneur des graphiques -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <div id="chartsData" data-charts='<?php echo json_encode($chart); ?>'></div>
+        <div id="chartsData" data-charts='<?php echo json_encode($charts); ?>'></div>
         <div id="chartsContainer">
         </div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
