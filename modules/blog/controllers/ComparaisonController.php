@@ -88,13 +88,14 @@ class ComparaisonController{
             $geoJsonVerName = $experimentData['geoJsonVerName'] ?? null;
             $charts = $experimentData['charts'] ?? null;
             $tableData = $experimentData['tableData'] ?? null;
-            var_dump($tableData);
+            //var_dump($tableData);
+            var_dump($charts);
 
             // Reformater les données pour les passer à la vue
             $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
 
             // Passer chaque donnée individuellement à la vue
-            $this->view->showComparison($formattedData, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName);
+            $this->view->showComparison($formattedData, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
             $geoJsonSim = $this->GeoJsonModel->fetchGeoJson($geoJsonSimName);

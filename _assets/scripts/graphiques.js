@@ -6,11 +6,113 @@ function initializeChart(labels, dataSim, dataVer) {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter l'écouteur d'événements pour les boutons
     document.getElementById('addChartBtn').addEventListener('click', toggleChartForm);
     document.getElementById('createChart').addEventListener('click', createNewChart);
+
+
 });
 
+function recreateCharts(data_xp) {
+    let experimentationData = JSON.parse(data_xp);
+    console.log(experimentationData); // Vérification des données
+
+    const chartsContainer = document.getElementById('chartsContainer');
+
+    // Créez le conteneur de graphiques s'il n'existe pas
+    if (!chartsContainer) {
+        const newChartsContainer = document.createElement('div');
+        newChartsContainer.id = 'chartsContainer';  // Donnez-lui un ID pour référence future
+        document.body.appendChild(newChartsContainer);  // Ajoutez-le dans le DOM (par exemple dans <body>, ajustez si nécessaire)
+    }
+
+    // Une fois le conteneur disponible, ajoutez les graphiques
+    if (experimentData && experimentationData[0].data) {  // Correction pour accéder aux données correctement
+        experimentationData[0].data.forEach(chart => {
+            const chartContainer = document.createElement('div');
+            chartContainer.classList.add('chart-container');
+
+            // Créer un titre pour le graphique
+            const chartTitle = document.createElement('h3');
+            chartTitle.textContent = chart.name;
+            chartContainer.appendChild(chartTitle);
+
+            // Créer le canvas pour le graphique
+            const canvas = document.createElement('canvas');
+            canvas.id = `chart-${chart.type}-${new Date().getTime()}`; // Assurez-vous que l'ID est unique pour chaque graphique
+            chartContainer.appendChild(canvas);
+
+            // Ajouter le graphique au conteneur de graphiques
+            document.getElementById('chartsContainer').appendChild(chartContainer);
+
+            // Créer le graphique avec Chart.js (ou toute autre librairie que vous utilisez)
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: chart.type,
+                data: chart.data,
+                options: chart.options
+            });
+        });
+    }
+}
+
+// Récupérer les données du formulaire
+function getChartDataFromForm() {
+    const chartName = document.getElementById('chartName').value;
+    const chartType = document.querySelector('input[name="chartType"]:checked').value;
+
+    const selectedOptions = Array.from(document.querySelectorAll('#chartOptions input:checked')).map(opt => opt.id);
+    const normalizeChecked = document.getElementById('normalizeCheckbox').checked;
+    const showSimulation = document.getElementById('showSimulation').checked;
+    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked;
+
+    return {
+        chartName,
+        chartType,
+        selectedOptions,
+        normalizeChecked,
+        showSimulation,
+        showVeriteTerrain,
+    };
+}
+
+// Récupérer les données sauvegardées
+function getChartDataFromSaved(savedData) {
+    return {
+        chartName: savedData.name,
+        chartType: savedData.type,
+        selectedOptions: savedData.selectedOptions,
+        normalizeChecked: savedData.normalizeChecked,
+        showSimulation: savedData.showSimulation,
+        showVeriteTerrain: savedData.showVeriteTerrain,
+    };
+}
+// Créer un graphique générique avec les données reçues
+function createChart(chartData) {
+    const chartsContainer = document.getElementById('chartsContainer');
+    const chartDiv = document.createElement('div');
+    chartDiv.className = 'chart-container';
+    chartDiv.id = 'chart-' + chartData.chartType;
+
+    const chartId = 'canvas-' + Date.now();
+    chartDiv.innerHTML = `
+        <h3>${chartData.chartName}</h3>
+        <canvas id="${chartId}"></canvas>
+        <button class="deleteChartBtn">
+            <img src="./_assets/includes/trash-icon.png" alt="Supprimer" class="trash-icon" />
+        </button>
+    `;
+    chartsContainer.appendChild(chartDiv);
+
+    chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv, null));
+
+    const filteredData = getFilteredData(chartData.selectedOptions);
+    const normalizedData = applyNormalization(filteredData, chartData.normalizeChecked);
+
+    const datasets = createDatasets(normalizedData, chartData.chartType, chartData.showSimulation, chartData.showVeriteTerrain);
+    configureChart(chartDiv, chartData.chartType, normalizedData, datasets);
+}
 
 // Afficher/Masquer le formulaire d'ajout
 function toggleChartForm() {
@@ -20,43 +122,9 @@ function toggleChartForm() {
 
 // Créer un nouveau graphique
 function createNewChart() {
-    const chartName = document.getElementById('chartName').value;
-    chartType = document.querySelector('input[name="chartType"]:checked').value;
-
-    const selectedOptions = Array.from(document.querySelectorAll('#chartOptions input:checked')).map(opt => opt.id);
-    const normalizeChecked = document.getElementById('normalizeCheckbox').checked;
-    const showSimulation = document.getElementById('showSimulation').checked;
-    const showVeriteTerrain = document.getElementById('showVeriteTerrain').checked;
-
-    const chartsContainer = document.getElementById('chartsContainer');
-    const chartDiv = document.createElement('div');
-    chartDiv.className = 'chart-container';
-    chartDiv.id = 'chart-' + chartType;
-    const chartId = 'canvas-' + Date.now();
-    chartDiv.innerHTML = `
-        <h3>${chartName}</h3>
-        <canvas id="${chartId}"></canvas>
-        <button class="deleteChartBtn">
-    <img src="./_assets/includes/trash-icon.png" alt="Supprimer" class="trash-icon" />
-</button>
-    `;
-    chartsContainer.appendChild(chartDiv);
-
-    chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv, null));
-
-    const filteredData = getFilteredData(selectedOptions);
-
-    // Appliquer la normalisation si nécessaire
-    const normalizedData = applyNormalization(filteredData, normalizeChecked);
-
-    // Gérer les datasets
-    const datasets = createDatasets(normalizedData, chartType, showSimulation, showVeriteTerrain);
-
-    // Créer le graphique
-    configureChart(chartDiv, chartType, normalizedData, datasets);
-
-    // Cacher le formulaire
-    document.getElementById('chartFormContainer').style.display = 'none';
+    const chartData = getChartDataFromForm();  // Récupérer les données du formulaire
+    createChart(chartData);  // Créer le graphique avec les données récupérées
+    document.getElementById('chartFormContainer').style.display = 'none';  // Masquer le formulaire
 }
 
 // Filtrer les données en fonction des options sélectionnées
@@ -325,53 +393,7 @@ function saveExperimentation(experimentationData) {
         .catch(error => console.error('Erreur:', error));
 }
 
-function recreateCharts(experimentationData) {
-    const { charts, geoJsonSimName, geoJsonVerName, tableData } = experimentationData;
 
-    // Réinsertion des graphiques
-    const chartsContainer = document.getElementById('chartsContainer');
 
-    // Nettoyer les anciens graphiques avant d'ajouter les nouveaux
-    chartsContainer.innerHTML = '';
 
-    charts.forEach(chartData => {
-        // Réutiliser createNewChart pour chaque graphique
-        createNewChart(chartData); // Passer l'objet chartData pour recréer le graphique
-    });
 
-    // Vous pouvez également recréer ou afficher les données du tableau et les fichiers GeoJSON si nécessaire
-    // Ex: afficher `geoJsonSimName`, `geoJsonVerName`, et `tableData`
-}
-
-// Fonction pour reformater les données reçues de PHP
-function reformatDataForComparison(tableData) {
-    // Initialisation des arrays pour les différentes catégories
-    const graphSim = [];
-    const graphVer = [];
-    const errors = [];
-
-    // On parcourt les lignes du tableau en sautant la première ligne (entêtes)
-    for (let i = 1; i < tableData.length; i++) {
-        const row = tableData[i];
-
-        // Si la ligne est valide
-        if (row.length === 4) {
-            const label = row[0];
-            const simValue = parseFloat(row[1]);  // Simulation
-            const verValue = parseFloat(row[2]);  // Vérité terrain
-            const errorValue = parseFloat(row[3]); // Erreur
-
-            // Ajouter les données dans les arrays correspondants
-            graphSim.push({ label: label, y: simValue });
-            graphVer.push({ label: label, y: verValue });
-            errors.push({ label: "Error " + label, y: errorValue });
-        }
-    }
-
-    // Retourner un objet avec les données formatées
-    return {
-        graphSim: graphSim,
-        graphVer: graphVer,
-        errors: errors
-    };
-}
