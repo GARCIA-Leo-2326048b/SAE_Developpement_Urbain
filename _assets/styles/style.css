@@ -18,15 +18,17 @@ body {
 
 /* Stylisation du header */
 header {
+    /* Appliquez cette règle pour garantir que le header est toujours visible */
+        position: sticky;
+        top: 0;
+        width: 100%;
+        z-index: 1000;  /* Assure qu'il soit au-dessus du contenu */
     background: linear-gradient(45deg, rgba(231, 229, 215, 0.9), rgba(149, 119, 99, 0.8));
     color: #4b3a19;
     padding: 20px 0;
     text-align: center;
-    position: sticky; /* Reste en haut au défilement */
-    top: 0;
-    z-index: 1000;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    animation: slideIn 0.8s ease-out;
+    animation: fadeUp 0.8s ease-out forwards;
 }
 
 /* Animation de glissement pour le header */
@@ -130,20 +132,21 @@ header {
     transform: scale(1.1);
 }
 
-/* Footer */
+/* Stylisation du footer */
 footer {
-    background-color: #4b3a19;
-    color: #fff;
+    background-color: #59481d;
+    color: white;
     text-align: center;
-    padding: 15px 0;
-    margin-top: 5em;
-    position: relative;
-    bottom: 0;
+    padding: 10px 0;
+    position: fixed;
     width: 100%;
-    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeUp 0.8s ease-out 0.3s forwards;
+    bottom: 0;
+    z-index: 1000;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
 }
 
 /* Effet au survol des liens */
@@ -307,8 +310,9 @@ input[type="submit"]:hover {
 
 .popup-content {
     background-color: #e2eba7;
-    padding: 5em;
-    margin: 10em;
+    top : 20%;
+    padding: 3em;
+    margin: 5em;
     border-radius: 2em;
     text-align: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -554,7 +558,7 @@ ul ul {
 }
 
 .add-project-button {
-    background-color: #007bff;
+    background-color: #2b3e51;
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -570,7 +574,7 @@ ul ul {
 }
 
 .add-project-button:hover {
-    background-color: #0056b3;
+    background-color: #6a99cc;
 }
 
 .add-project-button i {
@@ -591,7 +595,7 @@ ul ul {
 }
 
 .create-button {
-    background-color: #28a745;
+    background-color: #685039;
     color: #fff;
     border: none;
     padding: 0.5rem 1rem;
@@ -602,7 +606,8 @@ ul ul {
 }
 
 .create-button:hover {
-    background-color: #218838;
+    background-color: #ffffff;
+    color: #4b3a19;
 }
 
 .cancel-button {

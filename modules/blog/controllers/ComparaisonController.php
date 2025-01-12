@@ -41,7 +41,7 @@ class ComparaisonController{
 
         // Appeler la méthode `saveExperimentation` du modèle
         try {
-            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimName, $geoJsonVerName, $name, $dossier, $project);
+            $this->comparaisonModel->saveExperimentationM($data, $geoJsonSimName, $geoJsonVerName, $name, $dossier, $project);
             // Répondre à l'AJAX
             echo json_encode(['success' => true]);
         } catch (Exception $e) {
@@ -65,9 +65,7 @@ class ComparaisonController{
     public function execute($filesSimName, $filesVerName,$experimentId = null){
 
 
-
         if ($experimentId) {
-            // Charger l'expérience si un ID est fourni
             // Charger l'expérience si un ID est fourni
             $experimentData = $this->comparaisonModel->loadExperimentation($experimentId);
 
@@ -79,10 +77,8 @@ class ComparaisonController{
             $geoJsonVerName = $experimentData['geoJsonVerName'] ?? null;
             $charts = $experimentData['charts'] ?? null;
             $tableData = $experimentData['tableData'] ?? null;
-            var_dump($charts);
-            //var_dump($tableData);
-            //var_dump($charts);
-
+            var_dump($geoJsonVer);
+            var_dump($geoJsonSim);
             // Reformater les données pour les passer à la vue
             $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
 

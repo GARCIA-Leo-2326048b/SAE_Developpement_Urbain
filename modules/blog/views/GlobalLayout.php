@@ -34,7 +34,7 @@ class GlobalLayout
             </div>
         </header>
         <!-- Bouton de retour -->
-        <button class="return-button" onclick="goBack()">
+        <button class="return-button" id="gobackButton" onclick="goBack()">
             <i class="fas fa-arrow-left"></i>
         </button>
 
