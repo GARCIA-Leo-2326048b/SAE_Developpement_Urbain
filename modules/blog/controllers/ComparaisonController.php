@@ -121,7 +121,7 @@ class ComparaisonController{
 
             $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
             // Si aucun ID n'est fourni, juste afficher les résultats
-            $this->view->showComparison($results, $filesSimName,$fileDataSim,$fileDataVer);
+            $this->view->showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer);
         }
 
     }

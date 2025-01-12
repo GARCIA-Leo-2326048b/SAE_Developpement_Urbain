@@ -9,7 +9,7 @@ class ComparaisonView
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
-    public function showComparison($results, $filesSimName,$fileDataSim,$fileDataVer,$charts = null): void
+    public function showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer,$charts = null): void
     {
         ob_start();
         ?>
@@ -178,7 +178,11 @@ class ComparaisonView
         <div id="chartsData" data-charts='<?php echo json_encode($charts); ?>'></div>
         <div id="chartsContainer">
         </div>
-
+        <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
+        <div id="geoJsonNames"
+             data-geojson-sim="<?php echo $filesSimName[0]; ?>"
+             data-geojson-ver="<?php echo $filesVerName[0]; ?>">
+        </div>
         <button type="submit" id="saveBtn">Sauvegarder</button>
 
         <!-- Modale pour entrer le nom et choisir le dossier -->
