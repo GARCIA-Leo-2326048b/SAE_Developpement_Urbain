@@ -75,7 +75,7 @@ class MesSimulationView
         <div id="popupExp" class="popup" style="display: none;">
             <div class="popup-content">
                 <h2 id="popup-file-nameExp">File</h2>
-                <button class="popup-button" id="actionButton" onclick="reloadExp()">Continuer</button>
+                <button class="popup-button" id="actionButton" onclick="reloadExp()">Charger</button>
                 <button class="popup-button" onclick="deleteFileExp()"><i class="fas fa-trash-alt"></i> </button>
                 <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
             </div>
