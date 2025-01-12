@@ -20,10 +20,12 @@ class AffichageView
         <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
         <script src="https://unpkg.com/georaster"></script>
         <script src="/_assets/scripts/affichageCarte.js"></script> <!-- script de création de carte -->
+        <link rel="stylesheet" href="/_assets/styles/affichage.css">
 
         <div id="map"></div>
-
+        <button id="toggleControls" onclick="toggleControls()">→</button>
         <div id="controls">
+
             <h3>Contrôles de la carte</h3>
 
             <!-- Sélectionner la couche de fond -->
@@ -36,7 +38,7 @@ class AffichageView
             <div id="layerButtonsmap"></div>
 
             <!-- Contrôle de l'opacité -->
-            <h4>Opacité :</h4>
+            <h4>Opacité </h4>
             <input type="range" id="opacitySlidermap" min="0" max="1" step="0.1" value="1" onchange="map.updateLayerOpacity()">
 
             <div>
@@ -45,7 +47,7 @@ class AffichageView
 
             <!-- Bouton pour uploader un fichier GeoTIFF -->
             <div>
-                <h4>Uploader un fichier GeoTIFF :</h4>
+                <h4>Uploader un fichier GeoTIFF </h4>
                 <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
             </div>
 
@@ -55,7 +57,9 @@ class AffichageView
 
             const map = new MapManager(null,null,null,'map');
             map.addHouseLayer(<?php echo $filesData[0] ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
-            map.addRoadLayer(<?php echo $filesData[1] ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
+            <?php if (!empty($filesData[1])): ?>
+            map.addRoadLayer(<?php echo $filesData[1]; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
+            <?php endif; ?>
 
             function toggleFileSelector() {
                 const container = document.getElementById('fileSelectorContainer');
@@ -64,6 +68,18 @@ class AffichageView
 
             function closeFileSelector() {
                 document.getElementById('fileSelectorContainer').style.display = 'none';
+            }
+            function toggleControls() {
+                const controls = document.getElementById('controls');
+                const toggleButton = document.getElementById('toggleControls');
+
+                if (controls.style.display === 'none' || controls.style.display === '') {
+                    controls.style.display = 'block';
+                    toggleButton.textContent = '×';
+                } else {
+                    controls.style.display = 'none';
+                    toggleButton.textContent = '→';
+                }
             }
         </script>
 
@@ -87,7 +103,6 @@ class AffichageView
             <div id="popup" class="popup" style="display: none;">
                 <div class="popup-content">
                     <h2 id="popup-file-name">File</h2>
-                    <button class="popup-button" id="actionButton" onclick="">Comparer</button>
                     <button class="popup-button" id="actionButton" onclick="addToSelection()">Ajouter à la selection</button>
                     <button class="popup-button" id="actionButton" onclick="removeFromSelection()">Retirer de la selection</button>
                     <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>

@@ -23,7 +23,6 @@ class ComparaisonView
         <script src="/_assets/scripts/affichageCarte.js"></script>
         <script src="/_assets/scripts/comparaisonCarte.js"></script>
         <link rel="stylesheet" href="/_assets/styles/comparaison.css">
-
         <!-- Affichage cartes -->
         <!-- Bouton pour afficher la carte Simulation -->
         <button id="showMapSimulation">Afficher la carte Simulation</button>
@@ -38,7 +37,7 @@ class ComparaisonView
             ?>
             <div class="modal-content">
                 <span class="close" id="closeSimulation">&times;</span>
-                <div id="mapSimulation" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
+                <div id="mapSimulation" style="height: 80vh; width: 50vw;"></div> <!-- Taille ajustée -->
             </div>
         </div>
 
@@ -49,31 +48,37 @@ class ComparaisonView
             ?>
             <div class="modal-content">
                 <span class="close" id="closeVerite">&times;</span>
-                <div id="mapVerite" style="height: 80vh; width: 90vw;"></div> <!-- Taille ajustée -->
+                <div id="mapVerite" style="height: 80vh; width: 50vw;"></div> <!-- Taille ajustée -->
             </div>
         </div>
 
         <script>
-            window.geoJsonHouseSim = <?php echo json_encode($fileDataSim[0]); ?>;
-            window.geoJsonHouseVer = <?php echo json_encode($fileDataVer[0]); ?>;
-            window.geoJsonHouseSim = <?php echo json_encode($fileDataSim[1]); ?>;
-            window.geoJsonHouseVer = <?php echo json_encode($fileDataVer[1]); ?>;
-        </script>
+            window.geoJsonHouseSim = <?php echo $fileDataSim[0] ?>;
+            window.geoJsonHouseVer = <?php echo $fileDataVer[0] ?>;
 
+            // Ajouter les données seulement si elles existent
+            <?php if (!empty($fileDataSim[1])): ?>
+            window.geoJsonHouseSimSecond = <?php echo $fileDataSim[1] ?>;
+            <?php endif; ?>
+
+            <?php if (!empty($fileDataVer[1])): ?>
+            window.geoJsonHouseVerSecond = <?php echo $fileDataVer[1] ?>;
+            <?php endif; ?>
+        </script>
 
 
         <div class="map-container">
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo $fileDataSim[1] ?>, null, 'mapSim');
+                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo !empty($fileDataSim[1]) ? json_encode($fileDataSim[1]) : 'null'; ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo $fileDataVer[1] ?>, null, 'mapVer');
+                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo !empty($fileDataVer[1]) ? json_encode($fileDataVer[1]) : 'null'; ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -82,9 +87,9 @@ class ComparaisonView
             <table border="1">
                 <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th><th>Erreur</th></tr>
                 <?php $this->renderRow('Moyenne des surfaces (m²)', $results['graphSim'][0]['y'], $results['graphVer'][0]['y'], $results['errors'][0]['y']); ?>
-                <?php $this->renderRow('Écart-type des surfaces (m²)', $results['graphSim'][3]['y'], $results['graphVer'][3]['y'], $results['errors'][3]['y']); ?>
-                <?php $this->renderRow('Minimum des surfaces (m²)', $results['graphSim'][1]['y'], $results['graphVer'][1]['y'], $results['errors'][1]['y']); ?>
-                <?php $this->renderRow('Maximum des surfaces (m²)', $results['graphSim'][2]['y'], $results['graphVer'][2]['y'], $results['errors'][2]['y']); ?>
+                <?php $this->renderRow('Écart-type des surfaces (m²)', $results['graphSim'][1]['y'], $results['graphVer'][1]['y'], $results['errors'][1]['y']); ?>
+                <?php $this->renderRow('Minimum des surfaces (m²)', $results['graphSim'][2]['y'], $results['graphVer'][2]['y'], $results['errors'][2]['y']); ?>
+                <?php $this->renderRow('Maximum des surfaces (m²)', $results['graphSim'][3]['y'], $results['graphVer'][3]['y'], $results['errors'][3]['y']); ?>
             </table>
         </ul>
 
@@ -93,9 +98,9 @@ class ComparaisonView
             <table border="1">
                 <tr><th>Statistique</th><th>Simulation</th><th>Vérité terrain</th><th>Erreur</th></tr>
                 <?php $this->renderRow('Moyenne des Shape Index', $results['graphSim'][4]['y'], $results['graphVer'][4]['y'], $results['errors'][4]['y']); ?>
-                <?php $this->renderRow('Écart-type des Shape Index', $results['graphSim'][7]['y'], $results['graphVer'][7]['y'], $results['errors'][7]['y']); ?>
-                <?php $this->renderRow('Minimum des Shape Index', $results['graphSim'][5]['y'], $results['graphVer'][5]['y'], $results['errors'][5]['y']); ?>
-                <?php $this->renderRow('Maximum des Shape Index', $results['graphSim'][6]['y'], $results['graphVer'][6]['y'], $results['errors'][6]['y']); ?>
+                <?php $this->renderRow('Écart-type des Shape Index', $results['graphSim'][5]['y'], $results['graphVer'][5]['y'], $results['errors'][5]['y']); ?>
+                <?php $this->renderRow('Minimum des Shape Index', $results['graphSim'][6]['y'], $results['graphVer'][6]['y'], $results['errors'][6]['y']); ?>
+                <?php $this->renderRow('Maximum des Shape Index', $results['graphSim'][7]['y'], $results['graphVer'][7]['y'], $results['errors'][7]['y']); ?>
             </table>
         </ul>
 
@@ -103,8 +108,8 @@ class ComparaisonView
         <script>
             // Initialisation du graphique
             window.initializeChart(
-                ['Area Mean (m²)', 'Area Min(m²)', 'Area Max(m²)', 'Area Std(m²)',
-                    "Shape Index Max", "Shape Index Min", "Shape Index Mean", "Shape Index Std"],
+                ['Area Mean (m²)',   'Area Std(m²)','Area Min(m²)','Area Max(m²)',
+                    'Shape Index Mean', 'Shape Index Std','Shape Index Min','Shape Index Max'  ],
                 <?php echo json_encode(array_column($results['graphSim'], 'y')); ?>,  // Données pour la simulation
                 <?php echo json_encode(array_column($results['graphVer'], 'y')); ?>   // Données pour la vérité terrain
             );

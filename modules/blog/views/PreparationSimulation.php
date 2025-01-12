@@ -31,7 +31,6 @@ class PreparationSimulation
                 <div id="popup" class="popup" style="display: none;">
                     <div class="popup-content">
                         <h2 id="popup-file-name">File</h2>
-                        <button class="popup-button" id="actionButton" onclick="performAction()">Simuler</button>
                         <button class="popup-button" id="actionButton" onclick="addToSelection()">Ajouter à la selection</button>
                         <button class="popup-button" id="actionButton" onclick="removeFromSelection()">Retirer de la selection</button>
                         <button class="popup-button" onclick="deleteFile()"><i class="fas fa-trash-alt"></i> </button>

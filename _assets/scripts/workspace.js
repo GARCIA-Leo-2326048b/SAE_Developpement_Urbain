@@ -283,32 +283,6 @@ function updateProjectload(){
             console.error("Erreur lors de la mise à jour de l'historique :", error);
         });
 }
-function switchMode(mode) {
-    // Met à jour le mode courant
-    currentMode = mode;
-
-    // Affiche ou masque la section de comparaison
-    document.getElementById('compare-section').style.display = (mode === 'comparaison') ? 'block' : 'none';
-
-    // Change le texte du bouton d'action
-    document.getElementById('actionButton').textContent = (mode === 'simulation') ? 'Simuler' : 'Sélectionner';
-
-    // Réinitialise les fichiers sélectionnés
-    selectedFiles = [];
-    updateCompareButtonState();
-
-    // Gère la classe active pour les boutons
-    const buttons = document.querySelectorAll('#mode-switch button');
-    buttons.forEach(button => {
-        if (button.textContent.includes(mode.charAt(0).toUpperCase() + mode.slice(1))) {
-            button.classList.add('active');
-        } else {
-            button.classList.remove('active');
-        }
-    });
-}
-
-
 function showForm(type) {
     if (type === 'vector') {
         document.getElementById('vectorForm').style.display = 'block';

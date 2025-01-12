@@ -209,7 +209,7 @@ a:hover {
     align-items: center;
 }
 
-#import button, #compareButton {
+#import button {
     width: 100%;
     padding: 10px 30px;  /* Augmenter la taille des boutons */
     margin: 15px;
@@ -222,14 +222,14 @@ a:hover {
     text-transform: uppercase; /* Rendre le texte plus visible */
 }
 
-#import button:hover, #compareButton.enabled {
+#import button:hover {
     background-color: #474e23;
     color: #e2eba7;
     transform: scale(1.05);
 }
 
 
-#import button:hover, #compareButton.enabled {
+#import button:hover {
     background-color: #474e23;
     color: #e2eba7;
     transform: scale(1.05);
@@ -459,40 +459,7 @@ ul ul {
     background-color: #e2eba7; /* Couleur lumineuse */
     box-shadow: 0 0 10px #e2eba7;
 }
-/* Style de base du bouton Comparer */
-.compare-button {
-    position: relative;
-    background: linear-gradient(135deg, #59481d, #453a14);
-    color: #e2eba7;
-    border: none;
-    border-radius: 50px;
-    padding: 12px 30px;
-    font-size: 16px;
-    font-weight: bold;
-    text-transform: uppercase;
-    cursor: pointer;
-    opacity: 0.6; /* Bouton désactivé */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
 
-/* Bouton activé */
-.compare-button:enabled {
-    opacity: 1;
-}
-
-/* Effet au survol */
-.compare-button:hover:enabled {
-    background: linear-gradient(135deg, #453a14, #59481d);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2), 0 0 10px #e2eba7;
-    transform: scale(1.05);
-}
-
-/* Animation */
-.compare-button:hover:enabled,
-.compare-button:enabled::after {
-    transition: all 0.3s ease;
-}
 
 /* Rendre l'historique plus large */
 #history {
@@ -533,15 +500,7 @@ ul ul {
     background-color: #f0f0f0;
 }
 
-#controls {
-    position: absolute;
-    top: 200px; /* Ajuste la position verticale selon tes besoins */
-    left: 120px; /* Positionne les contrôles à gauche */
-    background-color: rgba(255, 255, 255, 0.7); /* Fond semi-transparent pour les contrôles */
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1000; /* Assure que les contrôles apparaissent au-dessus de la carte */
-}
+
 
 #map {
     width: 100%;
