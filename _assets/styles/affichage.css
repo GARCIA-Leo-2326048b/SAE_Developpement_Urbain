@@ -1,39 +1,44 @@
-/* Conteneur des contrôles */
-#controls {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 250px;
-    background-color: rgba(255, 255, 255, 0.8); /* Plus transparent */
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    font-family: Arial, sans-serif;
-    display: none; /* Caché par défaut */
+/* Style pour le conteneur de la carte */
+#mapContainer {
+    width: 100%;
+    height: 80vh;
+    position: relative;
+    margin-bottom: 20px;
 }
 
+/* Style pour la carte elle-même */
+#map {
+    width: 100%;
+    height: 500px;
+}
+
+/* Bouton pour afficher/masquer les contrôles */
 #toggleControls {
     position: absolute;
-    top: 10px;
+    bottom: 85px;
     left: 10px;
-    z-index: 1100;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: #534998;
     color: white;
     border: none;
-    border-radius: 4px;
     padding: 10px 15px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
+    border-radius: 5px;
+    z-index: 1000;
 }
 
-#toggleControls:hover {
-    background-color: rgba(0, 0, 0, 0.9);
+/* Section des contrôles */
+#controls {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 20px;;
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid #ccc;
+    padding: 15px 15px 15px 3em;
+    z-index: 999;
+    border-radius: 5px;
 }
-
-
-/* Titres des sections */
 #controls h3,
 #controls h4 {
     margin: 0 0 10px;
@@ -49,7 +54,7 @@
     padding: 10px;
     font-size: 0.9em;
     color: #fff;
-    background-color: #007BFF;
+    background-color: #6b5eba;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -57,7 +62,7 @@
 }
 
 #controls button:hover {
-    background-color: #0056b3;
+    background-color: #574aa1;
 }
 
 /* Curseur pour l'opacité */
@@ -72,26 +77,28 @@
     margin-top: 10px;
 }
 
-/* Section de comparaison */
+/* Section du bouton Comparer */
 .compare-section {
-    margin: 0; /* Supprime l'espacement extérieur */
-    text-align: left; /* Aligne le bouton à gauche */
+    text-align: left;
+    margin-top: 20px;
 }
 
+/* Bouton Comparer */
 .compare-button {
-
-    background-color: #4CAF50;
+    padding: 10px 20px;
+    background-color: #534998;
     color: white;
+    font-size: 18px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px; /* Ajuste la taille du texte */
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
 }
+
 .compare-button:hover {
-    background-color: #218838;
+    background-color: #6b5eba;
 }
+
 
 /* Conteneur caché pour la sélection des fichiers */
 #fileSelectorContainer {
@@ -106,45 +113,10 @@
     margin: 5px;
     padding: 8px 12px;
     font-size: 0.9em;
-    background-color: #17a2b8;
-    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
-#fileSelectorContainer button:hover {
-    background-color: #138496;
-}
 
-.compare-section {
-    margin-top: 20px; /* Espacement entre la carte et le bouton */
-    text-align: center; /* Centrer le bouton sous la carte */
-}
 
-.compare-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 16px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s ease;
-}
-
-.compare-button:hover {
-    background-color: #45a049;
-}
-
-/* Section du bouton Comparer */
-.compare-section {
-    margin: 20px 0; /* Espacement au-dessus et au-dessous de la section */
-    text-align: center; /* Centrer le bouton */
-}
-
-.selected-button {
-    border: 2px solid #6b5eba; /* Bordure bleue pour le bouton sélectionné */
-    background-color: #f0f8ff; /* Fond légèrement bleu pour le bouton sélectionné */
-}

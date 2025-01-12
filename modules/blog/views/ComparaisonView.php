@@ -227,7 +227,7 @@ class ComparaisonView
     }
 
     private function mapControls($mapId) { ?>
-        <div id="controls">
+        <div id="controls-Map">
             <h3>Contrôles de la carte</h3>
 
             <!-- Sélectionner la couche de fond -->
