@@ -9,7 +9,7 @@ class ComparaisonView
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
-    public function showComparison($results, $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer): void
+    public function showComparison($results, $filesSimName,$fileDataSim,$fileDataVer,$charts = null): void
     {
         ob_start();
         ?>
@@ -54,10 +54,10 @@ class ComparaisonView
         </div>
 
         <script>
-            window.geoJsonHouseSim = <?php echo $geoJsonHouseSim; ?>;
-            window.geoJsonRoadSim = <?php echo $geoJsonRoadSim; ?>;
-            window.geoJsonHouseVer = <?php echo $geoJsonHouseVer; ?>;
-            window.geoJsonRoadVer = <?php echo $geoJsonRoadVer; ?>;
+            window.geoJsonHouseSim = <?php echo json_encode($fileDataSim[0]); ?>;
+            window.geoJsonHouseVer = <?php echo json_encode($fileDataVer[0]); ?>;
+            window.geoJsonHouseSim = <?php echo json_encode($fileDataSim[1]); ?>;
+            window.geoJsonHouseVer = <?php echo json_encode($fileDataVer[1]); ?>;
         </script>
 
 
@@ -66,14 +66,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    const mapSim = new MapManager(<?php echo $geoJsonHouseSim ?>, <?php echo $geoJsonRoadSim ?>, null, 'mapSim');
+                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo $fileDataSim[1] ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    const mapVer = new MapManager(<?php echo $geoJsonHouseVer ?>, <?php echo $geoJsonRoadVer ?>, null, 'mapVer');
+                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo $fileDataVer[1] ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -110,15 +110,7 @@ class ComparaisonView
             );
         </script>
 
-        <!-- Si des graphiques existent, recréez-les -->
 
-        <?php
-        if ($charts) {
-            echo "<script>";
-            echo "recreateCharts(" . json_encode($charts) . ");";
-            echo "</script>";
-        }
-        ?>
         <!-- Options de contrôle -->
         <div style="display: none;">
             <div style="width: 30%; padding: 20px; background-color: #e0f7f4;">
@@ -185,14 +177,10 @@ class ComparaisonView
 
         <!-- Conteneur des graphiques -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <div id="chartsData" data-charts='<?php echo json_encode($chart); ?>'></div>
+        <div id="chartsData" data-charts='<?php echo json_encode($charts); ?>'></div>
         <div id="chartsContainer">
         </div>
-        <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
-        <div id="geoJsonNames"
-             data-geojson-sim="<?php echo $geoJsonHouseSimName; ?>"
-             data-geojson-ver="<?php echo $geoJsonHouseVerName; ?>">
-        </div>
+
         <button type="submit" id="saveBtn">Sauvegarder</button>
 
         <!-- Modale pour entrer le nom et choisir le dossier -->
@@ -231,26 +219,25 @@ class ComparaisonView
           </tr>";
     }
 
-    private function mapControls($mapId){?>
-
+    private function mapControls($mapId) { ?>
         <div id="controls">
             <h3>Contrôles de la carte</h3>
 
             <!-- Sélectionner la couche de fond -->
             <div>
-                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToSatellite()">Satellite</button>
-                <button onclick="mapManagers['<?php echo $mapId ?>'].switchToStreets()">Streets</button>
+                <button onclick="mapManagers['<?php echo htmlspecialchars($mapId) ?>'].switchToSatellite()">Satellite</button>
+                <button onclick="mapManagers['<?php echo htmlspecialchars($mapId) ?>'].switchToStreets()">Streets</button>
             </div>
 
             <!-- Sélectionner la couche -->
-            <div id="layerButtons<?php echo $mapId ?>"></div>
+            <div id="layerButtons<?php echo htmlspecialchars($mapId) ?>"></div>
 
             <!-- Contrôle de l'opacité -->
             <h4>Opacité :</h4>
-            <input type="range" id="opacitySlider<?php echo $mapId ?>" min="0" max="1" step="0.1" value="1" onchange="mapManagers['<?php echo $mapId ?>'].updateLayerOpacity()">
+            <input type="range" id="opacitySlider<?php echo htmlspecialchars($mapId) ?>" min="0" max="1" step="0.1" value="1" onchange="mapManagers['<?php echo htmlspecialchars($mapId) ?>'].updateLayerOpacity()">
 
             <div>
-                <button onclick="mapManagers['<?php echo $mapId ?>'].supprimerCouche()">Supprimer la couche sélectionnée</button>
+                <button onclick="mapManagers['<?php echo htmlspecialchars($mapId) ?>'].supprimerCouche()">Supprimer la couche sélectionnée</button>
             </div>
 
             <!-- Bouton pour uploader un fichier GeoTIFF -->
@@ -259,7 +246,5 @@ class ComparaisonView
                 <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
             </div>
         </div>
-
     <?php }
-
 }

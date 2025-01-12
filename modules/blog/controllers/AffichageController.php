@@ -32,15 +32,19 @@ class AffichageController
         $this->view = $view;
     }
 
-    public function execute($house = null, $road = null, $tiff = null)
+    public function execute($files = [])
     {
         $repertoires = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->utilisateur);
 
-        $houseData = $this->model->fetchGeoJson($house);
-        $roadData = $this->model->fetchGeoJson($road);
+        $fileData = [];
+        foreach ($files as $file) {
+            $fileData[] = $this->model->fetchGeoJson($file);
 
-        (new AffichageView($repertoires))->show($houseData,$roadData,null,null);
-//        $this->view->show($houseData,$roadData,null,null);
+        }
+
+
+        (new AffichageView($repertoires))->show($fileData);
+
     }
 
 }

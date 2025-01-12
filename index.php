@@ -14,27 +14,34 @@ try {
                 break;
 
             case 'affichage':
-                // Récupérer les paramètres 'house' et 'road' depuis l'URL
-                $house = filter_input(INPUT_GET, 'house'); // Nom du fichier GeoJSON maison
-                $road = filter_input(INPUT_GET, 'road');  // Nom du fichier GeoJSON route
+                // Récupérer les fichiers depuis l'URL
+                $files = filter_input(INPUT_GET, 'files'); // Cela sera une chaîne encodée
 
+                if ($files) {
+                    // Décoder la chaîne et convertir en tableau
+                    $filesArray = explode(',', urldecode($files));
 
-                    // Passer les paramètres au contrôleur pour traitement
-                    (new blog\controllers\AffichageController())->execute($house, $road);
+                    // Passer la liste des fichiers au contrôleur
+                    (new blog\controllers\AffichageController())->execute($filesArray);
 
                     // Stocker les fichiers de simulation en session pour réutilisation
-                    $_SESSION['houseSim'] = $house;
-                    $_SESSION['roadSim'] = $road;
-
+                    $_SESSION['simFiles'] = $filesArray;
+                }
                 break;
+
             case 'compare':
-                $houseSim = $_SESSION['houseSim'] ?? null;
-                $roadSim = $_SESSION['roadSim'] ?? null;
-                $houseVer = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
-                $roadVer = filter_input(INPUT_GET, 'road');
+                // Récupérer les fichiers stockés en session
+                $simFiles = $_SESSION['simFiles'] ?? [];
 
-                (new blog\controllers\ComparaisonController())->execute($houseSim,$houseVer,$roadSim,$roadVer);
+                // Récupérer la nouvelle liste de fichiers pour la comparaison
+                $compareFiles = filter_input(INPUT_GET, 'files');
+
+                if ($compareFiles) {
+                    $compareFilesArray = explode(',', urldecode($compareFiles));
+                    (new blog\controllers\ComparaisonController())->execute($simFiles, $compareFilesArray);
+                }
                 break;
+
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();
                 break;
@@ -91,7 +98,7 @@ try {
                 break;
             case 'reloadExp':
                 $id = filter_input(INPUT_GET, 'id'); // Récupérer le nom du fichier
-                (new blog\controllers\ComparaisonController())->execute(null,null,$id);
+                (new blog\controllers\ComparaisonController())->execute(null,null,null,null,$id);
                 break;
             case 'get_all_folders':
                 (new blog\controllers\Upload())->selectFolder();

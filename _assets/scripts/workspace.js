@@ -624,65 +624,82 @@ function closeForm(formId) {
 
 function addToSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
-    if (!selectionFiles.includes(fileId)) {
-        selectionFiles.push(fileId);
-        if (window.location.href === 'https://developpement-urbain.alwaysdata.net/index.php?action=new_simulation') {
+
+    // Si c'est le premier fichier, le traiter comme un building, sinon comme une couche
+    if (!selectionFiles.some(file => file.name === fileId)) {
+        selectionFiles.push({ name: fileId });
+
+        // Mettre à jour l'UI en fonction du type de page
+        if (window.location.search.includes('action=new_simulation')) {
             updateSimulationSelectedFilesUI();
-            console.log('erreurrrrr');
-        }
-        else {
+        } else {
             updateComparisonSelectedFilesUI();
-            console.log('ca marche')
         }
+
         closePopup();
     }
-
 }
 
 function removeFromSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
-    selectionFiles = selectionFiles.filter(file => file !== fileId);
-    if (window.location.href === 'index.php?action=new_simulation') {
+
+    // Filtrer pour retirer le fichier avec le nom spécifique
+    selectionFiles = selectionFiles.filter(file => file.name !== fileId);
+
+    // Mettre à jour l'UI selon la page actuelle
+    if (window.location.search.includes('action=new_simulation')) {
         updateSimulationSelectedFilesUI();
+    } else {
+        updateComparisonSelectedFilesUI();
     }
-    else { updateComparisonSelectedFilesUI();}
 }
 
 function updateSimulationSelectedFilesUI() {
     const list = document.getElementById('selected-files-list');
-    list.innerHTML = '';
+    list.innerHTML = ''; // Réinitialiser la liste à chaque mise à jour
+
     selectionFiles.forEach(file => {
         const listItem = document.createElement('li');
-        listItem.textContent = file;
+        listItem.textContent = `${file.name} `; // Affichage du nom et du type
         list.appendChild(listItem);
     });
 
-    // Enable or disable the simulate button
+    // Trouver le bouton et vérifier si la sélection est vide ou non
     const simulateButton = document.getElementById('simulate-button');
-    simulateButton.disabled = selectionFiles.length === 0;
+
+    if (simulateButton) {
+        // Activer ou désactiver le bouton en fonction de la longueur de la sélection
+        simulateButton.disabled = selectionFiles.length === 0 ? true : false;
+    }
 }
 
 function updateComparisonSelectedFilesUI() {
     const list = document.getElementById('selected-files-list');
-    list.innerHTML = '';
+    list.innerHTML = ''; // Réinitialiser la liste à chaque mise à jour
+
     selectionFiles.forEach(file => {
         const listItem = document.createElement('li');
-        listItem.textContent = file;
+        listItem.textContent = `${file.name} `; // Affichage du nom et du type
         list.appendChild(listItem);
     });
 
-    // Enable or disable the simulate button
+    // Trouver le bouton et vérifier si la sélection est vide ou non
     const compareButton = document.getElementById('compare-button');
-    compareButton.disabled = selectionFiles.length === 0;
+
+    if (compareButton) {
+        // Activer ou désactiver le bouton en fonction de la longueur de la sélection
+        compareButton.disabled = selectionFiles.length === 0 ? true : false;
+    }
 }
 
 function simulateSelectedFiles() {
-    // const fileId = document.getElementById('popup-file-name').textContent;
-    house = selectionFiles[0];
-    road = selectionFiles[1];
-    // Call the backend or perform actions with the selected files
-    window.location.href = 'index.php?action=affichage&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
+    // On prend la liste des fichiers sélectionnés
+    let files = selectionFiles; // Ceci peut être un tableau de fichiers
 
+    let fileNames = files.map(file => file.name).join(',');
+
+    // Appel à l'URL avec la liste de fichiers (sans encodage)
+    window.location.href = 'index.php?action=affichage&files=' + fileNames;
 }
 
 //reload
@@ -710,8 +727,11 @@ function reloadExp() {
 
 
 function compareSelectedFiles(){
-    house = selectionFiles[0];
-    road = selectionFiles[1];
-    // Call the backend or perform actions with the selected files
-    window.location.href = 'index.php?action=compare&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
+    // On prend la liste des fichiers sélectionnés
+    let files = selectionFiles; // Ceci peut être un tableau de fichiers
+
+    let fileNames = files.map(file => file.name).join(',');
+
+    // Appel à l'URL avec la liste de fichiers (sans encodage)
+    window.location.href = 'index.php?action=compare&files=' + fileNames;
 }

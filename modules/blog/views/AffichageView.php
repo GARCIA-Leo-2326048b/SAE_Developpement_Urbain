@@ -11,7 +11,7 @@ class AffichageView
         $this->fileSelectorView = new FileSelectorView($this->files);
     }
 
-    function show($house = null, $road = null, $vegetation = null, $tiffPath = null): void
+    function show($filesData): void
     {
         ob_start();
         ?>
@@ -52,10 +52,10 @@ class AffichageView
         </div>
 
         <script>
-            // Initialisation de la carte avec les couches GeoJSON et GeoTIFF
+
             const map = new MapManager(null,null,null,'map');
-            map.addHouseLayer(<?php echo $house ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
-            map.addRoadLayer(<?php echo $road ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
+            map.addHouseLayer(<?php echo $filesData[0] ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
+            map.addRoadLayer(<?php echo $filesData[1] ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
 
             function toggleFileSelector() {
                 const container = document.getElementById('fileSelectorContainer');
@@ -65,12 +65,6 @@ class AffichageView
             function closeFileSelector() {
                 document.getElementById('fileSelectorContainer').style.display = 'none';
             }
-
-
-
-
-
-
         </script>
 
         <div class="compare-section">
