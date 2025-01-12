@@ -14,24 +14,32 @@ try {
                 break;
 
             case 'affichage':
+                // Récupérer les fichiers depuis l'URL
+                $files = filter_input(INPUT_GET, 'files'); // Cela sera une chaîne encodée
 
-                // Récupérer le paramètre 'file_name' depuis l'URL
-                $house = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
-                $road = filter_input(INPUT_GET, 'road');
-                if ($house || $road) {
-                    // Passer le paramètre 'file_name' au contrôleur pour traitement
-                    (new blog\controllers\AffichageController())->execute($house, $road);
-                } else {
-                    echo "Aucun fichier sélectionné.";
+                if ($files) {
+                    // Décoder la chaîne et convertir en tableau
+                    $filesArray = explode(',', urldecode($files));
+
+                    // Passer la liste des fichiers au contrôleur
+                    (new blog\controllers\AffichageController())->execute($filesArray);
+
+                    // Stocker les fichiers de simulation en session pour réutilisation
+                    $_SESSION['simFiles'] = $filesArray;
                 }
                 break;
-            case 'compare':
-                $houseSim = $_SESSION['houseSim'] ?? null;
-                $roadSim = $_SESSION['roadSim'] ?? null;
-                $houseVer = filter_input(INPUT_GET, 'house'); // Récupérer le nom du fichier
-                $roadVer = filter_input(INPUT_GET, 'road');
 
-                (new blog\controllers\ComparaisonController())->execute($houseSim,$houseVer,$roadSim,$roadVer);
+            case 'compare':
+                // Récupérer les fichiers stockés en session
+                $simFiles = $_SESSION['simFiles'] ?? [];
+
+                // Récupérer la nouvelle liste de fichiers pour la comparaison
+                $compareFiles = filter_input(INPUT_GET, 'files');
+
+                if ($compareFiles) {
+                    $compareFilesArray = explode(',', urldecode($compareFiles));
+                    (new blog\controllers\ComparaisonController())->execute($simFiles, $compareFilesArray);
+                }
                 break;
             case 'authentification':
                 (new blog\controllers\AuthentificationController())->execute();

@@ -92,44 +92,53 @@ class ComparaisonModel
     }
 
     // Fonction pour reformater les données avant de les envoyer à la vue
-    public function reformaterDonnees($tableData) {
-
+    public function reformaterDonnees($tableData)
+    {
         // Décoder la chaîne JSON en tableau PHP
-        $tableDataF = json_decode($tableData[0]['table_data'], true);// true pour obtenir un tableau associatif
+        $tableDataF = json_decode($tableData[0]['table_data'], true); // true pour obtenir un tableau associatif
 
-// Vérifier si le décodage a fonctionné
-        if (json_last_error() === JSON_ERROR_NONE) {
-            var_dump($tableDataF); // Affiche le tableau décodé pour vérifier la structure
-        } else {
-            echo "Erreur lors du décodage JSON";
+        // Vérifier si le décodage a fonctionné
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            echo "Erreur lors du décodage JSON : " . json_last_error_msg();
+            return [];
         }
+
         // Initialisation des tableaux pour Simulation, Vérité terrain et Erreur
         $graphSim = [];
         $graphVer = [];
         $errors = [];
 
-        // Parcourir les lignes du tableau et reformater les données
-        foreach ($tableDataF as $row) {
-            if (count($row) == 4) {
-                $label = $row[0];  // Le nom de la statistique
+        // Pour éviter les en-têtes dupliqués, ignorer les lignes contenant "Statistique"
+        foreach ($tableDataF as $index => $row) {
+            // Ignorer la première ligne qui contient les en-têtes, ainsi que les duplications des en-têtes
+            if ($index === 0 || $row[0] === 'Statistique') {
+                continue;
+            }
+
+            // Vérifier que chaque ligne a bien 4 colonnes
+            if (count($row) === 4) {
+                $label = $row[0];        // Le nom de la statistique
                 $simValue = (float)$row[1];  // Simulation
                 $verValue = (float)$row[2];  // Vérité terrain
                 $errorValue = (float)$row[3]; // Erreur
 
-                // Ajouter les données dans les tableaux
+                // Ajouter les données dans les tableaux formatés
                 $graphSim[] = ["label" => $label, "y" => round($simValue, 2)];
                 $graphVer[] = ["label" => $label, "y" => round($verValue, 2)];
                 $errors[] = ["label" => "Error " . $label, "y" => round($errorValue, 2)];
+            } else {
+                echo "Erreur : Ligne inattendue au format incorrect.";
             }
         }
 
-        // Retourner les données reformattées sous forme de tableau PHP, sans json_encode
+        // Retourner les données reformattées
         return [
             'graphSim' => $graphSim,
             'graphVer' => $graphVer,
-            'errors' => $errors
+            'errors' => $errors,
         ];
     }
+
 
 
 
@@ -349,25 +358,29 @@ class ComparaisonModel
         // Arrondir les données de simulation
         $graphSim = array(
             array("label" => "Area mean", "y" => round($areaStatsSim['mean'], 2)),
+            array("label" => "Area Std", "y" => round($areaStatsSim['std'], 2)),
             array("label" => "Area min", "y" => round($areaStatsSim['min'], 2)),
             array("label" => "Area max", "y" => round($areaStatsSim['max'], 2)),
-            array("label" => "Area Std", "y" => round($areaStatsSim['std'], 2)),
+
             array("label" => "Shape Index Mean", "y" => round($shapeIndexStatsSim['mean'], 2)),
+            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsSim['std'], 2)),
             array("label" => "Shape Index Min", "y" => round($shapeIndexStatsSim['min'], 2)),
             array("label" => "Shape Index Max", "y" => round($shapeIndexStatsSim['max'], 2)),
-            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsSim['std'], 2)),
+
         );
 
         // Arrondir les données de vérité terrain
         $graphVer = array(
             array("label" => "Area mean", "y" => round($areaStatsVer['mean'], 2)),
+            array("label" => "Area Std", "y" => round($areaStatsVer['std'], 2)),
             array("label" => "Area min", "y" => round($areaStatsVer['min'], 2)),
             array("label" => "Area max", "y" => round($areaStatsVer['max'], 2)),
-            array("label" => "Area Std", "y" => round($areaStatsVer['std'], 2)),
+
             array("label" => "Shape Index Mean", "y" => round($shapeIndexStatsVer['mean'], 2)),
+            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsVer['std'], 2)),
             array("label" => "Shape Index Min", "y" => round($shapeIndexStatsVer['min'], 2)),
             array("label" => "Shape Index Max", "y" => round($shapeIndexStatsVer['max'], 2)),
-            array("label" => "Shape Index Std", "y" => round($shapeIndexStatsVer['std'], 2)),
+
         );
          // Calcul des erreurs (différences)
         // Calcul des erreurs (différences entre valeurs arrondies)

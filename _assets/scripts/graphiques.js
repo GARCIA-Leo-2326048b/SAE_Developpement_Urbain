@@ -329,44 +329,41 @@
     document.addEventListener('DOMContentLoaded', () => {
         const chartsElement = document.getElementById('chartsData');
 
-        // Vérifiez si l'élément existe et contient un attribut 'data-charts'
         if (chartsElement && chartsElement.hasAttribute('data-charts')) {
-            // Récupérez les données sous forme de chaîne JSON
             const jsonData = chartsElement.getAttribute('data-charts');
 
             try {
-                // Convertir la chaîne JSON en un objet JavaScript valide
                 const chartsData = JSON.parse(jsonData);
 
-                // Vérifiez si chaque élément contient une chaîne encodée JSON
                 if (Array.isArray(chartsData) && chartsData.length > 0) {
                     chartsData.forEach((chartData, index) => {
+                        // Analyse des données internes
                         if (typeof chartData.data_xp === "string") {
                             try {
-                                // Parsez la chaîne JSON encodée dans data_xp
                                 const parsedData = JSON.parse(chartData.data_xp);
 
-                                // Utilisez les données parsées comme source
-                                chartData = parsedData[0]; // Si les données sont dans un tableau
-                            } catch (innerError) {
-                                console.error(`Impossible de parser les données JSON internes pour le graphique ${index}`, innerError);
+                                // Utiliser les données parsées si disponibles
+                                if (Array.isArray(parsedData) && parsedData.length > 0) {
+                                    chartData = parsedData[0];
+                                }
+                            } catch (error) {
+                                console.error(`Erreur lors du parsing interne de 'data_xp' pour le graphique ${index}:`, error);
                                 return;
                             }
                         }
 
-                        // Validation des données après parsing
-                        if (!chartData.type || !chartData.data || !chartData.data.labels || !chartData.data.datasets) {
-                            console.error(`Données du graphique ${index} invalides :`, chartData);
+                        // Validation des données
+                        const chartType = chartData.type || 'bar'; // Valeur par défaut : 'bar'
+                        if (!['bar', 'radar', 'pie'].includes(chartType)) {
+                            console.error(`Type de graphique invalide pour le graphique ${index}: ${chartType}`);
                             return;
                         }
 
-                        // Procédez avec les données valides...
-                        const chartType = chartData.type;
-                        const labels = chartData.data.labels;
-                        const datasets = chartData.data.datasets;
+                        const labels = chartData.data.labels || [];
+                        const datasets = chartData.data.datasets || [];
                         const chartName = chartData.name || `Graphique ${index + 1}`;
 
-                        // Créez un élément de conteneur pour le graphique
+                        // Créer un conteneur pour le graphique
                         const chartsContainer = document.getElementById('chartsContainer');
                         const chartDiv = document.createElement('div');
                         chartDiv.className = 'chart-container';
@@ -379,25 +376,25 @@
                         </button>
                     `;
 
-                        // Ajoutez le conteneur au DOM
                         chartsContainer.appendChild(chartDiv);
 
                         // Configurez l'événement de suppression
                         chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv));
 
-                        // Créez et configurez le graphique
+                        // Configurez et affichez le graphique
                         configureChartReload(chartDiv, chartType, labels, datasets);
                     });
                 } else {
-                    console.error("Aucun graphique valide trouvé dans les données JSON");
+                    console.error("Aucun graphique valide trouvé dans les données JSON.");
                 }
             } catch (error) {
-                console.error("Erreur lors de la conversion des données JSON", error);
+                console.error("Erreur lors de la conversion des données JSON:", error);
             }
         } else {
-            console.error("L'élément 'chartsData' n'a pas l'attribut 'data-charts'");
+            console.error("L'élément 'chartsData' n'a pas l'attribut 'data-charts'.");
         }
     });
+
 
     /**
      * Fonction pour configurer et recharger un graphique

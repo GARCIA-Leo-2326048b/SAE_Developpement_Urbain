@@ -20,7 +20,7 @@ class MesSimulationView
         <div class="switcher-container">
             <div class="tabs">
                 <button id="simulation-tab" class="tab-button active">Simulation</button>
-                <button id="experience-tab" class="tab-button">Expériences</button>
+                <button id="experience-tab" class="tab-button">Expérimentation</button>
             </div>
             <div class="tabs-content">
                 <div id="simulation-content" class="tab-content active">

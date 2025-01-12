@@ -62,19 +62,10 @@ class ComparaisonController{
     }
 
 
-    public function execute($geoJsonHouseSimName, $geoJsonHouseVerName,$geoJsonRoadSimName,$geoJsonRoadVerName,$experimentId = null){
+    public function execute($filesSimName, $filesVerName,$experimentId = null){
 
 
 
-
-        // PHP : Gestion des redirections après soumission du formulaire
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['geoJsonName'])) {
-            $geoJsonName = htmlspecialchars($_POST['geoJsonName']);
-
-            // Redirige vers une nouvelle page en utilisant la méthode GET
-            header("Location: https://developpement-urbain.alwaysdata.net/index.php?action=affichage&house=$geoJsonName");
-            exit;
-        }
         if ($experimentId) {
             // Charger l'expérience si un ID est fourni
             // Charger l'expérience si un ID est fourni
@@ -89,22 +80,29 @@ class ComparaisonController{
             $charts = $experimentData['charts'] ?? null;
             $tableData = $experimentData['tableData'] ?? null;
             var_dump($charts);
+            //var_dump($tableData);
+            //var_dump($charts);
 
             // Reformater les données pour les passer à la vue
             $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
 
             // Passer chaque donnée individuellement à la vue
-            $this->view->showComparison($formattedData, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName,$charts);
+            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
-            $geoJsonHouseSim = $this->geoJsonModel->fetchGeoJson($geoJsonHouseSimName);
-            $geoJsonHouseVer= $this->geoJsonModel->fetchGeoJson($geoJsonHouseVerName);
-            $geoJsonRoadSim = $this->geoJsonModel->fetchGeoJson($geoJsonRoadSimName);
-            $geoJsonRoadVer = $this->geoJsonModel->fetchGeoJson($geoJsonRoadVerName);
+            $fileDataSim = [];
+            foreach ($filesSimName as $file) {
+                $fileDataSim[] = $this->geoJsonModel->fetchGeoJson($file);
+            }
+            $fileDataVer = [];
+            foreach ($filesVerName as $file) {
+                $fileDataVer[] = $this->geoJsonModel->fetchGeoJson($file);
+            }
+
 
             // Projeter les GeoJSON dans le même système de coordonnées
-            $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseSim);
-            $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseVer);
+            $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($fileDataSim[0]);
+            $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($fileDataVer[0]);
 
             // Calculer les statistiques pour chaque GeoJSON
             $valuesSim = $this->comparaisonModel->getAreasAndPerimeters(geoPHP::load($geoJsonSimProj));
@@ -123,7 +121,7 @@ class ComparaisonController{
 
             $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
             // Si aucun ID n'est fourni, juste afficher les résultats
-            $this->view->showComparison($results,  $geoJsonHouseSim,$geoJsonHouseVer,$geoJsonHouseSimName,$geoJsonHouseVerName, $geoJsonRoadSim,$geoJsonRoadVer);
+            $this->view->showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer);
         }
 
     }
