@@ -94,7 +94,7 @@ try {
                 break;
             case 'reloadExp':
                 $id = filter_input(INPUT_GET, 'id'); // Récupérer le nom du fichier
-                (new blog\controllers\ComparaisonController())->execute(null,null,null,null,$id);
+                (new blog\controllers\ComparaisonController())->execute(null,null,$id);
                 break;
             case 'get_all_folders':
                 (new blog\controllers\Upload())->selectFolder();

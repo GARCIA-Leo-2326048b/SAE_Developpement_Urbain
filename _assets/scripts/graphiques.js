@@ -32,7 +32,7 @@
         const chartDiv = document.createElement('div');
         chartDiv.className = 'chart-container';
         chartDiv.id = 'chart-' + chartType;
-        const chartId = 'canvas-' + Date.now();
+        const chartId = chartType;
         chartDiv.innerHTML = `
             <h3>${chartName}</h3>
             <canvas id="${chartId}"></canvas>
@@ -254,10 +254,10 @@
 
             chartContainers.forEach(chartContainer => {
                 const chartName = chartContainer.querySelector('h3').textContent;
-                const chartType = chartContainer.querySelector('canvas').getAttribute('id').split('-')[1];
+                const chartType = chartContainer.querySelector('canvas').getAttribute('id');
                 const chartData = chartContainer.querySelector('canvas').chart.data; // Récupérer les données du graphique
                 const chartOptions = chartContainer.querySelector('canvas').chart.options; // Récupérer les options
-
+                console.log(chartType);
                 // Rassembler toutes les informations du graphique
                 charts.push({
                     name: chartName,
@@ -300,6 +300,7 @@
     }
 
     function saveExperimentation(experimentationData) {
+        console.log(experimentationData);
         fetch('index.php?action=save_experimentation', {
             method: 'POST',
             headers: {

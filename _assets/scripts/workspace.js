@@ -763,12 +763,14 @@ $(document).ready(function () {
 
     // Déterminez si c'est l'accueil (ajustez le critère selon votre URL)
     if (currentURL.includes('?action=accueil') || currentURL.endsWith('/') || currentURL.endsWith('index.php')) {
-        $('#returnButton').hide(); // Cache le bouton
+        $('#gobackButton').hide(); // Cache le bouton
     }
 });
 
 function goBack() {
     window.history.back();
 }
+
+
 
 
