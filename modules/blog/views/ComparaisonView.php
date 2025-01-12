@@ -109,8 +109,6 @@ class ComparaisonView
                 <?php echo json_encode(array_column($results['graphVer'], 'y')); ?>   // Données pour la vérité terrain
             );
         </script>
-
-
         <!-- Options de contrôle -->
         <div style="display: none;">
             <div style="width: 30%; padding: 20px; background-color: #e0f7f4;">
@@ -246,5 +244,7 @@ class ComparaisonView
                 <input type="file" id="uploadGeoTiff" accept=".tif,.tiff" />
             </div>
         </div>
+
     <?php }
+
 }
