@@ -176,7 +176,7 @@ class Upload
             $this->uploadModel->saveUploadGJ($nom, $fileContent,$this->currentUserId, $dossierParent,$_SESSION['current_project_id']);
 
             // Réponse JSON pour succès
-            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
+            echo json_encode(['success' => true, 'message' => 'Fichier téléchargé avec succès.']);
         } catch (\Exception $e) {
             // Réponse JSON pour erreur
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
