@@ -11,7 +11,7 @@ class AffichageView
         $this->fileSelectorView = new FileSelectorView($this->files);
     }
 
-    function show($house = null, $road = null, $vegetation = null, $tiffPath = null): void
+    public function show($house = null, $road = null, $vegetation = null, $tiffPath = null): void
     {
         ob_start();
         ?>
@@ -107,3 +107,4 @@ class AffichageView
     }
 }
 ?>
+

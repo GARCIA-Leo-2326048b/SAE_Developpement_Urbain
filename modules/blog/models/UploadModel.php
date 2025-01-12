@@ -5,7 +5,11 @@ use PDO;
 
 class UploadModel {
     private $db;
-    private $errorMessage="";
+    private $p = ':project';
+    private $u = ':user';
+    private $uId = ':userId';
+    private $fname = ':folderName';
+    private $file = ':file_name';
 
     public function __construct($dbConnection)
     {
@@ -20,23 +24,17 @@ class UploadModel {
         $stmt->bindParam(':utilisateur', $userId);
         $stmt->execute();
 
-        if( $stmt->fetchColumn() > 0){
-            return true;
-
-        }else{
-            return false;
-        }
+        return $stmt->fetchColumn() > 0;
     }
 
     public function createProjectM($project,$userId)
     {
          try {
-            $query = "INSERT INTO projets  
-                      VALUES (:project, :user)";
+            $query = "INSERT INTO projets VALUES (:project, :user)";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':project', $project);
-            $stmt->bindParam(':user', $userId);
+            $stmt->bindParam($this->p, $project);
+            $stmt->bindParam($this->u, $userId);
 
 
             return $stmt->execute();
@@ -47,13 +45,9 @@ class UploadModel {
 
     public function getUserProjects($userId)
     {
-        $queryFolders = "
-        SELECT nom AS projet
-        FROM projets 
-        WHERE utilisateur = :userId 
-        ORDER BY nom";
+        $queryFolders = "SELECT nom AS projet FROM projets WHERE utilisateur = :userId ORDER BY nom";
         $stmtFolders = $this->db->prepare($queryFolders);
-        $stmtFolders->bindParam(':userId', $userId);
+        $stmtFolders->bindParam($this->uId, $userId);
         $stmtFolders->execute();
         return $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -63,15 +57,14 @@ class UploadModel {
     public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent,$project)
     {
         try {
-            $query = "INSERT INTO uploadGJ (file_name, file_data, user,dossier,projet) 
-                      VALUES (:file_name, :file_data, :user, :dossier, :project)";
+            $query = "INSERT INTO uploadGJ (file_name, file_data, user,dossier,projet) VALUES (:file_name, :file_data, :user, :dossier, :project)";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':file_name', $fileName);
+            $stmt->bindParam($this->file, $fileName);
             $stmt->bindParam(':file_data', $fileContent, PDO::PARAM_STR);
-            $stmt->bindParam(':user', $userId);
+            $stmt->bindParam($this->u, $userId);
             $stmt->bindParam(':dossier', $dossierParent);
-            $stmt->bindParam(':project', $project);
+            $stmt->bindParam($this->p, $project);
 
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -83,13 +76,12 @@ class UploadModel {
     public function saveUploadGT($fileName, $fileContent, $userId)
     {
         try {
-            $query = "INSERT INTO uploadGT (file_name, file_data, user) 
-                      VALUES (:file_name, :file_data, :user)";
+            $query = "INSERT INTO uploadGT (file_name, file_data, user) VALUES (:file_name, :file_data, :user)";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':file_name', $fileName);
+            $stmt->bindParam($this->file, $fileName);
             $stmt->bindParam(':file_data', $fileContent, PDO::PARAM_LOB);
-            $stmt->bindParam(':user', $userId);
+            $stmt->bindParam($this->u, $userId);
 
             return $stmt->execute();
         } catch (PDOException $e) {
@@ -97,144 +89,36 @@ class UploadModel {
         }
     }
 
-    // Récupérer les uploads GeoJSON d'un utilisateur
-    public function getUploadsGJByUser($userId)
+    public function fileExistGJ($customName,$userID,$project)
     {
-        try {
-            $query = "SELECT * FROM uploadGJ WHERE user = :user_id ORDER BY dateEnr DESC";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new \Exception("Erreur lors de la récupération des GeoJSON : " . $e->getMessage());
-        }
-    }
-
-    // Récupérer les uploads GeoTIFF d'un utilisateur
-    public function getUploadsGTByUser($userId)
-    {
-        try {
-            $query = "SELECT * FROM uploadGT WHERE user = :user_id ORDER BY dateEnr DESC";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new \Exception("Erreur lors de la récupération des GeoTIFF : " . $e->getMessage());
-        }
-    }
-
-    // Enregistrer une simulation
-    public function saveSimulation($fileName, $userId, $simulationData )
-    {
-        try {
-            $query = "INSERT INTO simulations (user_id, file_name, simulation_data) 
-                      VALUES (:user_id, :file_name, :simulation_data)";
-
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->bindParam(':file_name', $fileName);
-            $stmt->bindParam(':simulation_data', $simulationData);
-
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            throw new \Exception("Erreur lors de l'enregistrement de la simulation : " . $e->getMessage());
-        }
-    }
-
-    // Enregistrer une comparaison
-    public function saveComparison($userId, $fileSimulated, $fileComparing, $comparisonData = null)
-    {
-        try {
-            $query = "INSERT INTO comparisons (user_id, file_simulated, file_comparing, comparison_data) 
-                      VALUES (:user_id, :file_simulated, :file_comparing, :comparison_data)";
-
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(':user_id', $userId);
-            $stmt->bindParam(':file_simulated', $fileSimulated);
-            $stmt->bindParam(':file_comparing', $fileComparing);
-            $stmt->bindParam(':comparison_data', $comparisonData);
-
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            throw new \Exception("Erreur lors de l'enregistrement de la comparaison : " . $e->getMessage());
-        }
-    }
-
-    // Récupérer les uploads d'un utilisateur (GeoJSON et GeoTIFF)
-    public function getAllUploadsByUser($userId)
-    {
-        try {
-            $uploadsGJ = $this->getUploadsGJByUser($userId);
-            $uploadsGT = $this->getUploadsGTByUser($userId);
-            return ['GeoJSON' => $uploadsGJ, 'GeoTIFF' => $uploadsGT];
-        } catch (\Exception $e) {
-            throw new \Exception("Erreur lors de la récupération des uploads : " . $e->getMessage());
-        }
-    }
-
-    // Vérifier si les shapefiles ont le même système de référence
-    public function verifyShapefileReferenceSystems($filePaths)
-    {
-        // Cette fonction doit vérifier que tous les shapefiles ont le même SRID
-        // Cela nécessite de lire les fichiers .prj ou d'utiliser une bibliothèque PHP appropriée
-
-        // Pour l'exemple, nous allons supposer que tous les shapefiles ont le même SRID
-        // Implémentez la logique réelle selon vos besoins
-        return true;
-    }
-
-    // Vérifier si deux fichiers peuvent être comparés (même référence géologique)
-    public function verifyGeologicalReferences($fileSimulated, $fileComparing)
-    {
-        // Cette fonction doit vérifier que les deux fichiers ont la même référence géologique
-        // Implémentez la logique réelle selon vos besoins
-
-        // Pour l'exemple, nous allons supposer que les références géologiques sont les mêmes
-        // Implémentez la logique réelle selon vos besoins
-        return true;
-    }
-
-    public function file_existGJ($customName)
-    {
-        $query = "SELECT COUNT(*) FROM uploadGJ WHERE file_name = :file_name";
+        $query = "SELECT COUNT(*) FROM uploadGJ WHERE file_name = :file_name and user = :user and projet = :project";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':file_name', $customName);
+        $stmt->bindParam($this->file, $customName);
+        $stmt->bindParam($this->u, $userID);
+        $stmt->bindParam($this->p, $project);
         $stmt->execute();
 
-        if( $stmt->fetchColumn() > 0){
-            return true;
-
-        }else{
-            return false;
-        }
+        return  $stmt->fetchColumn() > 0;
     }
 
     public function deleteFileGJ($fileName,$userId,$projet) {
 
         $query = "DELETE FROM uploadGJ WHERE file_name = :file_name and user = :user and projet = :projet";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':file_name', $fileName);
-        $stmt->bindParam(':user', $userId);
+        $stmt->bindParam($this->file, $fileName);
+        $stmt->bindParam($this->u, $userId);
         $stmt->bindParam(':projet', $projet);
         return $stmt->execute();
     }
 
 
     public function verifyFolder($userId, $parentFolder, $folderName,$project): bool {
-        $query = "
-        SELECT COUNT(*) 
-        FROM organisation 
-        WHERE id_dossier = :folderName 
-        AND dossierParent = :parentFolder 
-        AND id_utilisateur = :userId
-        AND projet = :project";
+        $query = "SELECT COUNT(*) FROM organisation WHERE id_dossier = :folderName AND dossierParent = :parentFolder AND id_utilisateur = :userId AND projet = :project";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':folderName', $folderName);
+        $stmt->bindParam($this->fname, $folderName);
         $stmt->bindParam(':parentFolder', $parentFolder);
-        $stmt->bindParam(':userId', $userId);
-        $stmt->bindParam(':project', $project);
+        $stmt->bindParam($this->uId, $userId);
+        $stmt->bindParam($this->p, $project);
         $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
@@ -248,14 +132,12 @@ class UploadModel {
             }
 
             // Insérer le dossier dans 'organisation'
-            $insertFolder = "
-            INSERT INTO organisation (id_dossier, dossierParent, id_utilisateur,projet) 
-            VALUES (:folderName, :parentFolder, :userId,:project)";
+            $insertFolder = "INSERT INTO organisation (id_dossier, dossierParent, id_utilisateur,projet) VALUES (:folderName, :parentFolder, :userId,:project)";
             $stmtFolder = $this->db->prepare($insertFolder);
-            $stmtFolder->bindParam(':folderName', $folderName);
+            $stmtFolder->bindParam($this->fname, $folderName);
             $stmtFolder->bindParam(':parentFolder', $parentFolder);
-            $stmtFolder->bindParam(':userId', $userId);
-            $stmtFolder->bindParam(':project', $project);
+            $stmtFolder->bindParam($this->uId, $userId);
+            $stmtFolder->bindParam($this->p, $project);
             $stmtFolder->execute();
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
@@ -264,28 +146,19 @@ class UploadModel {
 
     public function getExperimentation($userId,$project) {
         // Récupérer les dossier
-        $queryFolders = "
-        SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent
-        FROM organisation
-        WHERE id_utilisateur = :userId
-        AND projet = :project
-        ORDER BY dossierParent, id_dossier";
+        $queryFolders = "SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent FROM organisation WHERE id_utilisateur = :userId AND projet = :project ORDER BY dossierParent, id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
-        $stmtFolders->bindParam(':userId', $userId);
-        $stmtFolders->bindParam(':project', $project);
+        $stmtFolders->bindParam($this->uId, $userId);
+        $stmtFolders->bindParam($this->p, $project);
         $stmtFolders->execute();
         $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
 
 
         // Récupérer les fichiers
-        $queryFiles = "
-    SELECT e.id_xp,e.nom_xp, e.dossier as dossier_id
-    FROM experimentation e
-    WHERE id_utilisateur = :userId
-    AND projet = :project";
+        $queryFiles = "SELECT e.id_xp,e.nom_xp, e.dossier as dossier_id FROM experimentation e WHERE id_utilisateur = :userId AND projet = :project";
         $stmtFiles = $this->db->prepare($queryFiles);
-        $stmtFiles->bindParam(':userId', $userId);
-        $stmtFiles->bindParam(':project', $project);
+        $stmtFiles->bindParam($this->uId, $userId);
+        $stmtFiles->bindParam($this->p, $project);
         $stmtFiles->execute();
         $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
 
@@ -327,14 +200,14 @@ class UploadModel {
 
 
 
-        foreach ($folderIndex as $folderId => &$f){
-            if(isset($f['parent_id']) and !($f['parent_id'] === 'root')){
+        foreach ($folderIndex as  &$f){
+            if(isset($f['parent_id']) && $f['parent_id'] !== 'root'){
                 $folderIndex[$f['parent_id']]['children'][] = &$f;
             }
         }
 
         // Construire l'arborescence hiérarchique
-        foreach ($folderIndex as $folderId => &$folder) {
+        foreach ($folderIndex as  &$folder) {
             if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
                 // Ajouter à la racine
                 $folderTree[] = &$folder;
@@ -348,27 +221,18 @@ class UploadModel {
 
     public function getFolderHierarchy($project, $userId) {
         // Récupérer les dossiers
-        $queryFolders = "
-    SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent 
-    FROM organisation 
-    WHERE id_utilisateur = :userId
-    AND projet = :project
-    ORDER BY dossierParent, id_dossier";
+        $queryFolders = "SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent FROM organisation WHERE id_utilisateur = :userId AND projet = :project ORDER BY dossierParent, id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
-        $stmtFolders->bindParam(':userId', $userId);
-        $stmtFolders->bindParam(':project', $project);
+        $stmtFolders->bindParam($this->uId, $userId);
+        $stmtFolders->bindParam($this->p, $project);
         $stmtFolders->execute();
         $folders = $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
 
         // Récupérer les fichiers
-        $queryFiles = "
-    SELECT f.file_name, f.dossier as dossier_id
-    FROM uploadGJ f
-    WHERE user = :userId
-    AND projet = :project";
+        $queryFiles = "SELECT f.file_name, f.dossier as dossier_id FROM uploadGJ f WHERE user = :userId AND projet = :project";
         $stmtFiles = $this->db->prepare($queryFiles);
-        $stmtFiles->bindParam(':userId', $userId);
-        $stmtFiles->bindParam(':project', $project);
+        $stmtFiles->bindParam($this->uId, $userId);
+        $stmtFiles->bindParam($this->p, $project);
         $stmtFiles->execute();
         $files = $stmtFiles->fetchAll(PDO::FETCH_ASSOC);
 
@@ -407,14 +271,15 @@ class UploadModel {
         }
 
         // Ajouter les dossiers enfants dans leurs dossiers parents
-        foreach ($folderIndex as $folderId => &$folder) {
+        foreach ($folderIndex as  &$folder) {
             if (isset($folder['parent_id']) && $folder['parent_id'] !== 'root') {
                 $folderIndex[$folder['parent_id']]['children'][] = &$folder;
             }
         }
+        unset($folder);
 
         // Ajouter les dossiers racines à l'arborescence principale
-        foreach ($folderIndex as $folderId => &$folder) {
+        foreach ($folderIndex as  &$folder) {
             if (empty($folder['parent_id']) || $folder['parent_id'] === 'root') {
                 $folderTree[] = &$folder;
             } else {
@@ -427,17 +292,11 @@ class UploadModel {
 
 
     public function getSubFolder($currentUserId, $folderName,$project) {
-        $queryFolders = "
-        SELECT id_dossier AS folder_id, id_dossier AS folder_name 
-        FROM organisation 
-        WHERE id_utilisateur = :userId 
-        AND dossierParent = :folderName
-        AND projet = :project
-        ORDER BY id_dossier";
+        $queryFolders = "SELECT id_dossier AS folder_id, id_dossier AS folder_name FROM organisation WHERE id_utilisateur = :userId AND dossierParent = :folderName AND projet = :project ORDER BY id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
-        $stmtFolders->bindParam(':userId', $currentUserId);
-        $stmtFolders->bindParam(':folderName', $folderName);
-        $stmtFolders->bindParam(':project', $project);
+        $stmtFolders->bindParam($this->uId, $currentUserId);
+        $stmtFolders->bindParam($this->fname, $folderName);
+        $stmtFolders->bindParam($this->p, $project);
         $stmtFolders->execute();
         return $stmtFolders->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -449,18 +308,18 @@ class UploadModel {
             // Étape 1 : Supprimer les fichiers du dossier
             $deleteFilesQuery = "DELETE FROM uploadGJ WHERE dossier = :folderName AND user = :userId AND projet = :project";
             $stmtFiles = $this->db->prepare($deleteFilesQuery);
-            $stmtFiles->bindParam(':folderName', $folderName);
-            $stmtFiles->bindParam(':userId', $userId);
-            $stmtFiles->bindParam(':project', $project);
+            $stmtFiles->bindParam($this->fname, $folderName);
+            $stmtFiles->bindParam($this->uId, $userId);
+            $stmtFiles->bindParam($this->p, $project);
             $stmtFiles->execute();
             error_log("Fichiers supprimés pour le dossier : " . $folderName);
 
             // Étape 2 : Récupérer les sous-dossiers
             $subFoldersQuery = "SELECT id_dossier FROM organisation WHERE dossierParent = :folderName AND id_utilisateur = :userId AND projet = :project";
             $stmtSubFolders = $this->db->prepare($subFoldersQuery);
-            $stmtSubFolders->bindParam(':folderName', $folderName);
-            $stmtSubFolders->bindParam(':userId', $userId);
-            $stmtSubFolders->bindParam(':project', $project);
+            $stmtSubFolders->bindParam($this->fname, $folderName);
+            $stmtSubFolders->bindParam($this->uId, $userId);
+            $stmtSubFolders->bindParam($this->p, $project);
             $stmtSubFolders->execute();
             $subFolders = $stmtSubFolders->fetchAll(PDO::FETCH_ASSOC);
 
@@ -472,9 +331,9 @@ class UploadModel {
             // Étape 3 : Supprimer le dossier lui-même
             $deleteFolderQuery = "DELETE FROM organisation WHERE id_dossier = :folderName AND id_utilisateur = :userId AND projet = :project";
             $stmtFolder = $this->db->prepare($deleteFolderQuery);
-            $stmtFolder->bindParam(':folderName', $folderName);
-            $stmtFolder->bindParam(':userId', $userId);
-            $stmtFolder->bindParam(':project', $project);
+            $stmtFolder->bindParam($this->fname, $folderName);
+            $stmtFolder->bindParam($this->uId, $userId);
+            $stmtFolder->bindParam($this->p, $project);
             $stmtFolder->execute();
 
             error_log("Dossier supprimé : " . $folderName);
@@ -503,29 +362,6 @@ class UploadModel {
 
 
 
-
-    public function file_existGT($customName)
-    {
-        $query = "SELECT COUNT(*) FROM uploadGT WHERE file_name = :file_name";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':file_name', $customName);
-        $stmt->execute();
-
-        if ($stmt->fetchColumn() > 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function setErrorMessage($errorMessage)
-    {
-        $this->errorMessage = $errorMessage;
-    }
-
-    public function getErrorMessage(){
-        return $this->errorMessage;
-    }
 
 }
 ?>

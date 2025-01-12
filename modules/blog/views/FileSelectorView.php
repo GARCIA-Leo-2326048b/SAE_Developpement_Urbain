@@ -9,10 +9,10 @@ class FileSelectorView
 
     public function __construct($files) {
         $this->files = $files;
-        $this->historiqueView = new \blog\views\HistoriqueView($this->files);
+        $this->historiqueView = new HistoriqueView($this->files);
     }
 
-    public function show() {?>
+    public function show() : void{?>
 
         <div class="container-content">
         <div class="main-content">

@@ -16,7 +16,7 @@ class Upload
     private $currentUserId; // ID de l'utilisateur connecté
     private $header = 'Content-Type: application/json';
     private $pref = '/[^a-zA-Z0-9_-]/';
-    private $nouser = false;
+
 
     public function __construct()
     {
@@ -32,9 +32,8 @@ class Upload
             $this->currentUserId = $_SESSION['user_id'];
         } else {
             // Rediriger vers la page de connexion
-//            header("Location: index.php?action=authentification");
-            $this->nouser = true;
-//            exit();
+           header("Location: index.php?action=authentification");
+          exit();
         }
     }
 
@@ -44,12 +43,12 @@ class Upload
         try {
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+                echo json_encode(['success' => false, 'message' => 'Pas la bonne methode HTTP.']);
             }
 
             // Récupérer les données envoyées par AJAX en GET
             if (empty($_POST['new_project_name'])) {
-                throw new \Exception("Le nom du projet est requis.");
+                echo json_encode(['success' => false, 'message' => 'Le nom du projet est requis.']);
             }
 
             $project = trim($_POST['new_project_name']);
@@ -57,7 +56,7 @@ class Upload
 
 
             if ($this->uploadModel->projetExiste($project,$this->currentUserId)) {
-                throw new \Exception("Ce projet existe déjà");
+                echo json_encode(['success' => false, 'message' => 'Ce Projet existe déjà']);
             }
 
             // Création du projet
@@ -91,9 +90,8 @@ class Upload
             $_SESSION['current_project_id'] = $_POST['project_id'];
             $_SESSION['current_project_name'] =  $_POST['project_id'];
             header("Location: index.php?action=home");
-//            echo json_encode(['success' => true, 'message' => 'Projet sélectionné avec succès.']);
         } else {
-//            echo json_encode(['success' => false, 'message' => 'Aucun projet sélectionné.']);
+           echo json_encode(['success' => false, 'message' => 'Aucun projet sélectionné.']);
         }
         exit();
     }
@@ -116,7 +114,7 @@ class Upload
             }
             // Gestion des fichiers Raster
             elseif (isset($_FILES['rasterfile'])) {
-                $this->handleRasterUpload();
+                $this->uploadfileGT();
             } else {
                 echo "Aucun fichier n'a été téléchargé.";
             }
@@ -141,37 +139,37 @@ class Upload
         try {
 
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                throw new \Exception("Méthode HTTP invalide. Utilisez POST pour uploader les fichiers.");
+                echo json_encode(['success' => false, 'message' => 'Pas la bonne méthode HTTP.']);
             }
 
             // Récupérer les données envoyées par AJAX en GET
             if (empty($_POST['shapefile_name'])) {
-                throw new \Exception("Le nom du fichier est requis.");
+                echo json_encode(['success' => false, 'message' => 'Le nom du fichier est requis.']);
             }
 
             $fileName = trim($_POST['shapefile_name']);
             $fileName = preg_replace($this->pref, '', $fileName); // Nettoyer le nom du dossier
 
             if (empty($fileName)) {
-                throw new \Exception("Nom de dossier invalide.");
+                echo json_encode(['success' => false, 'message' => 'Nom invalide.']);
             }
 
             $dossierParent = $_POST['dossier_parent'] ?? null;
             // Vérifier si le fichier existe déjà pour éviter les conflits
             $nom = $fileName . '.geojson';
-            if ($this->uploadModel->file_existGJ($nom)) {
-                throw new \Exception("fichier extste déjà.");
+            if ($this->uploadModel->fileExistGJ($nom,$this->currentUserId,$_SESSION['current_project_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Ce fichier existe déjà.']);
             }
             // Récupérer le contenu du fichier
             if (!isset($_FILES['geojson']) || $_FILES['geojson']['error'] !== UPLOAD_ERR_OK) {
-                throw new \Exception("Erreur lors de l'upload du fichier.");
+                echo json_encode(['success' => false, 'message' => 'Erreur lors du téléchargement du fichier.']);
             }
 
             $fileTmpPath = $_FILES['geojson']['tmp_name'];
             $fileContent = file_get_contents($fileTmpPath);
 
             if ($fileContent === false) {
-                throw new \Exception("Impossible de lire le fichier GeoJSON.");
+                echo json_encode(['success' => false, 'message' => 'Impossible de lire le fichier GeoJSON.']);
             }
 
             // Création du dossier
@@ -185,6 +183,73 @@ class Upload
         }
         exit();
     }
+
+    public function uploadfileGT()
+    {
+        header('Content-Type: application/json'); // Réponse au format JSON
+        try {
+            // Vérifier la méthode HTTP
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                echo json_encode(['success' => false, 'message' => 'Méthode HTTP invalide.']);
+                exit;
+            }
+
+            // Vérifier les champs nécessaires
+            if (empty($_POST['rasterfile_name'])) {
+                echo json_encode(['success' => false, 'message' => 'Le nom du fichier est requis.']);
+                exit;
+            }
+
+            $fileName = trim($_POST['rasterfile_name']);
+            $fileName = preg_replace('/[^a-zA-Z0-9_-]/', '', $fileName); // Nettoyer le nom du fichier
+
+            if (empty($fileName)) {
+                echo json_encode(['success' => false, 'message' => 'Nom de fichier invalide.']);
+                exit;
+            }
+
+            // Vérifier la présence du fichier téléchargé
+            if (!isset($_FILES['rasterfile']) || $_FILES['rasterfile']['error'] !== UPLOAD_ERR_OK) {
+                echo json_encode(['success' => false, 'message' => 'Erreur lors de l\'envoi du fichier.']);
+                exit;
+            }
+
+            $fileTmpPath = $_FILES['rasterfile']['tmp_name'];
+            $fileType = mime_content_type($fileTmpPath); // Récupérer le type MIME du fichier
+            $allowedTypes = ['image/tiff', 'image/png', 'image/jpeg'];
+
+            if (!in_array($fileType, $allowedTypes)) {
+                echo json_encode(['success' => false, 'message' => 'Type de fichier non autorisé.']);
+                exit;
+            }
+
+            $fileContent = file_get_contents($fileTmpPath);
+
+            if ($fileContent === false) {
+                echo json_encode(['success' => false, 'message' => 'Impossible de lire le contenu du fichier.']);
+                exit;
+            }
+
+            $dossierParent = $_POST['dossier_parent'] ?? null;
+            $nom = $fileName . '.geojson';
+
+            // Vérifier si le fichier existe déjà
+            if ($this->uploadModel->fileExistGJ($nom, $this->currentUserId, $_SESSION['current_project_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Ce fichier existe déjà.']);
+                exit;
+            }
+
+            // Enregistrer le fichier dans le dossier
+            $this->uploadModel->saveUploadGJ($nom, $fileContent, $this->currentUserId, $dossierParent, $_SESSION['current_project_id']);
+
+            // Réponse JSON en cas de succès
+            echo json_encode(['success' => true, 'message' => 'Fichier téléchargé avec succès.']);
+        } catch (\Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit();
+    }
+
 
     public function deleteFolder()
     {
@@ -242,39 +307,6 @@ class Upload
         return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
 
-//    public function folder1() {
-//        header($this->header); // Réponse au format JSON
-//        try {
-//            // Récupérer les données envoyées par AJAX en GET
-//            if (empty($_GET['dossier_name'])) {
-//                throw new \Exception("Le nom du dossier est requis.");
-//            }
-//
-//            $folderName = trim($_GET['dossier_name']);
-//            $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
-//
-//            if (empty($folderName)) {
-//                throw new \Exception("Nom de dossier invalide.");
-//            }
-//
-//            $dossierParent = $_GET['dossier_parent'] ?? null;
-//
-//            // Vérification de l'existence du dossier
-//            if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id'])) {
-//                throw new \Exception("Ce répertoire existe déjà.");
-//            }
-//
-//            // Création du dossier
-//            $this->uploadModel->createFolder($this->currentUserId, $dossierParent, $folderName,$_SESSION['current_project_id']);
-//
-//            // Réponse JSON pour succès
-//            echo json_encode(['success' => true, 'message' => 'Dossier créé avec succès.']);
-//        } catch (\Exception $e) {
-//            // Réponse JSON pour erreur
-//            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-//        }
-//        exit();
-//    }
 
     public function folder1() {
         header('Content-Type: application/json'); // Réponse au format JSON
@@ -283,21 +315,21 @@ class Upload
             $inputData = json_decode(file_get_contents('php://input'), true);
 
             if (empty($inputData['dossier_name'])) {
-                throw new \Exception("Le nom du dossier est requis.");
+                echo json_encode(['success' => false, 'message' => 'Le nom du dossier est requis.']);
             }
 
             $folderName = trim($inputData['dossier_name']);
             $folderName = preg_replace($this->pref, '', $folderName); // Nettoyer le nom du dossier
 
             if (empty($folderName)) {
-                throw new \Exception("Nom de dossier invalide.");
+                echo json_encode(['success' => false, 'message' => 'Nom de dossier invalide.']);
             }
 
             $dossierParent = $inputData['dossier_parent'] ?? null;
 
             // Vérification de l'existence du dossier
             if ($this->uploadModel->verifyFolder($this->currentUserId, $dossierParent, $folderName, $_SESSION['current_project_id'])) {
-                throw new \Exception("Ce répertoire existe déjà.");
+                echo json_encode(['success' => false, 'message' => 'Ce dossier existe déjà']);
             }
 
             // Création du dossier
@@ -321,168 +353,6 @@ class Upload
         header($this->header);
         echo json_encode($subFolders);
     }
-    // Gérer l'upload des Shapefiles
-    public function handleShapefileUpload()
-    {
-        $files = $_FILES['shapefile'];
-        $requiredExtensions = ['shp', 'shx', 'dbf']; // Extensions requises
-        $uploadedFiles = [];
-        $uploadDir = __DIR__ . '/../../../assets/shapefile/'; // Dossier de destination
-
-        if (isset($_POST['dossier_parent'])){
-            $dossierParent = $_POST['dossier_parent'];
-        } else {
-            $dossierParent = null;
-        }
-
-        // Récupérer le nom de fichier personnalisé
-        if (isset($_POST['shapefile_name']) && !empty(trim($_POST['shapefile_name']))) {
-            $customName = trim($_POST['shapefile_name']);
-            // Sanitize the custom name to prevent security issues
-            $customName = preg_replace($this->pref, '', $customName);
-            if (empty($customName)) {
-                throw new \Exception("Nom de fichier invalide.");
-            }
-        } else {
-            throw new \Exception("Veuillez spécifier un nom de fichier.");
-        }
-        // Vérifier si le fichier existe déjà pour éviter les conflits
-        $nom = $customName . '.geojson';
-        if ($this->uploadModel->file_existGJ($nom)) {
-            $this->errorMessage = "Le fichier " . htmlspecialchars($customName . '.geojson') . " existe déjà.";
-            return $this->errorMessage;
-        }
-        // Vérifier si le dossier est accessible en écriture
-        if (!is_writable($uploadDir)) {
-            throw new \Exception("Le dossier de destination n'est pas accessible en écriture.");
-        }
-
-        // Vérifier le nombre de fichiers uploadés
-        if (count($files['name']) > count($requiredExtensions)) {
-            throw new \Exception("Vous ne pouvez pas télécharger plus de " . count($requiredExtensions) . " fichiers shapefile à la fois.");
-        }
-
-        // Parcourir tous les fichiers téléchargés
-        foreach ($files['name'] as $key => $name) {
-            $fileTmpPath = $files['tmp_name'][$key];
-            $fileExtension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-
-            // Vérifiez si l'extension est dans la liste des fichiers requis
-            if (in_array($fileExtension, $requiredExtensions)) {
-                $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
-
-
-                // Déplacer chaque fichier dans le répertoire de destination
-                if (move_uploaded_file($fileTmpPath, $uploadFilePath)) {
-                    $uploadedFiles[$fileExtension] = $uploadFilePath;
-                } else {
-                    throw new \Exception("Erreur lors du téléchargement de " . htmlspecialchars($customName . '.' . $fileExtension) . ".");
-                }
-            } else {
-                throw new \Exception("Fichier " . htmlspecialchars($name) . " non valide. Extensions valides : .shp, .shx, .dbf");
-            }
-        }
-
-        // Vérifier que tous les fichiers requis (.shp, .shx, .dbf) sont présents
-        foreach ($requiredExtensions as $ext) {
-            if (!isset($uploadedFiles[$ext])) {
-                throw new \Exception("Le fichier ." . $ext . " est manquant.");
-            }
-        }
-
-        // Vérifier que les shapefiles ont le même système de référence
-        if (!$this->uploadModel->verifyShapefileReferenceSystems($uploadedFiles)) {
-            throw new \Exception("Les shapefiles ont des systèmes de référence différents.");
-        }
-
-        // Créer un fichier ZIP avec les fichiers téléchargés
-        $zipFilePath = $this->createZipFile($uploadedFiles, $customName);
-        if ($zipFilePath) {
-            // Envoyer le fichier ZIP à l'API OGRE
-            $geojsonFilePath = $this->convertShapefileToGeoJSON($zipFilePath, $customName);
-
-            // Enregistrer le GeoJSON dans la base de données
-            if ($geojsonFilePath) {
-                $geojsonFileName = basename($geojsonFilePath);
-                $geojsonContent = file_get_contents($geojsonFilePath);
-                if($this->nouser){
-                    header("Location: index.php?action=simulation");
-
-                }else {
-
-                    $this->uploadModel->saveUploadGJ($geojsonFileName, $geojsonContent, $this->currentUserId, $dossierParent);
-                    header("Location: index.php?action=new_simulation");
-                }
-
-            }
-        } else {
-            throw new \Exception("Erreur lors de la création du fichier ZIP.");
-        }
-    }
-
-    // Fonction pour compresser les shapefiles dans un fichier ZIP
-    private function createZipFile($files, $customName)
-    {
-        $zip = new ZipArchive();
-        $zipFileName = $customName . '_shapefile_' . time() . '.zip';
-        $zipFilePath = __DIR__ . '/../../../assets/shapefile/' . $zipFileName;
-
-        if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
-            foreach ($files as $file) {
-                $zip->addFile($file, basename($file));
-            }
-            $zip->close();
-            return $zipFilePath;
-        } else {
-            return false;
-        }
-    }
-
-    // Fonction pour convertir les shapefiles en GeoJSON via l'API OGRE
-    private function convertShapefileToGeoJSON($zipFilePath, $customName)
-    {
-        // URL de l'API OGRE pour la conversion
-        $apiUrl = "https://ogre.adc4gis.com/convert";
-
-        // Chemin de sortie pour le fichier GeoJSON
-        $geojsonFileName = $customName . '.geojson';
-        $geojsonFilePath = __DIR__ . '/../../../assets/shapefile/' . $geojsonFileName;
-
-        // Utiliser curl pour faire une requête POST vers l'API
-        $ch = curl_init();
-
-        // Paramètres de la requête POST avec le fichier ZIP
-        $data = array(
-            'upload' => new CURLFile($zipFilePath, 'application/zip', basename($zipFilePath))
-        );
-
-        // Configuration de curl
-        curl_setopt($ch, CURLOPT_URL, $apiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-
-        // Exécution de la requête
-        $response = curl_exec($ch);
-
-        // Gérer les erreurs de curl
-        if (curl_errno($ch)) {
-            throw new \Exception("Erreur API: " . curl_error($ch));
-        }
-
-        // Fermer la session curl
-        curl_close($ch);
-
-        // Sauvegarder la réponse (GeoJSON) dans un fichier
-        file_put_contents($geojsonFilePath, $response);
-
-        // Vérifier si le fichier GeoJSON a bien été créé
-        if (file_exists($geojsonFilePath)) {
-            return $geojsonFilePath;
-        } else {
-            throw new \Exception("La conversion a échoué.");
-        }
-    }
 
     // Gérer l'upload des fichiers Raster
     public function handleRasterUpload()
@@ -497,39 +367,39 @@ class Upload
                 // Sanitize the custom name to prevent security issues
                 $customName = preg_replace($this->pref, '', $customName);
                 if (empty($customName)) {
-                    throw new \Exception("Nom de fichier invalide.");
+                    echo json_encode(['success' => false, 'message' => 'Nom de fichier invalide.']);
                 }
             } else {
-                throw new \Exception("Veuillez spécifier un nom de fichier.");
+                echo json_encode(['success' => false, 'message' => 'Veuillez spécifiez un nom de fichier.']);
             }
 
             // Vérifiez les erreurs
             if ($file['error'] !== UPLOAD_ERR_OK) {
-                throw new \Exception("Erreur lors du téléchargement du fichier : " . $this->codeToMessage($file['error']));
+                echo json_encode(['success' => false, 'message' => 'Erreur lors du téléchargement du fichier .']);
             }
 
             // Vérifier si le dossier est accessible en écriture
             if (!is_writable($uploadDir)) {
-                throw new \Exception("Le dossier de destination n'est pas accessible en écriture.");
+                echo json_encode(['success' => false, 'message' => 'Le dossier de destination est impossible à atteindre .']);
             }
 
             // Définir un nom de fichier unique avec le nom personnalisé
             $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $allowedExtensions = ['tif', 'tiff', 'png', 'jpg', 'jpeg'];
             if (!in_array($fileExtension, $allowedExtensions)) {
-                throw new \Exception("Extension de fichier non autorisée. Extensions valides : .tif, .tiff, .png, .jpg, .jpeg");
+                echo json_encode(['success' => false, 'message' => 'Extension de fichier non autorisée. Extensions valides : .tif, .tiff, .png, .jpg, .jpeg.']);
             }
 
             $uploadFilePath = $uploadDir . $customName . '.' . $fileExtension;
 
             // Vérifier si le fichier existe déjà pour éviter les conflits
             if (file_exists($uploadFilePath)) {
-                throw new \Exception("Le fichier " . htmlspecialchars($customName . '.' . $fileExtension) . " existe déjà.");
+                echo json_encode(['success' => false, 'message' => 'Ce fichier existe déjà.']);
             }
 
             // Déplacer le fichier téléchargé
             if (!move_uploaded_file($file['tmp_name'], $uploadFilePath)) {
-                throw new \Exception("Erreur lors du déplacement du fichier.");
+                echo json_encode(['success' => false, 'message' => 'Erreur lors du téléchargement du fichier .']);
             }
 
 
@@ -578,7 +448,7 @@ class Upload
 
         // Gérer les erreurs de curl
         if (curl_errno($ch)) {
-            throw new \Exception("Erreur API: " . curl_error($ch));
+            echo json_encode(['success' => false, 'message' => 'Erreur Api.']);
         }
 
         // Fermer la session curl
@@ -591,41 +461,8 @@ class Upload
         if (file_exists($geoTiffFilePath)) {
             return $geoTiffFilePath;
         } else {
-            throw new \Exception("La conversion a échoué.");
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de la conversion.']);
         }
-    }
-
-    // Fonction pour traduire les codes d'erreur d'upload en messages
-    private function codeToMessage($code)
-    {
-        switch ($code) {
-            case UPLOAD_ERR_INI_SIZE:
-                $message = "Le fichier dépasse la directive upload_max_filesize dans php.ini.";
-                break;
-            case UPLOAD_ERR_FORM_SIZE:
-                $message = "Le fichier dépasse la directive MAX_FILE_SIZE spécifiée dans le formulaire HTML.";
-                break;
-            case UPLOAD_ERR_PARTIAL:
-                $message = "Le fichier n'a été que partiellement téléchargé.";
-                break;
-            case UPLOAD_ERR_NO_FILE:
-                $message = "Aucun fichier n'a été téléchargé.";
-                break;
-            case UPLOAD_ERR_NO_TMP_DIR:
-                $message = "Manque un dossier temporaire.";
-                break;
-            case UPLOAD_ERR_CANT_WRITE:
-                $message = "Échec de l'écriture du fichier sur le disque.";
-                break;
-            case UPLOAD_ERR_EXTENSION:
-                $message = "Une extension PHP a arrêté le téléchargement du fichier.";
-                break;
-
-            default:
-                $message = "Erreur inconnue lors du téléchargement du fichier.";
-                break;
-        }
-        return $message;
     }
 
 

@@ -13,8 +13,8 @@ class FormView
     public function renderButtons(): void {
         ?>
         <h2>Uploader des fichiers</h2>
-        <button onclick="showForm('vector')">Uploader un fichier Shapefile (Vecteur)</button>
-        <button onclick="showForm('raster')">Uploader un fichier Raster (Image)</button>
+        <button onclick="showForm('vector')">Uploader un  Shapefile </button>
+        <button onclick="showForm('raster')">Uploader un  Raster </button>
         <?php
     }
 
@@ -53,12 +53,13 @@ class FormView
                 <br><br>
                 <?php if (isset($_SESSION['suid'])): ?>
                     <label for="dossier_parent">Sélectionnez un dossier :</label>
-                    <select class="folder-selector" id="dossier_parent" name="dossier_parent">
+                    <select id="dossier_parent" name="dossier_parent">
                         <?php $this->folderHistory->generateFolderOptions($this->folderHistory->getFiles()); ?>
                     </select>
                 <?php endif; ?>
                 <input type="submit" value="Télécharger">
             </form>
+
             <?php
         }
     }

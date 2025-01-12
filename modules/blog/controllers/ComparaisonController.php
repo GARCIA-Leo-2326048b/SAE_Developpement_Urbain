@@ -11,7 +11,7 @@ use geoPHP;
 class ComparaisonController{
 
     private $comparaisonModel;
-    private $GeoJsonModel;
+    private $geoJsonModel;
     private $view;
     private $db;
 
@@ -22,7 +22,7 @@ class ComparaisonController{
         $folders = $uploadModel->getFolderHierarchy($_SESSION['current_project_id'], $_SESSION['user_id']);
         $this->comparaisonModel = new ComparaisonModel();
         $this->view = new ComparaisonView($folders);
-        $this->GeoJsonModel = new GeoJsonModel();
+        $this->geoJsonModel = new GeoJsonModel();
     }
 
     public function saveExperimentation()
@@ -97,10 +97,10 @@ class ComparaisonController{
             $this->view->showComparison($formattedData, $geoJsonSim, $geoJsonVer, $geoJsonSimName, $geoJsonVerName,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
-            $geoJsonHouseSim = $this->GeoJsonModel->fetchGeoJson($geoJsonHouseSimName);
-            $geoJsonHouseVer= $this->GeoJsonModel->fetchGeoJson($geoJsonHouseVerName);
-            $geoJsonRoadSim = $this->GeoJsonModel->fetchGeoJson($geoJsonRoadSimName);
-            $geoJsonRoadVer = $this->GeoJsonModel->fetchGeoJson($geoJsonRoadVerName);
+            $geoJsonHouseSim = $this->geoJsonModel->fetchGeoJson($geoJsonHouseSimName);
+            $geoJsonHouseVer= $this->geoJsonModel->fetchGeoJson($geoJsonHouseVerName);
+            $geoJsonRoadSim = $this->geoJsonModel->fetchGeoJson($geoJsonRoadSimName);
+            $geoJsonRoadVer = $this->geoJsonModel->fetchGeoJson($geoJsonRoadVerName);
 
             // Projeter les GeoJSON dans le même système de coordonnées
             $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($geoJsonHouseSim);

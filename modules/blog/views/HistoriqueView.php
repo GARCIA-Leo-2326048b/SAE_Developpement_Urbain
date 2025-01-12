@@ -5,68 +5,71 @@ namespace blog\views;
 class HistoriqueView
 {
     private $files;
+    private $closetag = '</ul>';
 
     public function __construct($files) {
         $this->files = $files;
     }
 
-    private function displayFolderTree($folders, $historyId): void {
-        $ulCloseTag = '</ul>';
+    private function displayFolderTree(array $folders, string $historyId): void {
         echo '<ul>';
         foreach ($folders as $folder) {
             echo '<li>';
-            if (isset($folder['type']) && $folder['type'] === 'file') {
-                // Vérifier si le fichier est une expérimentation
-                if (isset($folder['exp']) && $folder['exp'] === 'oui') {
-                    // Pop-up pour les fichiers d'expérimentation avec l'ID
-                    echo "<button class='history-file experiment-file' 
-                      onclick=\"showExperimentPopup('" . htmlspecialchars($folder['name']) . "', '" . htmlspecialchars($folder['id'] ?? '') . "')\">"
-                        . htmlspecialchars($folder['name']) . "</button>";
-                } else {
-                    // Pop-up classique pour les fichiers
-                    echo "<button class='history-file' 
-                      onclick=\"showPopup('" . htmlspecialchars($folder['name']) . "')\">"
-                        . htmlspecialchars($folder['name']) . "</button>";
-                }
+            if ($this->isFile($folder)) {
+                $this->renderFile($folder);
             } else {
-                // Utilisation de l'ID unique ici pour chaque dossier
-                $folderId = $historyId . '-' . htmlspecialchars($folder['name']);
-                echo "<button class='folder-toggle' data-folder-id='" . htmlspecialchars($folder['name']) . "' 
-                  oncontextmenu='showContextMenu(event, \"" . htmlspecialchars($folder['name']) . "\")'
-                  onclick='toggleFolder(\"" . $folderId . "\")'>
-                  <i class='icon-folder'>📁</i> " . htmlspecialchars($folder['name']) . "</button>";
-
-                if (!empty($folder['files'])) {
-                    // Ajouter les fichiers dans une liste
-                    echo "<ul id='" . $folderId . "-files' style='display: none;'>";
-                    foreach ($folder['files'] as $file) {
-                        // Vérifier si le fichier est une expérimentation
-                        if (isset($file['exp']) && $file['exp'] === 'oui') {
-                            echo "<li><button class='history-file experiment-file' 
-                              onclick=\"showExperimentPopup('" . htmlspecialchars($file['name']) . "', '" . htmlspecialchars($file['id'] ?? '') . "')\">"
-                                . htmlspecialchars($file['name']) . "</button></li>";
-                        } else {
-                            echo "<li><button class='history-file' 
-                              onclick=\"showPopup('" . htmlspecialchars($file['name']) . "')\">"
-                                . htmlspecialchars($file['name']) . "</button></li>";
-                        }
-                    }
-                    echo $ulCloseTag;
-                }
-
-                if (!empty($folder['children'])) {
-                    // Afficher les dossiers enfants
-                    echo "<ul id='" . $folderId . "-children' style='display: none;'>";
-                    $this->displayFolderTree($folder['children'], $historyId);  // Recurse pour afficher les enfants
-                    echo $ulCloseTag;
-                }
+                $this->renderFolder($folder, $historyId);
             }
             echo '</li>';
         }
-        echo $ulCloseTag;
+        echo $this->closetag;
     }
 
+    private function isFile(array $item): bool {
+        return isset($item['type']) && $item['type'] === 'file';
+    }
 
+    private function renderFile(array $file): void {
+        $name = htmlspecialchars($file['name']);
+        if (isset($file['exp']) && $file['exp'] === 'oui') {
+            $id = htmlspecialchars($file['id'] ?? '');
+            echo "<button class='history-file experiment-file' onclick=\"showExperimentPopup('$name', '$id')\">$name</button>";
+        } else {
+            echo "<button class='history-file' onclick=\"showPopup('$name')\">$name</button>";
+        }
+    }
+
+    private function renderFolder(array $folder, string $historyId): void {
+        $name = htmlspecialchars($folder['name']);
+        $folderId = $historyId . '-' . $name;
+
+        echo "<button class='folder-toggle' data-folder-id='$name' oncontextmenu='showContextMenu(event, \"$name\")' onclick='toggleFolder(\"$folderId\")'>
+          <i class='icon-folder'>📁</i> $name</button>";
+
+        if (!empty($folder['files'])) {
+            $this->renderFileList($folder['files'], $folderId);
+        }
+
+        if (!empty($folder['children'])) {
+            $this->renderChildFolders($folder['children'], $historyId, $folderId);
+        }
+    }
+
+    private function renderFileList(array $files, string $folderId): void {
+        echo "<ul id='" . $folderId . "-files' style='display: none;'>";
+        foreach ($files as $file) {
+            echo '<li>';
+            $this->renderFile($file);
+            echo '</li>';
+        }
+        echo $this->closetag;
+    }
+
+    private function renderChildFolders(array $children, string $historyId, string $parentFolderId): void {
+        echo "<ul id='" . $parentFolderId . "-children' style='display: none;'>";
+        $this->displayFolderTree($children, $historyId); // Recursive call
+        echo $this->closetag;
+    }
 
 
     public function render($historyId): void {
@@ -79,7 +82,7 @@ class HistoriqueView
     public function generateFolderOptions($folders, $prefix = ''): void
     {
         // Ajouter l'option par défaut "racine" ou "root"
-        echo "<option value='root'>Choisir..</option>";
+        echo "<option value='root'>Root</option>";
 
         // Parcourir les dossiers et générer les options
         foreach ($folders as $folder) {

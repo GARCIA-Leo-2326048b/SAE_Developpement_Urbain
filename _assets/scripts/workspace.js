@@ -6,8 +6,6 @@ $(document).ready(function() {
 
         let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
 
-        console.log("Début de l'envoi du fichier...");
-
         $.ajax({
             url: 'index.php?action=create_project', // URL de votre contrôleur
             type: 'POST', // Utilisez POST pour les fichiers
@@ -16,7 +14,6 @@ $(document).ready(function() {
             contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
             dataType: 'json',
             success: function (response) {
-                console.log("Réponse du serveur :", response);
                 if (response.success) {
                     Swal.fire({
                         icon: 'success',
@@ -35,8 +32,6 @@ $(document).ready(function() {
                 }
             },
             error: function (xhr, status, error) {
-                console.error("Erreur AJAX :", status, error);
-                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
                 Swal.fire({
                     icon: 'error',
                     title: 'Erreur',
@@ -60,7 +55,7 @@ $(document).ready(function() {
     });
 
 
-//Recharger les options
+    //Recharger les options
     $('.folder-selector').on('change', function() {
         let folderName = $(this).val(); // Récupérer la valeur du dossier sélectionné
         globalParentFolder = folderName;
@@ -104,8 +99,7 @@ $(document).ready(function() {
             return; // Sortir si le nom du dossier est vide
         }
 
-        console.log("Nom du dossier:", folderName); // Affiche la valeur nettoyée du dossier
-        console.log("Dossier parent:", parentFolder); // Affiche la valeur du parent du dossier
+
 
         // Envoyer les données au contrôleur via AJAX (en POST)
         $.ajax({
@@ -118,7 +112,6 @@ $(document).ready(function() {
             }),
             dataType: 'json',
             success: function (data) {
-                console.log(data);
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
@@ -138,9 +131,6 @@ $(document).ready(function() {
                 }
             },
             error: function (xhr, status, error) {
-                console.error("Statut :", status);
-                console.error("Erreur :", error);
-                console.error("Réponse du serveur :", xhr.responseText);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erreur',
@@ -163,7 +153,6 @@ $(document).ready(function() {
         let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
         formData.append('shapefile_name', $('#shapefile_name').val()); // Ajouter des données supplémentaires si nécessaire
 
-        console.log("Début de l'envoi du fichier...");
 
         $.ajax({
             url: 'index.php?action=upload', // URL de votre contrôleur
@@ -173,7 +162,6 @@ $(document).ready(function() {
             contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
             dataType: 'json',
             success: function (response) {
-                console.log("Réponse du serveur :", response);
                 if (response.success) {
                     Swal.fire({
                         icon: 'success',
@@ -182,6 +170,52 @@ $(document).ready(function() {
                     }).then(() => {
                         // Recharger ou mettre à jour l'affichage sans recharger la page
                         updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                        updateFolderOptions();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: response.message,
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Erreur AJAX :", status, error);
+                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors du téléchargement.',
+                });
+            },
+        });
+    });
+
+    $('#rasterForm').on('submit', function (e) {
+        e.preventDefault(); // Empêche le rechargement de la page
+
+        let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
+        formData.append('rasterfile_name', $('#rasterfile_name').val()); // Ajouter des données supplémentaires si nécessaire
+
+
+        $.ajax({
+            url: 'index.php?action=upload', // URL de votre contrôleur
+            type: 'POST', // Utilisez POST pour les fichiers
+            data: formData,
+            processData: false, // Nécessaire pour éviter que jQuery ne traite les données
+            contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: response.message,
+                    }).then(() => {
+                        // Recharger ou mettre à jour l'affichage sans recharger la page
+                        updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
+                        updateFolderOptions();
                     });
                 } else {
                     Swal.fire({
@@ -356,14 +390,17 @@ function updateFolderOptions() {
 
             const $select = $('#dossier_parent1');
             const $select2 = $('#dossier_parent');
+            const $select3 = $('#folderSelect');
             $select2.empty(); // Vide le contenu actuel du select
             $select2.append('<option value="root">Choisir..</option>'); // Ajoute l'option "Racine"
             $select2.append(data); // Insère directement les options reçues du serveur
             $select.empty(); // Vide le contenu actuel du select
             $select.append('<option value="root">Choisir..</option>'); // Ajoute l'option "Racine"
             $select.append(data); // Insère directement les options reçues du serveur
+            $select3.empty(); // Vide le contenu actuel du select
+            $select3.append('<option value="root">Choisir..</option>'); // Ajoute l'option "Racine"
+            $select3.append(data); // Insère directement les options reçues du serveur
 
-            console.log($select.html());
         })
         .catch(error => {
             console.error("Erreur lors de la mise à jour de l'historique :", error);
@@ -414,29 +451,16 @@ function performAction() {
 
 }
 
-function selectFile() {
-    const fileName = document.getElementById('popup-file-name').textContent;
-    if (selectedFiles.length < 2 && !selectedFiles.includes(fileName)) {
-        selectedFiles.push(fileName);
-        alert(fileName + " a été sélectionné.");
-    } else if (selectedFiles.includes(fileName)) {
-        alert("Ce fichier est déjà sélectionné.");
-    } else {
-        alert("Vous ne pouvez sélectionner que deux fichiers au maximum.");
-    }
-    updateCompareButtonState();
-}
-
 function deleteFile() {
     const fileName = document.getElementById('popup-file-name').textContent;
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Êtes-vous sûr ?",
+        text: "Vous ne pourrez pas revenir en arrière !",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Oui !"
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`index.php?action=deletFile&fileName=${fileName}`, {
@@ -450,8 +474,8 @@ function deleteFile() {
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
-                            title: "Deleted!",
-                            text: "Your file has been deleted.",
+                            title:"Supprimé !",
+                            text: "Votre fichier a été supprimé avec succès.",
                             icon: "success"
                         });
                         updateHistory();
@@ -472,13 +496,13 @@ function deleteFileExp() {
     const fileName = document.getElementById('popup-file-nameExp').textContent;
     console.log(fileName);
     Swal.fire({
-        title: "Are you sure?",
-        text: "You won't be able to revert this!",
+        title: "Êtes-vous sûr ?",
+        text: "Vous ne pourrez pas revenir en arrière !",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!"
+        confirmButtonText: "Oui, supprimez-le !"
     }).then((result) => {
         if (result.isConfirmed) {
             fetch(`index.php?action=deletFileExp&fileName=${fileName}`, {
@@ -492,25 +516,25 @@ function deleteFileExp() {
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
-                            title: "Deleted!",
-                            text: "Your file has been deleted.",
+                            title: "Supprimé !",
+                            text: "Votre fichier a été supprimé avec succès.",
                             icon: "success"
                         });
                         updateHistoryExp();
                     } else {
                         Swal.fire({
                             icon: "error",
-                            title: "Oops...",
+                            title: "Oups...",
                             text: "Erreur lors de la suppression de " + fileName,
-                            footer: '<a href="#">Why do I have this issue?</a>'
+                            footer: '<a href="#">Pourquoi ai-je ce problème ?</a>'
                         });
-
                     }
                 });
         }
     });
     closePopup(actualpopup);
 }
+
 
 
 
@@ -551,27 +575,6 @@ function hideContextMenu() {
     }
 }
 
-
-function updateCompareButtonState() {
-    const compareButton = document.getElementById('compareButton');
-    if (selectedFiles.length === 2) {
-        compareButton.disabled = false;
-        compareButton.classList.add('enabled'); // Ajouter la classe 'enabled'
-    } else {
-        compareButton.disabled = true;
-        compareButton.classList.remove('enabled'); // Retirer la classe 'enabled'
-    }
-}
-
-
-function compare() {
-    if (selectedFiles.length === 2) {
-        alert("Comparaison entre " + selectedFiles[0] + " et " + selectedFiles[1] + " lancée !");
-        // Ajouter la logique de comparaison ici
-    } else {
-        alert("Veuillez sélectionner exactement deux fichiers.");
-    }
-}
 
 function deleteFolder() {
     Swal.fire({
@@ -715,3 +718,37 @@ function compareSelectedFiles(){
     // Call the backend or perform actions with the selected files
     window.location.href = 'index.php?action=compare&house=' + encodeURIComponent(house) + '&road=' + encodeURIComponent(road);
 }
+
+AOS.init({
+    duration: 1000, // Durée de l'animation
+    once: true, // Animation unique par session
+});
+
+$(document).ready(function () {
+    const $backToTop = $('#backToTop');
+
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 200) {
+            $backToTop.fadeIn();
+        } else {
+            $backToTop.fadeOut();
+        }
+    });
+
+    $backToTop.click(function () {
+        $('html, body').animate({ scrollTop: 0 }, 800);
+    });
+
+    const currentURL = window.location.href;
+
+    // Déterminez si c'est l'accueil (ajustez le critère selon votre URL)
+    if (currentURL.includes('?action=accueil') || currentURL.endsWith('/') || currentURL.endsWith('index.php')) {
+        $('#returnButton').hide(); // Cache le bouton
+    }
+});
+
+function goBack() {
+    window.history.back();
+}
+
+

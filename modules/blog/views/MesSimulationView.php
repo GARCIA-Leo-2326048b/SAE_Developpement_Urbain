@@ -15,7 +15,7 @@ class MesSimulationView
     }
 
 
-    public function show()
+    public function show() : void
     { ob_start();?>
         <div class="switcher-container">
             <div class="tabs">

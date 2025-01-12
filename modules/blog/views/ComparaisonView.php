@@ -4,7 +4,7 @@ namespace blog\views;
 
 class ComparaisonView
 {
-    private $hfolders;
+    private HistoriqueView $hfolders;
 
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);

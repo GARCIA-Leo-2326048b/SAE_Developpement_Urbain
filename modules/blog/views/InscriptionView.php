@@ -4,7 +4,7 @@ namespace blog\views;
 
 class InscriptionView
 {
-    public function show($error = null) { // Accepte un paramètre pour l'erreur
+    public function show($error = null) : void{ // Accepte un paramètre pour l'erreur
         if (isset($_SESSION['suid'])){
             header('location: https://developpement-urbain.alwaysdata.net/index.php');
         } else {
@@ -30,3 +30,4 @@ class InscriptionView
 }
 
 ?>
+

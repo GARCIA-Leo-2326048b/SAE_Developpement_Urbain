@@ -10,8 +10,8 @@ use blog\views\PreparationSimulation;
 
 class WorkSpaceController
 {
-    private $db;
-    private $uploadModel;
+    private  $db;
+    private  $uploadModel;
     private $utilisateur;
 
     public function __construct(){
@@ -30,7 +30,7 @@ class WorkSpaceController
         (new PreparationSimulation($repertoires))->show();
     }
 
-    public function project()
+    public function project() : void
     {
         if (!isset($_SESSION['current_project_id'])) {
             $_SESSION['current_project_id'] = null; // Initialisez à `null` si non défini

@@ -6,160 +6,172 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e7e5d7;
-    color: #59481d;
+    font-family: 'Poppins', Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
     line-height: 1.6;
     padding: 0;
     margin: 0;
+    overflow-x: hidden; /* Évite les débordements horizontaux */
+    transition: background-color 0.3s ease;
 }
 
 /* Stylisation du header */
 header {
-    background: linear-gradient(45deg, rgba(231, 229, 215, 0.9), rgba(149, 119, 99, 0.8)); /* Dégradé subtil avec une transparence légère */
-    color: #59481d;
+    background: linear-gradient(45deg, rgba(231, 229, 215, 0.9), rgba(149, 119, 99, 0.8));
+    color: #4b3a19;
     padding: 20px 0;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre subtile pour contraste */
-    backdrop-filter: blur(5px); /* Flou subtil en arrière-plan pour l'effet holographique */
-}
-header .titre h1 {
-    margin-bottom: 10px;
-    font-size: 2.5rem;
-}
-
-#header {
-    margin-top: 10px;
+    position: sticky; /* Reste en haut au défilement */
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.8s ease-out;
 }
 
-#header a {
-    color: #59481d;
-    text-decoration: none;
-    margin: 0 15px;
-    font-size: 1.1rem;
-    transition: color 0.3s ease;
+/* Animation de glissement pour le header */
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
-#header a:hover {
-    color: #957743;
-}
-
+/* Logo */
 .logo {
     display: flex;
     justify-content: center;
     align-items: center;
+    animation: fadeIn 1.2s ease-in-out;
 }
 
-/* Style pour l'image du logo */
 .logo-img {
-    width: 10em;
+    width: 12rem;
     height: auto;
+    transition: transform 0.3s ease;
 }
-.container {
-    text-align: center;
-    padding: 50px 20px;
+
+.logo-img:hover {
+    transform: scale(1.1); /* Zoom léger au survol */
 }
+
+/* Contenu principal */
+.content {
+    padding: 20px;
+    margin: 5rem auto;
+    max-width: 1100px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease-out forwards;
+}
+
+/* Animation de montée subtile */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Boutons */
 .buttons {
+    text-align: center;
     margin-top: 30px;
 }
+
 .buttons button {
-    padding: 15px 30px;
+    padding: 12px 24px;
     margin: 10px;
-    font-size: 16px;
+    font-size: 1rem;
     background-color: #957743;
     color: #fff;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s;
 }
+
 .buttons button:hover {
-    background-color: #59481d;
-}
-.welcome-message {
-    font-size: 24px;
-    margin-bottom: 20px;
+    background-color: #4b3a19;
+    transform: scale(1.05);
 }
 
-/* Contenu principal */
-.content {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    margin: 4rem auto;
-    max-width: 1000px;
-    background-color: white;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Stylisation du footer */
-footer {
-    background-color: #59481d;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
+/* Bouton de retour */
+.return-button {
     position: fixed;
-    width: 100%;
-    bottom: 0;
-    z-index: 1000;
-}
-
-footer p {
-    margin: 0;
-    font-size: 0.9rem;
-}
-#import{
-    display:flex;
-}
-section#import button {
-    padding: 1em;
-    margin: 1em;
-    background-color: #e2eba7;
-    color: #474e23;
-    border-radius: 5em;
-    font-family: cursive;
-}
-section#import button:hover {
-    background-color: #474e23;
-    color: #e2eba7;
-    box-shadow: 0 0 50px 5px;
-}
-.importform {
-    margin: 1em;
-    align-self: center;
-    align-items: center;
-}
-input[type="submit"] {
-    padding: 1em;
-    border-radius: 5em;
-    font-family: cursive;
+    top: 15px;
+    left: 15px;
+    background-color: #957743;
     color: white;
-    background-color: #474e23;
-}
-/* Conteneur principal pour l'historique, les boutons et les formulaires */
-.container-content {
-    justify-content: space-between;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    transition: background-color 0.3s, transform 0.2s ease;
 }
 
-/* Barre de défilement pour l'historique */
+.return-button:hover {
+    background-color: #4b3a19;
+    transform: scale(1.1);
+}
+
+/* Footer */
+footer {
+    background-color: #4b3a19;
+    color: #fff;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 5em;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease-out 0.3s forwards;
+}
+
+/* Effet au survol des liens */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #957743;
+}
+
+/* Stylisation de l'historique */
 #history {
-    width: 40%;
-    background-color: #e2eba7;
-    padding: 10px;
+    width: 60%; /* Plus large pour l'historique */
+    background-color: #f3f3f3;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    height: 500px;
     overflow-y: auto;
+    margin-right: 20px;
 }
 
 #history h2 {
-    font-size: 1em;
-    font-family: cursive;
-    margin-bottom: 10px;
-    color: #474e23;
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 15px;
 }
 
 #history-files {
@@ -168,53 +180,91 @@ input[type="submit"] {
 }
 
 .history-file {
-    background-color: #59481d;
-    color: white;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 5px;
+    background-color: #ffffff;
+    color: #333;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
     cursor: pointer;
     text-align: left;
-    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .history-file:hover {
     background-color: #957743;
+    transform: scale(1.03);
 }
 
-#history{
-    cursor: help;
+.history-file:active {
+    transform: scale(1);
 }
 
-
-/* Section pour les boutons d'upload */
+/* Section d'import */
 #import {
-    width: 50%;
+    width: 40%;
     display: flex;
     justify-content: center;
     flex-direction: column;
     align-items: center;
 }
 
-#import button ,#compareButton{
-    padding: 1em;
-    margin: 1em;
-    background-color: #e2eba7;
+#import button, #compareButton {
+    width: 100%;
+    padding: 10px 30px;  /* Augmenter la taille des boutons */
+    margin: 15px;
+    background-color: #d0e6a5; /* Une couleur différente pour l'effet visuel */
     color: #474e23;
-    border-radius: 5em;
-    font-family: cursive;
+    border-radius: 1em; /* Forme arrondie */
+    font-size: 1rem;  /* Augmenter la taille de la police */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s ease;
+    text-transform: uppercase; /* Rendre le texte plus visible */
 }
 
-#import button:hover ,#compareButton.enabled{
+#import button:hover, #compareButton.enabled {
     background-color: #474e23;
     color: #e2eba7;
-    box-shadow: 0 0 50px 5px;
+    transform: scale(1.05);
 }
 
-/* Style des formulaires */
+
+#import button:hover, #compareButton.enabled {
+    background-color: #474e23;
+    color: #e2eba7;
+    transform: scale(1.05);
+}
+/* Animation pour faire apparaître un formulaire */
+#import .importform {
+    display: none;  /* Initialement caché */
+    animation: slideIn 0.5s ease-in-out;
+}
+
+#import button:active + .importform {
+    display: block;  /* Afficher le formulaire lorsque le bouton est cliqué */
+}
+
+/* Animation pour le formulaire */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.importform {
+    margin: 1em;
+    text-align: center;
+}
+
+/* Formulaires */
 form {
     background-color: white;
-    padding: 20px;
+    padding: 25px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 400px;
@@ -223,7 +273,7 @@ form {
 
 form input[type="text"], form input[type="file"], form input[type="password"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -295,11 +345,30 @@ input[type="submit"]:hover {
     background-color: #957743;
 }
 
+/* Section de la gestion des projets */
+.project-management {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.project-management input[type="text"], .project-management textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+
 
 /* Style général pour les éléments de dossier */
 .folder-toggle {
     font-size: 20px;  /* Taille de la police plus grande pour les dossiers */
-    background-color: #4CAF50;  /* Couleur de fond plus professionnelle */
+    background-color: #254c27;  /* Couleur de fond plus professionnelle */
     color: white;  /* Texte blanc */
     border: none;
     padding: 10px 20px;
@@ -312,7 +381,7 @@ input[type="submit"]:hover {
 }
 
 .folder-toggle:hover {
-    background-color: #45a049;  /* Couleur de survol */
+    background-color: #214325;  /* Couleur de survol */
 }
 
 /* Style pour l'icône du dossier */
@@ -323,7 +392,7 @@ input[type="submit"]:hover {
 
 /* Style pour les boutons de fichiers */
 .history-file {
-    background-color: #2196F3;  /* Couleur des boutons de fichiers */
+    background-color: #685039;  /* Couleur des boutons de fichiers */
     color: white;
     padding: 8px 15px;
     margin: 5px 0;
@@ -334,7 +403,7 @@ input[type="submit"]:hover {
 }
 
 .history-file:hover {
-    background-color: #0b7dda;  /* Couleur au survol des fichiers */
+    background-color: #716459;  /* Couleur au survol des fichiers */
 }
 
 /* Effet de tabulation pour les sous-dossiers */
@@ -437,18 +506,6 @@ ul ul {
     justify-content: space-between;
     width: 100%;
     gap: 20px; /* Espacement entre les sections */
-}
-
-/* Centrage du footer */
-footer {
-    background-color: #59481d;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-    left: 0;
 }
 
 .context-menu {
@@ -632,15 +689,15 @@ footer {
 
 /*mes simulation view*/
 
- .switcher-container {
-     width: 80%;
-     margin: auto;
-     padding: 20px;
-     border: 1px solid #ccc;
-     border-radius: 8px;
-     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-     background-color: #f9f9f9;
- }
+.switcher-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+}
 
 .tabs {
     display: flex;
@@ -678,17 +735,17 @@ footer {
 }
 
 /*Style modale*/
- .modal {
-     display: none;
-     position: fixed;
-     z-index: 1000;
-     left: 0;
-     top: 0;
-     width: 100%;
-     height: 100%;
-     overflow: auto;
-     background-color: rgba(0, 0, 0, 0.4);
- }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
 
 .modal-content {
     background-color: #fefefe;
@@ -712,21 +769,21 @@ footer {
     text-decoration: none;
     cursor: pointer;
 }
-     /* Style pour le bouton "volant" */
- #saveBtn {
-     position: fixed; /* Fixe le bouton à un endroit précis dans la fenêtre */
-     bottom: 20%; /* Distance du bas de l'écran */
-     right: 10%; /* Distance du côté droit */
-     background-color: #007BFF; /* Couleur de fond */
-     color: white; /* Couleur du texte */
-     padding: 10px 20px; /* Espacement interne */
-     border: none; /* Pas de bordure */
-     border-radius: 5px; /* Coins arrondis */
-     cursor: pointer; /* Curseur interactif */
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Ombre pour l'effet volant */
-     z-index: 1000; /* S'assurer qu'il est au-dessus des autres éléments */
-     transition: transform 0.2s; /* Animation pour un effet au survol */
- }
+/* Style pour le bouton "volant" */
+#saveBtn {
+    position: fixed; /* Fixe le bouton à un endroit précis dans la fenêtre */
+    bottom: 20%; /* Distance du bas de l'écran */
+    right: 10%; /* Distance du côté droit */
+    background-color: #007BFF; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    padding: 10px 20px; /* Espacement interne */
+    border: none; /* Pas de bordure */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Curseur interactif */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Ombre pour l'effet volant */
+    z-index: 1000; /* S'assurer qu'il est au-dessus des autres éléments */
+    transition: transform 0.2s; /* Animation pour un effet au survol */
+}
 
 #saveBtn:hover {
     transform: scale(1.1); /* Agrandissement au survol */

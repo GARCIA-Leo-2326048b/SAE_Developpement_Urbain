@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require_once  __DIR__ . '/vendor/autoload.php';
 
 session_start();
 
@@ -57,9 +57,6 @@ try {
             case 'view_simulations':
                 (new blog\controllers\WorkSpaceController())->project();
                 break;
-                case 'simulation':
-                    (new blog\controllers\SimulationController())->simuler();
-                    break;
             case 'new_simulation':
                 (new blog\controllers\WorkSpaceController())->execute();
                 break;
@@ -89,7 +86,7 @@ try {
                 break;
             case 'reloadExp':
                 $id = filter_input(INPUT_GET, 'id'); // Récupérer le nom du fichier
-                (new blog\controllers\ComparaisonController())->execute(null,null,null,$id);
+                (new blog\controllers\ComparaisonController())->execute(null,null,null,null,$id);
                 break;
             case 'get_all_folders':
                 (new blog\controllers\Upload())->selectFolder();
@@ -106,8 +103,7 @@ try {
     }else {
         (new blog\controllers\HomepageController())->execute();
     }
-} catch (\Exception $e) {
+} catch (Exception $e) {
     echo $e->getMessage();
 }
 
-?>
