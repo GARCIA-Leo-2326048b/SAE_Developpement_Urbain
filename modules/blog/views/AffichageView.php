@@ -112,7 +112,6 @@ class AffichageView
                 </div>
             </div>
         </div>
-
         <?php
         (new GlobalLayout('Affichage', ob_get_clean()))->show();
     }

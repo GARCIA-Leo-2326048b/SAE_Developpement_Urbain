@@ -405,36 +405,40 @@
      * @param {Array} datasets - Les ensembles de données pour le graphique
      */
     function configureChartReload(chartDiv, chartType, labels, datasets) {
-        const config = {
-            type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : chartType,
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                responsive: true,
-                scales: chartType === 'bar'
-                    ? {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => `${value} m²`,
+        try {
+            const config = {
+                type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : chartType,
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options: {
+                    responsive: true,
+                    scales: chartType === 'bar'
+                        ? {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => `${value} m²`,
+                                },
                             },
-                        },
-                    }
-                    : chartType === 'radar'
-                        ? { r: { beginAtZero: true } }
-                        : {},
-            },
-        };
+                        }
+                        : chartType === 'radar'
+                            ? { r: { beginAtZero: true } }
+                            : {},
+                },
+            };
 
-        const ctx = chartDiv.querySelector('canvas').getContext('2d');
-        const chart = new Chart(ctx, config);
+            const ctx = chartDiv.querySelector('canvas').getContext('2d');
+            const chart = new Chart(ctx, config);
 
-        // Attacher l'objet chart à l'élément <canvas>
-        chartDiv.querySelector('canvas').chart = chart;
+            // Attacher l'objet chart à l'élément <canvas>
+            chartDiv.querySelector('canvas').chart = chart;
 
-        return chart;
+            return chart;
+        } catch (error) {
+            console.error('Erreur dans la création du graphique:', error);
+        }
     }
 
 

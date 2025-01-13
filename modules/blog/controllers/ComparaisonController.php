@@ -31,8 +31,8 @@ class ComparaisonController{
         $data = json_decode(file_get_contents('php://input'), true);
 
         // Récupérer les noms des fichiers GeoJSON pour la simulation et la vérité terrain
-        $geoJsonSimName = $data['geoJsonSimName'] ?? 'default_simulation';
-        $geoJsonVerName = $data['geoJsonVerName'] ?? 'default_verite';
+        $geoJsonSimNames = $data['geoJsonSimNames'] ?? [];
+        $geoJsonVerNames = $data['geoJsonVerNames'] ?? [];
 
         // Récupérer le nom, le dossier, et le projet depuis la requête AJAX
         $name = $data['name'] ?? 'Nom par défaut';
@@ -41,7 +41,7 @@ class ComparaisonController{
 
         // Appeler la méthode `saveExperimentation` du modèle
         try {
-            $this->comparaisonModel->saveExperimentationM($data, $geoJsonSimName, $geoJsonVerName, $name, $dossier, $project);
+            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimNames, $geoJsonVerNames, $name, $dossier, $project);
             // Répondre à l'AJAX
             echo json_encode(['success' => true]);
         } catch (Exception $e) {
@@ -71,19 +71,25 @@ class ComparaisonController{
 
             // Extraire les données du tableau associatif
             $nomXp = $experimentData['nom_xp'] ?? null;
-            $geoJsonSim = $experimentData['geoJsonSim'] ?? null;
-            $geoJsonVer = $experimentData['geoJsonVer'] ?? null;
-            $geoJsonSimName = $experimentData['geoJsonSimName'] ?? null;
-            $geoJsonVerName = $experimentData['geoJsonVerName'] ?? null;
+            $geoJsonSimName = $experimentData['geoJsonSimName'] ?? [];
+            $geoJsonVerName = $experimentData['geoJsonVerName'] ?? [];
             $charts = $experimentData['charts'] ?? null;
             $tableData = $experimentData['tableData'] ?? null;
-            var_dump($geoJsonVer);
-            var_dump($geoJsonSim);
             // Reformater les données pour les passer à la vue
             $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
 
+            // Désimbriquer les données GeoJSON si nécessaire
+            $geoJsonSim = isset($experimentData['geoJsonSim']) ? array_map(function ($item) {
+                return is_array($item) && isset($item['file_data']) ? $item['file_data'] : $item;
+            }, $experimentData['geoJsonSim']) : [];
+
+            $geoJsonVer = isset($experimentData['geoJsonVer']) ? array_map(function ($item) {
+                return is_array($item) && isset($item['file_data']) ? $item['file_data'] : $item;
+            }, $experimentData['geoJsonVer']) : [];
+
+
             // Passer chaque donnée individuellement à la vue
-            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
+            $this->view->showComparison($formattedData, $geoJsonSimName,$geoJsonVerName,$geoJsonSim,$geoJsonVer,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
             $fileDataSim = [];
@@ -114,7 +120,6 @@ class ComparaisonController{
             // Calculer les statistiques pour les Shape Index
             $shapeIndexStatsSim = $this->comparaisonModel->getStat($shapeIndexesSim);
             $shapeIndexStatsVer = $this->comparaisonModel->getStat($shapeIndexesVer);
-
             $results = $this->comparaisonModel->grapheDonnees($areaStatsSim,$areaStatsVer,$shapeIndexStatsSim,$shapeIndexStatsVer);
             // Si aucun ID n'est fourni, juste afficher les résultats
             $this->view->showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer);
