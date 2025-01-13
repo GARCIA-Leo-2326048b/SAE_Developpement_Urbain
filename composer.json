@@ -16,6 +16,7 @@
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-zip": "*",
-    "proj4php/proj4php": "^2.0"
+    "proj4php/proj4php": "^2.0",
+    "ext-fileinfo": "*"
   }
 }

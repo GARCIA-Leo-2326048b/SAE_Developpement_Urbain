@@ -96,6 +96,11 @@ try {
                 $id = filter_input(INPUT_GET, 'id'); // Récupérer le nom du fichier
                 (new blog\controllers\ComparaisonController())->execute(null,null,$id);
                 break;
+            case 'reloadExpUpdate':
+                $data = json_decode(file_get_contents('php://input'), true);
+                (new blog\controllers\ComparaisonController())->updateExperimentationCharts($data);
+                break;
+
             case 'get_all_folders':
                 (new blog\controllers\Upload())->selectFolder();
                 break;

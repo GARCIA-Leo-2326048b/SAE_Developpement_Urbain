@@ -18,11 +18,10 @@ body {
 
 /* Stylisation du header */
 header {
-    /* Appliquez cette règle pour garantir que le header est toujours visible */
-        position: sticky;
-        top: 0;
-        width: 100%;
-        z-index: 1000;  /* Assure qu'il soit au-dessus du contenu */
+    position: relative;
+    top: 0;
+    width: 100%;
+    z-index: 1000;  /* Assure qu'il soit au-dessus du contenu */
     background: linear-gradient(45deg, rgba(231, 229, 215, 0.9), rgba(149, 119, 99, 0.8));
     color: #4b3a19;
     padding: 20px 0;
@@ -30,6 +29,7 @@ header {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     animation: fadeUp 0.8s ease-out forwards;
 }
+
 
 /* Animation de glissement pour le header */
 @keyframes slideIn {
@@ -61,7 +61,7 @@ header {
     transform: scale(1.1); /* Zoom léger au survol */
 }
 
-/* Contenu principal */
+/* Contenu principal ajusté */
 .content {
     padding: 20px;
     margin: 5rem auto;
@@ -72,6 +72,7 @@ header {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeUp 0.8s ease-out forwards;
+    margin-top: 80px; /* Ajoute un espace sous le header pour ne pas le cacher */
 }
 
 /* Animation de montée subtile */
@@ -132,7 +133,7 @@ header {
     transform: scale(1.1);
 }
 
-/* Stylisation du footer */
+/* Assurez-vous que l'élément footer est toujours en bas */
 footer {
     background-color: #59481d;
     color: white;

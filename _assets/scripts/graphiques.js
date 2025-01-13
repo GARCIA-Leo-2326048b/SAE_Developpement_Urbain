@@ -257,7 +257,7 @@
                 const chartType = chartContainer.querySelector('canvas').getAttribute('id');
                 const chartData = chartContainer.querySelector('canvas').chart.data; // Récupérer les données du graphique
                 const chartOptions = chartContainer.querySelector('canvas').chart.options; // Récupérer les options
-                console.log(chartType);
+
                 // Rassembler toutes les informations du graphique
                 charts.push({
                     name: chartName,
@@ -300,7 +300,6 @@
     }
 
     function saveExperimentation(experimentationData) {
-        console.log(experimentationData);
         fetch('index.php?action=save_experimentation', {
             method: 'POST',
             headers: {
@@ -332,58 +331,40 @@
 
         if (chartsElement && chartsElement.hasAttribute('data-charts')) {
             const jsonData = chartsElement.getAttribute('data-charts');
+            console.log(jsonData);
+            console.log("Les données après parse");
 
             try {
                 const chartsData = JSON.parse(jsonData);
+                console.log(chartsData);
 
                 if (Array.isArray(chartsData) && chartsData.length > 0) {
                     chartsData.forEach((chartData, index) => {
-                        // Analyse des données internes
+                        // Vérification et parsing des données internes
                         if (typeof chartData.data_xp === "string") {
                             try {
                                 const parsedData = JSON.parse(chartData.data_xp);
 
-                                // Utiliser les données parsées si disponibles
+                                // Si 'data_xp' contient plusieurs graphiques
                                 if (Array.isArray(parsedData) && parsedData.length > 0) {
-                                    chartData = parsedData[0];
+                                    parsedData.forEach((parsedChartData, innerIndex) => {
+                                        createChart(
+                                            parsedChartData,
+                                            index,
+                                            innerIndex
+                                        );
+                                    });
                                 }
                             } catch (error) {
-                                console.error(`Erreur lors du parsing interne de 'data_xp' pour le graphique ${index}:`, error);
-                                return;
+                                console.error(
+                                    `Erreur lors du parsing interne de 'data_xp' pour le graphique ${index}:`,
+                                    error
+                                );
                             }
+                        } else {
+                            // Si les données ne sont pas imbriquées dans 'data_xp'
+                            createChart(chartData, index);
                         }
-
-                        // Validation des données
-                        const chartType = chartData.type || 'bar'; // Valeur par défaut : 'bar'
-                        if (!['bar', 'radar', 'pie'].includes(chartType)) {
-                            console.error(`Type de graphique invalide pour le graphique ${index}: ${chartType}`);
-                            return;
-                        }
-
-                        const labels = chartData.data.labels || [];
-                        const datasets = chartData.data.datasets || [];
-                        const chartName = chartData.name || `Graphique ${index + 1}`;
-
-                        // Créer un conteneur pour le graphique
-                        const chartsContainer = document.getElementById('chartsContainer');
-                        const chartDiv = document.createElement('div');
-                        chartDiv.className = 'chart-container';
-                        const chartId = `canvas-${Date.now()}-${index}`;
-                        chartDiv.innerHTML = `
-                        <h3>${chartName}</h3>
-                        <canvas id="${chartId}"></canvas>
-                        <button class="deleteChartBtn">
-                            <img src="./_assets/includes/trash-icon.png" alt="Supprimer" class="trash-icon" />
-                        </button>
-                    `;
-
-                        chartsContainer.appendChild(chartDiv);
-
-                        // Configurez l'événement de suppression
-                        chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv));
-
-                        // Configurez et affichez le graphique
-                        configureChartReload(chartDiv, chartType, labels, datasets);
                     });
                 } else {
                     console.error("Aucun graphique valide trouvé dans les données JSON.");
@@ -396,17 +377,52 @@
         }
     });
 
+    /**
+     * Crée un graphique en fonction des données fournies.
+     * @param {Object} chartData - Les données du graphique.
+     * @param {number} index - L'index principal du graphique.
+     * @param {number} [innerIndex] - L'index interne (si plusieurs graphiques dans 'data_xp').
+     */
+    function createChart(chartData, index, innerIndex = null) {
+        const chartType = chartData.type || 'bar'; // Type de graphique par défaut : bar
+        const labels = chartData.data.labels || [];
+        const datasets = chartData.data.datasets || [];
+        const chartName = chartData.name || `Graphique ${index + 1}${innerIndex !== null ? `-${innerIndex + 1}` : ''}`;
+
+        // Génération d'un ID unique basé sur le chartType et les index
+        const chartId = `${chartType}-${index}${innerIndex !== null ? `-${innerIndex}` : ''}`;
+
+        // Créer un conteneur pour le graphique
+        const chartsContainer = document.getElementById('chartsContainer');
+        const chartDiv = document.createElement('div');
+        chartDiv.className = 'chart-container';
+        chartDiv.innerHTML = `
+        <h3>${chartName}</h3>
+        <canvas id="${chartId}"></canvas>
+        <button class="deleteChartBtn">
+            <img src="./_assets/includes/trash-icon.png" alt="Supprimer" class="trash-icon" />
+        </button>
+    `;
+
+        chartsContainer.appendChild(chartDiv);
+
+        // Configurez l'événement de suppression
+        chartDiv.querySelector('.deleteChartBtn').addEventListener('click', () => removeChart(chartDiv));
+
+        // Configurez et affichez le graphique
+        configureChartReload(chartDiv, chartType, labels, datasets);
+    }
 
     /**
-     * Fonction pour configurer et recharger un graphique
-     * @param {HTMLElement} chartDiv - Le conteneur du graphique
-     * @param {string} chartType - Le type de graphique (bar, line, etc.)
-     * @param {Array} labels - Les étiquettes du graphique
-     * @param {Array} datasets - Les ensembles de données pour le graphique
+     * Fonction pour configurer et recharger un graphique.
+     * @param {HTMLElement} chartDiv - Le conteneur du graphique.
+     * @param {string} chartType - Le type de graphique (bar, radar, etc.).
+     * @param {Array} labels - Les étiquettes du graphique.
+     * @param {Array} datasets - Les ensembles de données pour le graphique.
      */
     function configureChartReload(chartDiv, chartType, labels, datasets) {
         const config = {
-            type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : chartType,
+            type: chartType === 'spider' ? 'radar' : chartType, // Convertit "spider" en "radar"
             data: {
                 labels: labels,
                 datasets: datasets,
@@ -436,6 +452,75 @@
 
         return chart;
     }
+
+    //Le cas d'enregistrement après un reload
+    function enregistrer() {
+        const updateBtn = document.getElementById('updateBtn');
+        const experimentationId = updateBtn.getAttribute('data-id'); // ID de l'expérimentation existante
+
+        if (!experimentationId) {
+            alert("ID de l'expérimentation introuvable !");
+            return;
+        }
+
+        // Récupérer les graphiques dans #chartsContainer
+        const charts = [];
+        const chartContainers = document.querySelectorAll('#chartsContainer .chart-container');
+
+        chartContainers.forEach(chartContainer => {
+            const canvas = chartContainer.querySelector('canvas');
+
+            if (canvas && canvas.chart) {
+                const chartName = chartContainer.querySelector('h3')?.textContent || "Sans titre";
+                const chartType = canvas.chart.config.type || 'bar'; // Utiliser le type de graphique du chart
+                const chartData = canvas.chart.data; // Données du graphique
+                const chartOptions = canvas.chart.options; // Options du graphique
+
+                // Validation du type de graphique
+                const validChartTypes = ['pie', 'bar', 'line', 'doughnut', 'radar'];
+                if (!validChartTypes.includes(chartType)) {
+                    console.error(`Type de graphique invalide : ${chartType}`);
+                    return; // Ne pas envoyer ce graphique
+                }
+
+                charts.push({
+                    name: chartName,
+                    type: chartType,
+                    data: chartData,
+                    options: chartOptions,
+                });
+            }
+        });
+
+        // Préparer les données pour l'envoi
+        const experimentationData = {
+            id: experimentationId, // ID de l'expérimentation à mettre à jour
+            charts: charts, // Nouveaux graphiques uniquement
+        };
+
+        // Envoi des graphiques via AJAX
+        fetch(`index.php?action=reloadExpUpdate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(experimentationData),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Graphiques mis à jour avec succès !");
+                } else {
+                    alert("Une erreur est survenue lors de la mise à jour.");
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+
+
+
+
 
 
 

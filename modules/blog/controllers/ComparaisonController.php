@@ -77,12 +77,12 @@ class ComparaisonController{
             $geoJsonVerName = $experimentData['geoJsonVerName'] ?? null;
             $charts = $experimentData['charts'] ?? null;
             $tableData = $experimentData['tableData'] ?? null;
-            var_dump($geoJsonVer);
-            var_dump($geoJsonSim);
+            var_dump($charts);
             // Reformater les données pour les passer à la vue
             $formattedData = $this->comparaisonModel->reformaterDonnees($tableData);
 
             // Passer chaque donnée individuellement à la vue
+            $this->view->setId($experimentId);
             $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
@@ -121,6 +121,28 @@ class ComparaisonController{
         }
 
     }
+
+    public function updateExperimentationCharts($data)
+    {
+        // Récupérer l'ID de l'expérimentation
+        $id = $data['id'] ?? null;
+
+        if (!$id || !isset($data['charts'])) {
+            echo json_encode(['success' => false, 'message' => 'ID ou graphiques manquants']);
+            return;
+        }
+
+        try {
+            // Appeler la méthode du modèle pour mettre à jour les graphiques
+            $success = $this->comparaisonModel->updateExperimentationChartsM($id, $data['charts']);
+            echo json_encode(['success' => $success]);
+        } catch (Exception $e) {
+            error_log('Erreur lors de la mise à jour : ' . $e->getMessage());
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+
 
 
 }
