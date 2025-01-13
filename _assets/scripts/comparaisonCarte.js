@@ -14,11 +14,14 @@ function toggleBackgroundMaps(hide) {
 const mapManagers = {};
 
 // Fonction pour initialiser la carte dans une modale
-function initializeModalMap(geoJsonHouse, geoJsonRoad, mapId) {
+function initializeModalMap(geoJsonHouse, geoJsonRoad =null, mapId) {
     if (!mapManagers[mapId]) {
         mapManagers[mapId] = new MapManager(null, null, null, mapId);
         mapManagers[mapId].addHouseLayer(geoJsonHouse);
-        mapManagers[mapId].addRoadLayer(geoJsonRoad);
+        if (geoJsonRoad) {
+            mapManagers[mapId].addRoadLayer(geoJsonRoad);
+        }
+
     }
 }
 
