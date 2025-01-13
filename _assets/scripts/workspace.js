@@ -613,7 +613,7 @@ function addToSelection() {
             updateComparisonSelectedFilesUI();
         }
 
-        closePopup();
+        closePopupS();
     }
 }
 
