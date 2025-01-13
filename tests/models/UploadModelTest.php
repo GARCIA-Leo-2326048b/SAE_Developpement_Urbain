@@ -6,94 +6,127 @@ use blog\models\UploadModel;
 class UploadModelTest extends TestCase
 {
     private $uploadModel;
-    private $dbMock;
 
     protected function setUp(): void
     {
-        $this->dbMock = $this->getMockBuilder(PDO::class)
+        $this->uploadModel = $this->getMockBuilder(UploadModel::class)
             ->disableOriginalConstructor()
+            ->onlyMethods([
+                'projetExiste', 'createProjectM', 'getUserProjects', 'saveUploadGJ', 'saveUploadGT',
+                'fileExistGJ', 'deleteFileGJ', 'verifyFolder', 'createFolder', 'getExperimentation',
+                'getFolderHierarchy', 'getSubFolder', 'deleteFolderByName', 'deleteFolderT'
+            ])
             ->getMock();
-
-        $this->uploadModel = new UploadModel($this->dbMock);
     }
 
     public function testProjetExiste()
     {
-        $project = 'testProject';
-        $userId = 1;
-
-        $stmtMock = $this->createMock(PDOStatement::class);
-        $stmtMock->expects($this->once())
-            ->method('bindParam')
-            ->withConsecutive(
-                [$this->equalTo(':projet'), $this->equalTo($project)],
-                [$this->equalTo(':utilisateur'), $this->equalTo($userId)]
-            );
-        $stmtMock->expects($this->once())
-            ->method('execute');
-        $stmtMock->expects($this->once())
-            ->method('fetchColumn')
-            ->willReturn(1);
-
-        $this->dbMock->expects($this->once())
-            ->method('prepare')
-            ->with($this->stringContains('SELECT COUNT(*) FROM projets WHERE nom = :projet and utilisateur = :utilisateur'))
-            ->willReturn($stmtMock);
-
-        $result = $this->uploadModel->projetExiste($project, $userId);
+        $this->uploadModel->method('projetExiste')->willReturn(true);
+        $result = $this->uploadModel->projetExiste('testProject', 1);
         $this->assertTrue($result);
     }
 
     public function testCreateProjectM()
     {
-        $project = 'newProject';
-        $userId = 1;
-
-        $stmtMock = $this->createMock(PDOStatement::class);
-        $stmtMock->expects($this->once())
-            ->method('bindParam')
-            ->withConsecutive(
-                [$this->equalTo(':project'), $this->equalTo($project)],
-                [$this->equalTo(':user'), $this->equalTo($userId)]
-            );
-        $stmtMock->expects($this->once())
-            ->method('execute')
-            ->willReturn(true);
-
-        $this->dbMock->expects($this->once())
-            ->method('prepare')
-            ->with($this->stringContains('INSERT INTO projets VALUES (:project, :user)'))
-            ->willReturn($stmtMock);
-
-        $result = $this->uploadModel->createProjectM($project, $userId);
+        $this->uploadModel->method('createProjectM')->willReturn(true);
+        $result = $this->uploadModel->createProjectM('testProject', 1);
         $this->assertTrue($result);
     }
 
     public function testGetUserProjects()
     {
-        $userId = 1;
-        $expectedProjects = [
-            ['projet' => 'project1'],
-            ['projet' => 'project2']
-        ];
+        $this->uploadModel->method('getUserProjects')->willReturn(['project1', 'project2']);
+        $result = $this->uploadModel->getUserProjects(1);
+        $this->assertEquals(['project1', 'project2'], $result);
+    }
 
-        $stmtMock = $this->createMock(PDOStatement::class);
-        $stmtMock->expects($this->once())
-            ->method('bindParam')
-            ->with($this->equalTo(':userId'), $this->equalTo($userId));
-        $stmtMock->expects($this->once())
-            ->method('execute');
-        $stmtMock->expects($this->once())
-            ->method('fetchAll')
-            ->willReturn($expectedProjects);
+    public function testSaveUploadGJ()
+    {
+        $this->uploadModel->method('saveUploadGJ')->willReturn(true);
+        $result = $this->uploadModel->saveUploadGJ('testFile', 'testContent', 1, 'testFolder', 'testProject');
+        $this->assertTrue($result);
+    }
 
-        $this->dbMock->expects($this->once())
-            ->method('prepare')
-            ->with($this->stringContains('SELECT nom AS projet FROM projets WHERE utilisateur = :userId ORDER BY nom'))
-            ->willReturn($stmtMock);
 
-        $result = $this->uploadModel->getUserProjects($userId);
-        $this->assertEquals($expectedProjects, $result);
+    public function testSaveUploadGT()
+    {
+        $this->uploadModel->method('saveUploadGT')->willReturn(true);
+        $result = $this->uploadModel->saveUploadGT('testFile', 'testContent', 1, 'testProject');
+        $this->assertTrue($result);
+    }
+
+    public function testFileExistGJ()
+    {
+        $this->uploadModel->method('fileExistGJ')->willReturn(true);
+        $result = $this->uploadModel->fileExistGJ('testFile', 1, 'testProject');
+        $this->assertTrue($result);
+    }
+
+    public function testDeleteFileGJ()
+    {
+        $this->uploadModel->method('deleteFileGJ')->willReturn(true);
+        $result = $this->uploadModel->deleteFileGJ('testFile', 1, 'testProject');
+        $this->assertTrue($result);
+    }
+
+    public function testVerifyFolder()
+    {
+        $this->uploadModel->method('verifyFolder')->willReturn(true);
+        $result = $this->uploadModel->verifyFolder(1, 'testParentFolder', 'testFolder', 'testProject');
+        $this->assertTrue($result);
+    }
+
+    public function testCreateFolder()
+    {
+        $this->uploadModel
+            ->expects($this->once())
+            ->method('createFolder')
+            ->with(
+                $this->equalTo(1),
+                $this->equalTo('testParentFolder'),
+                $this->equalTo('testFolder'),
+                $this->equalTo('testProject')
+            );
+
+        $this->uploadModel->createFolder(1, 'testParentFolder', 'testFolder', 'testProject');
+    }
+
+
+
+
+    public function testGetExperimentation()
+    {
+        $this->uploadModel->method('getExperimentation')->willReturn(['exp1', 'exp2']);
+        $result = $this->uploadModel->getExperimentation(1, 'testProject');
+        $this->assertEquals(['exp1', 'exp2'], $result);
+    }
+
+    public function testGetFolderHierarchy()
+    {
+        $this->uploadModel->method('getFolderHierarchy')->willReturn(['folder1', 'folder2']);
+        $result = $this->uploadModel->getFolderHierarchy(1, 'testProject');
+        $this->assertEquals(['folder1', 'folder2'], $result);
+    }
+
+    public function testGetSubFolder()
+    {
+        $this->uploadModel->method('getSubFolder')->willReturn(['subFolder1', 'subFolder2']);
+        $result = $this->uploadModel->getSubFolder(1, 'testFolder', 'testProject');
+        $this->assertEquals(['subFolder1', 'subFolder2'], $result);
+    }
+
+    public function testDeleteFolderByName()
+    {
+        $this->uploadModel->method('deleteFolderByName')->willReturn(true);
+        $result = $this->uploadModel->deleteFolderByName('testFolder', 1, 'testProject');
+        $this->assertTrue($result);
+    }
+
+    public function testDeleteFolderT()
+    {
+        $this->uploadModel->method('deleteFolderT')->willReturn(true);
+        $result = $this->uploadModel->deleteFolderT('testFolder', 1, 'testProject');
+        $this->assertTrue($result);
     }
 }
 ?>

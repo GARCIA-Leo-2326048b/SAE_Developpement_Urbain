@@ -1,16 +1,43 @@
 <?php
 
 namespace blog\views;
+/**
+ * Classe AffichageView
+ *
+ * Cette classe gère l'affichage de la carte et des contrôles associés.
+ */
 class AffichageView
 {
+    /**
+     * @var array $files Liste des fichiers
+     */
     private $files;
 
+    /**
+     * @var FileSelectorView $fileSelectorView Vue pour la sélection des fichiers
+     */
     private $fileSelectorView;
+
+    /**
+     * Constructeur de la classe AffichageView
+     *
+     * Initialise les fichiers et la vue de sélection des fichiers.
+     *
+     * @param array $files Liste des fichiers
+     */
     public function __construct($files) {
         $this->files = $files;
         $this->fileSelectorView = new FileSelectorView($this->files);
     }
 
+    /**
+     * Afficher la vue
+     *
+     * Affiche la carte et les contrôles associés.
+     *
+     * @param array $filesData Données des fichiers
+     * @return void
+     */
     function show($filesData): void
     {
         ob_start();

@@ -2,14 +2,36 @@
 
 namespace blog\views;
 
+/**
+ * Classe FormView
+ *
+ * Cette classe gère l'affichage des formulaires d'upload de fichiers.
+ */
 class FormView
 {
+    /**
+     * @var HistoriqueView $folderHistory Vue pour l'historique des dossiers
+     */
     private $folderHistory;
 
+    /**
+     * Constructeur de la classe FormView
+     *
+     * Initialise la vue avec l'historique des dossiers.
+     *
+     * @param array $files Liste des fichiers
+     */
     public function __construct($files){
         $this->folderHistory = new HistoriqueView($files);
     }
 
+    /**
+     * Afficher les boutons de formulaire
+     *
+     * Affiche les boutons pour uploader des fichiers Shapefile et Raster.
+     *
+     * @return void
+     */
     public function renderButtons(): void {
         ?>
         <h2>Uploader des fichiers</h2>
@@ -18,6 +40,15 @@ class FormView
         <?php
     }
 
+
+    /**
+     * Afficher le formulaire
+     *
+     * Affiche le formulaire d'upload en fonction du type de fichier (vector ou raster).
+     *
+     * @param string $type Type de fichier (vector ou raster)
+     * @return void
+     */
     public function renderForm(string $type): void {
 
         if ($type === 'vector') {
@@ -64,6 +95,14 @@ class FormView
         }
     }
 
+
+    /**
+     * Afficher tous les formulaires
+     *
+     * Affiche les boutons et les formulaires pour uploader des fichiers vector et raster.
+     *
+     * @return void
+     */
     public function renderAllForms(): void {
         $this->renderButtons();
         $this->renderForm('vector');

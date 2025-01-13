@@ -8,16 +8,44 @@ use ZipArchive;
 use _assets\config\Database;
 use blog\models\UploadModel;
 
+/**
+ * Classe Upload
+ *
+ * Cette classe gère les opérations d'upload de fichiers et de gestion de projets.
+ */
 class Upload
 {
-
+    /**
+     * @var \PDO $db Connexion à la base de données
+     */
     private $db;
+
+    /**
+     * @var UploadModel $uploadModel Modèle pour les opérations d'upload
+     */
     private $uploadModel;
-    private $currentUserId; // ID de l'utilisateur connecté
+
+    /**
+     * @var int $currentUserId ID de l'utilisateur connecté
+     */
+    private $currentUserId;
+
+    /**
+     * @var string $header En-tête de la réponse HTTP
+     */
     private $header = 'Content-Type: application/json';
+
+    /**
+     * @var string $pref Expression régulière pour nettoyer les noms de dossiers
+     */
     private $pref = '/[^a-zA-Z0-9_-]/';
 
-
+    /**
+     * Constructeur de la classe Upload
+     *
+     * Initialise la connexion à la base de données et le modèle d'upload.
+     * Vérifie l'authentification de l'utilisateur.
+     */
     public function __construct()
     {
         // Initialiser la connexion à la base de données
@@ -37,6 +65,14 @@ class Upload
         }
     }
 
+    /**
+     * Créer un projet
+     *
+     * Récupère les données du formulaire, vérifie l'existence du projet, et crée un nouveau projet.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function createProject()
     {
         header($this->header); // Réponse au format JSON
@@ -84,6 +120,13 @@ class Upload
         exit();
     }
 
+    /**
+     * Définir le projet actif
+     *
+     * Récupère l'ID du projet depuis la requête POST et met à jour le projet actif dans la session.
+     *
+     * @return void
+     */
     public function setProject()
     {
         if (!empty($_POST['project_id'])) {
@@ -96,7 +139,13 @@ class Upload
         exit();
     }
 
-
+    /**
+     * Récupérer les projets de l'utilisateur
+     *
+     * Récupère les projets de l'utilisateur connecté et génère l'affichage des projets.
+     *
+     * @return string
+     */
     public function getProjects()
     {
         header($this->header);
@@ -105,6 +154,13 @@ class Upload
         return $folderHistory->generateProjects($files);
     }
 
+    /**
+     * Gérer le téléchargement de fichiers
+     *
+     * Gère le téléchargement de fichiers et les erreurs associées.
+     *
+     * @return void
+     */
     public function telechargement()
     {
         try {
@@ -123,6 +179,14 @@ class Upload
         }
     }
 
+    /**
+     * Supprimer un fichier
+     *
+     * Récupère le nom du fichier à supprimer depuis la requête GET et appelle le modèle pour supprimer le fichier.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function deleteFile() {
         $fileName = htmlspecialchars(filter_input(INPUT_GET, 'fileName', FILTER_SANITIZE_SPECIAL_CHARS));
 
@@ -133,6 +197,14 @@ class Upload
         }
     }
 
+    /**
+     * Gérer l'upload de fichiers
+     *
+     * Récupère les données du formulaire, vérifie et enregistre le fichier uploadé.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function uploadfile()
     {
         header($this->header); // Réponse au format JSON
@@ -184,6 +256,14 @@ class Upload
         exit();
     }
 
+    /**
+     * Supprimer un dossier
+     *
+     * Récupère le nom du dossier à supprimer depuis la requête GET et appelle le modèle pour supprimer le dossier.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function deleteFolder()
     {
         header($this->header); // Indique que la réponse est au format JSON
@@ -216,7 +296,13 @@ class Upload
         }
     }
 
-
+    /**
+     * Récupérer l'arbre des dossiers
+     *
+     * Récupère la hiérarchie des dossiers pour le projet courant et l'utilisateur connecté.
+     *
+     * @return string
+     */
     public function getArbre() {
         $files = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'],$this->currentUserId);
         $folderHistory = new \blog\views\HistoriqueView($files);
@@ -224,6 +310,13 @@ class Upload
         return $folderHistory->render($historyId);
     }
 
+    /**
+     * Récupérer l'arbre des expérimentations
+     *
+     * Récupère les expérimentations pour le projet courant et l'utilisateur connecté.
+     *
+     * @return string
+     */
     public function getArbreExp()
     {
         $files = $this->uploadModel->getExperimentation($this->currentUserId,$_SESSION['current_project_id']);
@@ -232,6 +325,14 @@ class Upload
         return $folderHistory->render($historyId);
     }
 
+    /**
+     * Sélectionner un dossier
+     *
+     * Récupère la hiérarchie des dossiers pour le projet courant et l'utilisateur connecté.
+     * Génère les options de sélection de dossier.
+     *
+     * @return string
+     */
     public function selectFolder()
     {
         header($this->header);
@@ -240,7 +341,14 @@ class Upload
         return $folderHistory->generateFolderOptions($folderHistory->getFiles());
     }
 
-
+    /**
+     * Créer un dossier
+     *
+     * Récupère les données du formulaire, vérifie l'existence du dossier, et crée un nouveau dossier.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function folder1() {
         header('Content-Type: application/json'); // Réponse au format JSON
         try {
@@ -277,8 +385,14 @@ class Upload
         exit();
     }
 
-
-
+    /**
+     * Récupérer les sous-dossiers
+     *
+     * Récupère les sous-dossiers d'un dossier donné pour le projet courant et l'utilisateur connecté.
+     * Répond avec les sous-dossiers en format JSON.
+     *
+     * @return void
+     */
     public function getSubFolders()
     {
         $folderName = htmlspecialchars(filter_input(INPUT_GET, 'folderName', FILTER_SANITIZE_SPECIAL_CHARS));
@@ -287,7 +401,16 @@ class Upload
         echo json_encode($subFolders);
     }
 
-    // Gérer l'upload des fichiers Raster
+
+    /**
+     * Gérer l'upload des fichiers Raster
+     *
+     * Récupère les données du formulaire, vérifie et enregistre le fichier Raster uploadé.
+     * Convertit le fichier Raster en GeoTIFF via une API externe.
+     * Répond avec succès ou erreur selon le résultat.
+     *
+     * @return void
+     */
     public function handleRasterUpload()
     {
         $file = $_FILES['rasterfile'];
@@ -352,7 +475,15 @@ class Upload
         }
     }
 
-    // Fonction pour convertir les fichiers Raster en GeoTIFF via l'API OGRE
+    /**
+     * Convertir les fichiers Raster en GeoTIFF via l'API OGRE
+     *
+     * Utilise une requête curl pour envoyer le fichier Raster à l'API OGRE et récupérer le fichier GeoTIFF converti.
+     *
+     * @param string $rasterFilePath Chemin du fichier Raster
+     * @param string $customName Nom personnalisé pour le fichier GeoTIFF
+     * @return string|null Chemin du fichier GeoTIFF ou null en cas d'erreur
+     */
     private function convertRasterToGeoTIFF($rasterFilePath, $customName)
     {
         // URL de l'API pour la conversion

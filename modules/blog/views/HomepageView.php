@@ -1,13 +1,35 @@
 <?php
 namespace blog\views;
+/**
+ * Classe HomepageView
+ *
+ * Cette classe gère l'affichage de la page d'accueil de l'application.
+ */
 class HomepageView {
+    /**
+     * @var array $projets Liste des projets
+     */
     private $projets;
 
+    /**
+     * Constructeur de la classe HomepageView
+     *
+     * Initialise la vue avec la liste des projets.
+     *
+     * @param array $project Liste des projets
+     */
     public function __construct($project){
         // Utiliser SingletonModel pour obtenir la connexion à la base de données
         $this->projets = $project;
     }
 
+    /**
+     * Afficher la page d'accueil
+     *
+     * Affiche le contenu de la page d'accueil, y compris les messages de bienvenue, la gestion des projets, les simulations et les options de connexion.
+     *
+     * @return void
+     */
     public function show() : void {
         ob_start();?>
         <main>
