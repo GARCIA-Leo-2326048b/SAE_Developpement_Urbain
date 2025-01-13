@@ -25,16 +25,5 @@ class GeoJsonModel
         // Retourner les données GeoJSON
         return $stmt->fetchColumn();
     }
-    public function fetchIdGeoJson($geojson) {
-        try {
 
-            $stmt = $this->db->prepare("SELECT file_name FROM uploadGJ WHERE file_data LIKE :geojson");
-            $stmt->bindValue(':geojson', "%$geojson%", \PDO::PARAM_STR);
-            $stmt->execute();
-
-            return $stmt->fetchColumn();
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
 }

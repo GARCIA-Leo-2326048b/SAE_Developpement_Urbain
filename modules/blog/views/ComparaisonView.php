@@ -5,6 +5,7 @@ namespace blog\views;
 class ComparaisonView
 {
     private HistoriqueView $hfolders;
+    private $idExp = null;
 
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
@@ -53,6 +54,9 @@ class ComparaisonView
         </div>
 
         <script>
+            console.log(<?php echo json_encode($fileDataSim); ?>);  // Afficher les données dans la console
+            console.log(<?php echo json_encode($fileDataVer); ?>);  // Afficher les données dans la console
+
             window.geoJsonHouseSim = <?php echo $fileDataSim[0] ?>;
             window.geoJsonHouseVer = <?php echo $fileDataVer[0] ?>;
 
@@ -185,10 +189,18 @@ class ComparaisonView
         </div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
         <div id="geoJsonNames"
-             data-geojson-sim="<?php echo $filesSimName[0]; ?>"
-             data-geojson-ver="<?php echo $filesVerName[0]; ?>">
+             data-geojson-sim="<?php echo implode(',', $filesSimName); ?>"
+             data-geojson-ver="<?php echo implode(',', $filesVerName); ?>">
         </div>
-        <button type="submit" id="saveBtn">Sauvegarder</button>
+        <?php
+            if($this->idExp === null){
+        ?>
+                <button type="submit" id="saveBtn">Sauvegarder</button>
+            <?php }else{ ?>
+                <button type="submit" id="updateBtn" data-id="<?= $this->idExp ?>" onclick="enregistrer()">Update</button>
+                <?php
+            }
+                ?>
 
         <!-- Modale pour entrer le nom et choisir le dossier -->
         <div id="saveModal" class="modal" style="display: none;">
@@ -255,5 +267,10 @@ class ComparaisonView
         </div>
 
     <?php }
+
+    public function setId($idExp)
+    {
+       $this->idExp = $idExp;
+    }
 
 }

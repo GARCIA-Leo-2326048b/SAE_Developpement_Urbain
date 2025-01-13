@@ -114,7 +114,7 @@ class Upload
             }
             // Gestion des fichiers Raster
             elseif (isset($_FILES['rasterfile'])) {
-                $this->uploadfileGT();
+                $this->handleRasterUpload();
             } else {
                 echo "Aucun fichier n'a été téléchargé.";
             }
@@ -183,73 +183,6 @@ class Upload
         }
         exit();
     }
-
-    public function uploadfileGT()
-    {
-        header('Content-Type: application/json'); // Réponse au format JSON
-        try {
-            // Vérifier la méthode HTTP
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                echo json_encode(['success' => false, 'message' => 'Méthode HTTP invalide.']);
-                exit;
-            }
-
-            // Vérifier les champs nécessaires
-            if (empty($_POST['rasterfile_name'])) {
-                echo json_encode(['success' => false, 'message' => 'Le nom du fichier est requis.']);
-                exit;
-            }
-
-            $fileName = trim($_POST['rasterfile_name']);
-            $fileName = preg_replace('/[^a-zA-Z0-9_-]/', '', $fileName); // Nettoyer le nom du fichier
-
-            if (empty($fileName)) {
-                echo json_encode(['success' => false, 'message' => 'Nom de fichier invalide.']);
-                exit;
-            }
-
-            // Vérifier la présence du fichier téléchargé
-            if (!isset($_FILES['rasterfile']) || $_FILES['rasterfile']['error'] !== UPLOAD_ERR_OK) {
-                echo json_encode(['success' => false, 'message' => 'Erreur lors de l\'envoi du fichier.']);
-                exit;
-            }
-
-            $fileTmpPath = $_FILES['rasterfile']['tmp_name'];
-            $fileType = mime_content_type($fileTmpPath); // Récupérer le type MIME du fichier
-            $allowedTypes = ['image/tiff', 'image/png', 'image/jpeg'];
-
-            if (!in_array($fileType, $allowedTypes)) {
-                echo json_encode(['success' => false, 'message' => 'Type de fichier non autorisé.']);
-                exit;
-            }
-
-            $fileContent = file_get_contents($fileTmpPath);
-
-            if ($fileContent === false) {
-                echo json_encode(['success' => false, 'message' => 'Impossible de lire le contenu du fichier.']);
-                exit;
-            }
-
-            $dossierParent = $_POST['dossier_parent'] ?? null;
-            $nom = $fileName . '.geojson';
-
-            // Vérifier si le fichier existe déjà
-            if ($this->uploadModel->fileExistGJ($nom, $this->currentUserId, $_SESSION['current_project_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Ce fichier existe déjà.']);
-                exit;
-            }
-
-            // Enregistrer le fichier dans le dossier
-            $this->uploadModel->saveUploadGJ($nom, $fileContent, $this->currentUserId, $dossierParent, $_SESSION['current_project_id']);
-
-            // Réponse JSON en cas de succès
-            echo json_encode(['success' => true, 'message' => 'Fichier téléchargé avec succès.']);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-        }
-        exit();
-    }
-
 
     public function deleteFolder()
     {
