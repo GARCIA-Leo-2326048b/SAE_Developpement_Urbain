@@ -5,6 +5,7 @@ namespace blog\views;
 class ComparaisonView
 {
     private HistoriqueView $hfolders;
+    private $idExp = null;
 
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
@@ -191,7 +192,15 @@ class ComparaisonView
              data-geojson-sim="<?php echo implode(',', $filesSimName); ?>"
              data-geojson-ver="<?php echo implode(',', $filesVerName); ?>">
         </div>
-        <button type="submit" id="saveBtn">Sauvegarder</button>
+        <?php
+            if($this->idExp === null){
+        ?>
+                <button type="submit" id="saveBtn">Sauvegarder</button>
+            <?php }else{ ?>
+                <button type="submit" id="updateBtn" data-id="<?= $this->idExp ?>" onclick="enregistrer()">Update</button>
+                <?php
+            }
+                ?>
 
         <!-- Modale pour entrer le nom et choisir le dossier -->
         <div id="saveModal" class="modal" style="display: none;">
@@ -258,5 +267,10 @@ class ComparaisonView
         </div>
 
     <?php }
+
+    public function setId($idExp)
+    {
+       $this->idExp = $idExp;
+    }
 
 }

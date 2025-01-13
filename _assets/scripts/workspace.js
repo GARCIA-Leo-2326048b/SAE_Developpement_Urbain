@@ -192,52 +192,6 @@ $(document).ready(function() {
         });
     });
 
-    $('#rasterForm').on('submit', function (e) {
-        e.preventDefault(); // Empêche le rechargement de la page
-
-        let formData = new FormData(this); // Crée un objet FormData à partir du formulaire
-        formData.append('rasterfile_name', $('#rasterfile_name').val()); // Ajouter des données supplémentaires si nécessaire
-
-
-        $.ajax({
-            url: 'index.php?action=upload', // URL de votre contrôleur
-            type: 'POST', // Utilisez POST pour les fichiers
-            data: formData,
-            processData: false, // Nécessaire pour éviter que jQuery ne traite les données
-            contentType: false, // Nécessaire pour permettre l'envoi multipart/form-data
-            dataType: 'json',
-            success: function (response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Succès',
-                        text: response.message,
-                    }).then(() => {
-                        // Recharger ou mettre à jour l'affichage sans recharger la page
-                        updateHistory();  // Appeler ta fonction pour mettre à jour l'historique
-                        updateFolderOptions();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erreur',
-                        text: response.message,
-                    });
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error("Erreur AJAX :", status, error);
-                console.log("Réponse brute :", xhr.responseText); // Affichez la réponse brute
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erreur',
-                    text: 'Une erreur est survenue lors du téléchargement.',
-                });
-            },
-        });
-    });
-
-
 
 
 });

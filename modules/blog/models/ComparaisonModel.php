@@ -189,6 +189,29 @@ class ComparaisonModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function updateExperimentationChartsM($id, $charts)
+    {
+        try {
+            // Encoder les graphiques en JSON
+            $chartsJson = json_encode($charts, JSON_THROW_ON_ERROR);
+
+            // Mettre à jour la colonne `data_xp` pour l'expérimentation donnée
+            $sql = "UPDATE experimentation 
+                SET data_xp = :chartsJson 
+                WHERE id_xp = :id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bindParam(':chartsJson', $chartsJson);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+            return $stmt->execute();
+        } catch (Exception $e) {
+            error_log('Erreur lors de la mise à jour des graphiques : ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
     public function getEPSGCode($geoJson)
     {
         $geometry = geoPHP::load($geoJson);

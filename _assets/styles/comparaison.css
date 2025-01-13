@@ -237,6 +237,34 @@ form h4 {
     outline: none;
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.8);
 }
+/* Bouton de comparaison */
+#updateBtn {
+    background-color: #007bff; /* Bleu */
+    color: white;
+    border: none;
+    padding: 10px 20px; /* Taille du bouton ajustée */
+    font-size: 16px; /* Taille de police légèrement plus grande */
+    text-transform: none; /* Pas de texte en majuscule */
+    border-radius: 25px; /* Bordure plus arrondie */
+    cursor: pointer;
+    position: fixed;
+    bottom: 60px; /* Un peu plus haut pour ne pas chevaucher le footer */
+    right: 20px; /* Positionné à droite avec une petite marge */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#updateBtn:hover {
+    background-color: #0056b3; /* Bleu plus foncé au survol */
+    transform: translateY(-1px); /* Léger effet de soulèvement au survol */
+}
+
+#updateBtn:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.8);
+}
+
+
 
 /* Styles pour la modale */
 .modal {
