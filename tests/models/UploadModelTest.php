@@ -22,7 +22,7 @@ class UploadModelTest extends TestCase
     public function testProjetExiste()
     {
         $this->uploadModel->method('projetExiste')->willReturn(true);
-        $result = $this->uploadModel->projetExiste('testProject');
+        $result = $this->uploadModel->projetExiste('testProject', 1);
         $this->assertTrue($result);
     }
 
@@ -43,9 +43,10 @@ class UploadModelTest extends TestCase
     public function testSaveUploadGJ()
     {
         $this->uploadModel->method('saveUploadGJ')->willReturn(true);
-        $result = $this->uploadModel->saveUploadGJ('testFile', 'testContent', 1, 'testProject');
+        $result = $this->uploadModel->saveUploadGJ('testFile', 'testContent', 1, 'testFolder', 'testProject');
         $this->assertTrue($result);
     }
+
 
     public function testSaveUploadGT()
     {
@@ -71,16 +72,27 @@ class UploadModelTest extends TestCase
     public function testVerifyFolder()
     {
         $this->uploadModel->method('verifyFolder')->willReturn(true);
-        $result = $this->uploadModel->verifyFolder('testFolder', 1, 'testProject');
+        $result = $this->uploadModel->verifyFolder(1, 'testParentFolder', 'testFolder', 'testProject');
         $this->assertTrue($result);
     }
 
     public function testCreateFolder()
     {
-        $this->uploadModel->method('createFolder')->willReturn(true);
-        $result = $this->uploadModel->createFolder('testFolder', 1, 'testProject');
-        $this->assertTrue($result);
+        $this->uploadModel
+            ->expects($this->once())
+            ->method('createFolder')
+            ->with(
+                $this->equalTo(1),
+                $this->equalTo('testParentFolder'),
+                $this->equalTo('testFolder'),
+                $this->equalTo('testProject')
+            );
+
+        $this->uploadModel->createFolder(1, 'testParentFolder', 'testFolder', 'testProject');
     }
+
+
+
 
     public function testGetExperimentation()
     {

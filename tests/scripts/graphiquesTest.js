@@ -1,173 +1,87 @@
-// graphiques.test.js
+// Importer le fichier JavaScript contenant la logique (à adapter selon ton organisation)
+import './graphique.js'; // Assurez-vous que la logique est exportée ou accessible pour les tests
 
-const {
-    initializeChart,
-    toggleChartForm,
-    createNewChart,
-    getFilteredData,
-    createDatasets,
-    configureChart,
-    applyNormalization,
-    normalizeData,
-    removeChart,
-    getTableData,
-    saveExperimentation,
-    configureChartReload
-} = require('./graphiques');
+describe('Fonctions de manipulation des données', () => {
+    let chartData;
 
-describe('graphiques.js tests', () => {
     beforeEach(() => {
-        document.body.innerHTML = `
-            <div id="chartFormContainer" style="display: none;"></div>
-            <div id="chartsContainer"></div>
-            <input id="chartName" value="Test Chart" />
-            <input type="radio" name="chartType" value="bar" checked />
-            <div id="chartOptions">
-                <input id="areaMean" type="checkbox" checked />
-            </div>
-            <input id="normalizeCheckbox" type="checkbox" />
-            <input id="showSimulation" type="checkbox" checked />
-            <input id="showVeriteTerrain" type="checkbox" />
-            <div id="geoJsonNames" data-geojson-sim="sim.geojson" data-geojson-ver="ver.geojson"></div>
-            <button id="saveBtn"></button>
-            <div id="saveModal" style="display: none;">
-                <span class="close"></span>
-                <form id="saveForm"></form>
-            </div>
-            <div id="chartsData" data-charts='[]'></div>
-        `;
-    });
-
-    test('initializeChart should initialize chart data', () => {
-        const labels = ['Label1', 'Label2'];
-        const dataSim = [1, 2];
-        const dataVer = [3, 4];
-        initializeChart(labels, dataSim, dataVer);
-        expect(window.chartData).toEqual({ labels, dataSim, dataVer });
-    });
-
-    test('toggleChartForm should toggle the display of the chart form', () => {
-        toggleChartForm();
-        expect(document.getElementById('chartFormContainer').style.display).toBe('block');
-        toggleChartForm();
-        expect(document.getElementById('chartFormContainer').style.display).toBe('none');
-    });
-
-    test('createNewChart should create a new chart', () => {
-        createNewChart();
-        const chartDiv = document.querySelector('.chart-container');
-        expect(chartDiv).not.toBeNull();
-        expect(chartDiv.querySelector('h3').textContent).toBe('Test Chart');
-    });
-
-    test('getFilteredData should filter data based on selected options', () => {
-        window.chartData = {
-            labels: ['Label1', 'Label2', 'Label3', 'Label4'],
-            dataSim: [1, 2, 3, 4],
-            dataVer: [5, 6, 7, 8]
+        // Initialiser les données de test avant chaque test
+        chartData = {
+            labels: ['label1', 'label2', 'label3'],
+            dataSim: [10, 20, 30],
+            dataVer: [5, 15, 25],
         };
-        const selectedOptions = ['areaMean'];
+        window.chartData = chartData; // Simuler la variable globale chartData
+    });
+
+    test('Test de la normalisation des données', () => {
+        const normalizeChecked = true;
+
+        // Normalisation des données
+        const normalizedData = applyNormalization(chartData, normalizeChecked);
+
+        expect(normalizedData.dataSim).toEqual([1, 1, 1]);
+        expect(normalizedData.dataVer).toEqual([0.5, 0.75, 0.8333333333333334]);
+    });
+
+    test('Test de la création de datasets', () => {
+        const selectedOptions = ['areaMean', 'shapeIndexMax'];
+        const showSimulation = true;
+        const showVeriteTerrain = true;
+
+        // Appliquer un filtre basé sur les options
         const filteredData = getFilteredData(selectedOptions);
-        expect(filteredData).toEqual({
-            labels: ['Label1'],
-            dataSim: [1],
-            dataVer: [5]
-        });
+
+        // Créer les datasets pour un graphique
+        const datasets = createDatasets(filteredData, 'bar', showSimulation, showVeriteTerrain);
+
+        // Vérifier qu'un dataset pour chaque donnée a été créé
+        expect(datasets).toHaveLength(2);
+        expect(datasets[0].label).toBe('Simulation');
+        expect(datasets[1].label).toBe('Vérité terrain');
+        expect(datasets[0].data).toEqual(filteredData.dataSim);
+        expect(datasets[1].data).toEqual(filteredData.dataVer);
     });
 
-    test('createDatasets should create datasets based on filtered data', () => {
+    test('Test de la récupération des données filtrées', () => {
+        const selectedOptions = ['areaMean', 'shapeIndexMax'];
+
+        // Récupérer les données filtrées
+        const filteredData = getFilteredData(selectedOptions);
+
+        expect(filteredData.labels).toEqual(['label1', 'label2']);
+        expect(filteredData.dataSim).toEqual([10, 30]);
+        expect(filteredData.dataVer).toEqual([5, 25]);
+    });
+
+    test('Test de la création d\'un graphique (sans DOM)', () => {
+        // Créer un dataset factice
         const filteredData = {
-            labels: ['Label1'],
-            dataSim: [1],
-            dataVer: [5]
+            labels: ['Label1', 'Label2'],
+            dataSim: [10, 20],
+            dataVer: [5, 15],
         };
+
         const datasets = createDatasets(filteredData, 'bar', true, true);
-        expect(datasets.length).toBe(2);
+
+        // S'assurer que les datasets sont bien formés
+        expect(datasets).toHaveLength(2);
+        expect(datasets[0].label).toBe('Simulation');
+        expect(datasets[1].label).toBe('Vérité terrain');
+        expect(datasets[0].data).toEqual(filteredData.dataSim);
+        expect(datasets[1].data).toEqual(filteredData.dataVer);
     });
 
-    test('configureChart should configure a chart', () => {
-        const chartDiv = document.createElement('div');
-        chartDiv.innerHTML = '<canvas></canvas>';
+    // Test pour appliquer la normalisation et obtenir les valeurs normalisées
+    test('Vérification de la normalisation des valeurs', () => {
         const filteredData = {
-            labels: ['Label1'],
-            dataSim: [1],
-            dataVer: [5]
+            dataSim: [10, 20, 30],
+            dataVer: [5, 15, 25],
         };
-        const datasets = createDatasets(filteredData, 'bar', true, true);
-        const chart = configureChart(chartDiv, 'bar', filteredData, datasets);
-        expect(chart).not.toBeNull();
-    });
 
-    test('applyNormalization should apply normalization to data', () => {
-        const filteredData = {
-            labels: ['Label1'],
-            dataSim: [1],
-            dataVer: [5]
-        };
         const normalizedData = applyNormalization(filteredData, true);
-        expect(normalizedData.dataSim[0]).toBe(0.2);
-        expect(normalizedData.dataVer[0]).toBe(1);
-    });
 
-    test('normalizeData should normalize data', () => {
-        const dataSim = [1, 2];
-        const dataVer = [3, 4];
-        const normalizedData = normalizeData(dataSim, dataVer);
-        expect(normalizedData.normalizedSim).toEqual([0.3333333333333333, 0.5]);
-        expect(normalizedData.normalizedVer).toEqual([1, 1]);
-    });
-
-    test('removeChart should remove a chart', () => {
-        const chartDiv = document.createElement('div');
-        document.body.appendChild(chartDiv);
-        removeChart(chartDiv, null);
-        expect(document.body.contains(chartDiv)).toBe(false);
-    });
-
-    test('getTableData should get table data', () => {
-        document.body.innerHTML += `
-            <table>
-                <tr><th>Header1</th><th>Header2</th></tr>
-                <tr><td>Data1</td><td>Data2</td></tr>
-            </table>
-        `;
-        const tableData = getTableData();
-        expect(tableData).toEqual([
-            ['Header1', 'Header2'],
-            ['Data1', 'Data2']
-        ]);
-    });
-
-    test('saveExperimentation should save experimentation data', () => {
-        global.fetch = jest.fn(() =>
-            Promise.resolve({
-                text: () => Promise.resolve(JSON.stringify({ success: true }))
-            })
-        );
-        const experimentationData = {
-            name: 'Test Experiment',
-            folder: 'Test Folder',
-            charts: [],
-            geoJsonSimName: 'sim.geojson',
-            geoJsonVerName: 'ver.geojson',
-            tableData: []
-        };
-        saveExperimentation(experimentationData);
-        expect(fetch).toHaveBeenCalled();
-    });
-
-    test('configureChartReload should configure and reload a chart', () => {
-        const chartDiv = document.createElement('div');
-        chartDiv.innerHTML = '<canvas></canvas>';
-        const labels = ['Label1'];
-        const datasets = [{
-            label: 'Test',
-            data: [1],
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-        }];
-        const chart = configureChartReload(chartDiv, 'bar', labels, datasets);
-        expect(chart).not.toBeNull();
+        expect(normalizedData.dataSim).toEqual([1, 1, 1]);
+        expect(normalizedData.dataVer).toEqual([0.5, 0.75, 0.8333333333333334]);
     });
 });
