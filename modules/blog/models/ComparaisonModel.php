@@ -16,7 +16,7 @@ class ComparaisonModel
         // Connexion à la base de données via SingletonModel
         $this->db = SingletonModel::getInstance()->getConnection();
     }
-    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer, $name, $dossier, $project)
+    public function saveExperimentationM($data, $geoJsonNameSim, $geoJsonNameVer, $name, $dossier, $project)
     {
         $userId = $_SESSION['user_id'];
 

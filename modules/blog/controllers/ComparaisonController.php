@@ -41,7 +41,7 @@ class ComparaisonController{
 
         // Appeler la méthode `saveExperimentation` du modèle
         try {
-            $this->comparaisonModel->saveExperimentation($data, $geoJsonSimNames, $geoJsonVerNames, $name, $dossier, $project);
+            $this->comparaisonModel->saveExperimentationM($data, $geoJsonSimNames, $geoJsonVerNames, $name, $dossier, $project);
             // Répondre à l'AJAX
             echo json_encode(['success' => true]);
         } catch (Exception $e) {
