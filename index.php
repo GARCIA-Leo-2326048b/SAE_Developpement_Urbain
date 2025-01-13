@@ -4,7 +4,14 @@ require_once  __DIR__ . '/vendor/autoload.php';
 
 session_start();
 
-
+/**
+ * Point d'entrée principal de l'application.
+ *
+ * Ce script gère les différentes actions en fonction des paramètres passés dans l'URL.
+ * Il initialise la session, charge les dépendances et appelle les contrôleurs appropriés.
+ *
+ * @throws Exception Si une erreur se produit lors de l'exécution des actions.
+ */
 try {
     if (filter_input(INPUT_GET, 'action')) {
         $action = filter_input(INPUT_GET, 'action');

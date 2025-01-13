@@ -2,15 +2,43 @@
 
 namespace blog\views;
 
+/**
+ * Classe GlobalLayout
+ *
+ * Cette classe gère l'affichage du layout global de l'application.
+ */
 class GlobalLayout
 {
+    /**
+     * @var string $content Contenu de la page
+     */
     private $content;
+
+    /**
+     * @var string $title Titre de la page
+     */
     private $title;
 
+    /**
+     * Constructeur de la classe GlobalLayout
+     *
+     * Initialise le layout global avec le titre et le contenu de la page.
+     *
+     * @param string $title Titre de la page
+     * @param string $content Contenu de la page
+     */
     public function __construct($title, $content) {
         $this->title = $title;
         $this->content = $content;
     }
+
+    /**
+     * Afficher le layout global
+     *
+     * Affiche le layout global avec le titre, le contenu, les styles et les scripts nécessaires.
+     *
+     * @return void
+     */
     public function show() : void {?>
         <!-- views/layout.php -->
         <!DOCTYPE html>

@@ -2,14 +2,47 @@
 
 namespace blog\views;
 
+/**
+ * Classe ComparaisonView
+ *
+ * Cette classe gère l'affichage de la vue de comparaison des données de simulation et de vérité terrain.
+ */
 class ComparaisonView
 {
+    /**
+     * @var HistoriqueView $hfolders Vue pour l'historique des dossiers
+     */
     private HistoriqueView $hfolders;
+
+    /**
+     * @var int|null $idExp ID de l'expérimentation
+     */
     private $idExp = null;
 
+    /**
+     * Constructeur de la classe ComparaisonView
+     *
+     * Initialise la vue avec l'historique des dossiers.
+     *
+     * @param array $hfolders Historique des dossiers
+     */
     public function __construct($hfolders){
         $this->hfolders = new HistoriqueView($hfolders);
     }
+
+    /**
+     * Afficher la vue de comparaison
+     *
+     * Affiche les cartes de simulation et de vérité terrain, ainsi que les statistiques et graphiques associés.
+     *
+     * @param array $results Résultats des comparaisons
+     * @param array $filesSimName Noms des fichiers de simulation
+     * @param array $filesVerName Noms des fichiers de vérité terrain
+     * @param array $fileDataSim Données des fichiers de simulation
+     * @param array $fileDataVer Données des fichiers de vérité terrain
+     * @param array|null $charts Graphiques (optionnel)
+     * @return void
+     */
     public function showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer,$charts = null): void
     {
         ob_start();
@@ -228,6 +261,18 @@ class ComparaisonView
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
 
+
+    /**
+     * Rendre une ligne de tableau
+     *
+     * Affiche une ligne de tableau avec les valeurs de simulation, de vérité terrain et d'erreur.
+     *
+     * @param string $label Libellé de la statistique
+     * @param float $simValue Valeur de simulation
+     * @param float $verValue Valeur de vérité terrain
+     * @param float $errorValue Valeur d'erreur
+     * @return void
+     */
     private function renderRow($label, $simValue, $verValue, $errorValue)
     {
         echo "<tr>
@@ -238,6 +283,15 @@ class ComparaisonView
           </tr>";
     }
 
+
+    /**
+     * Afficher les contrôles de la carte
+     *
+     * Affiche les contrôles de la carte pour changer la couche de fond, ajuster l'opacité et uploader des fichiers GeoTIFF.
+     *
+     * @param string $mapId ID de la carte
+     * @return void
+     */
     private function mapControls($mapId) { ?>
         <div id="controls-Map" style="width: 300px; padding: 20px; background-color: #e0f7f4; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); font-family: Arial, sans-serif;">
             <h3>Contrôles de la carte</h3>
@@ -267,7 +321,14 @@ class ComparaisonView
         </div>
 
     <?php }
-
+    /**
+     * Définir l'ID de l'expérimentation
+     *
+     * Définit l'ID de l'expérimentation pour la mise à jour.
+     *
+     * @param int $idExp ID de l'expérimentation
+     * @return void
+     */
     public function setId($idExp)
     {
        $this->idExp = $idExp;

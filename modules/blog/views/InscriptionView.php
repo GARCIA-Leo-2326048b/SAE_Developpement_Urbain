@@ -2,8 +2,21 @@
 
 namespace blog\views;
 
+/**
+ * Classe InscriptionView
+ *
+ * Cette classe gère l'affichage de la page d'inscription.
+ */
 class InscriptionView
 {
+    /**
+     * Afficher la page d'inscription
+     *
+     * Affiche le formulaire d'inscription et gère les erreurs éventuelles.
+     *
+     * @param string|null $error Message d'erreur à afficher (optionnel)
+     * @return void
+     */
     public function show($error = null) : void{ // Accepte un paramètre pour l'erreur
         if (isset($_SESSION['suid'])){
             header('location: https://developpement-urbain.alwaysdata.net/index.php');
