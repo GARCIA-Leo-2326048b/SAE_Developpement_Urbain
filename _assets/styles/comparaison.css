@@ -309,3 +309,99 @@ form h4 {
     visibility: hidden;
     pointer-events: none; /* Empêche l'interaction */
 }
+
+/* Bouton Afficher la carte Simulation */
+#showMapSimulation {
+    padding: 10px 20px;
+    background-color: #534998; /* Même couleur violette */
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px 0;
+}
+
+#showMapSimulation:hover {
+    background-color: #6b5eba; /* Couleur violette légèrement plus claire lors du survol */
+}
+
+/* Bouton Afficher la carte Vérité terrain */
+#showMapVerite {
+    padding: 10px 20px;
+    background-color: #534998; /* Même couleur violette */
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px 0;
+    float: right;
+}
+
+#showMapVerite:hover {
+    background-color: #6b5eba; /* Couleur violette légèrement plus claire lors du survol */
+}
+
+#controls-Map {
+    width: 300px;
+    padding: 20px;
+    background-color: #e0f7f4;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    display: none; /* Masquer par défaut */
+}
+
+#controls-Map h3 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+#controls-Map h4 {
+    font-size: 1.2em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+#controls-Map button {
+    background-color: #558b2f;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+#controls-Map button:hover {
+    background-color: #33691e;
+}
+
+#controls-Map input[type="range"] {
+    width: 100%;
+    margin-top: 10px;
+}
+
+#controls-Map input[type="file"] {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+}
+
+#controls-Map div {
+    margin-bottom: 15px;
+}
+
+
+
+#controls-Map .chart-controls {
+    margin-top: 20px;
+}
+

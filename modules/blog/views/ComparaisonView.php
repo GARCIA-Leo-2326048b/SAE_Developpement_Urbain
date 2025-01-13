@@ -54,16 +54,19 @@ class ComparaisonView
         </div>
 
         <script>
+            console.log(<?php echo json_encode($fileDataSim); ?>);  // Afficher les données dans la console
+            console.log(<?php echo json_encode($fileDataVer); ?>);  // Afficher les données dans la console
+
             window.geoJsonHouseSim = <?php echo $fileDataSim[0] ?>;
             window.geoJsonHouseVer = <?php echo $fileDataVer[0] ?>;
 
             // Ajouter les données seulement si elles existent
             <?php if (!empty($fileDataSim[1])): ?>
-            window.geoJsonHouseSimSecond = <?php echo $fileDataSim[1] ?>;
+            window.geoJsonRoadSim = <?php echo $fileDataSim[1] ?>;
             <?php endif; ?>
 
             <?php if (!empty($fileDataVer[1])): ?>
-            window.geoJsonHouseVerSecond = <?php echo $fileDataVer[1] ?>;
+            window.geoJsonRoadVer = <?php echo $fileDataVer[1] ?>;
             <?php endif; ?>
         </script>
 
@@ -72,14 +75,14 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo !empty($fileDataSim[1]) ? json_encode($fileDataSim[1]) : 'null'; ?>, null, 'mapSim');
+                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo !empty($fileDataSim[1]) ? $fileDataSim[1] : 'null'; ?>, null, 'mapSim');
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo !empty($fileDataVer[1]) ? json_encode($fileDataVer[1]) : 'null'; ?>, null, 'mapVer');
+                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo !empty($fileDataVer[1]) ? $fileDataVer[1] : 'null'; ?>, null, 'mapVer');
                 </script>
             </div>
         </div>
@@ -186,8 +189,8 @@ class ComparaisonView
         </div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
         <div id="geoJsonNames"
-             data-geojson-sim="<?php echo $filesSimName[0]; ?>"
-             data-geojson-ver="<?php echo $filesVerName[0]; ?>">
+             data-geojson-sim="<?php echo implode(',', $filesSimName); ?>"
+             data-geojson-ver="<?php echo implode(',', $filesVerName); ?>">
         </div>
         <?php
             if($this->idExp === null){
@@ -236,7 +239,7 @@ class ComparaisonView
     }
 
     private function mapControls($mapId) { ?>
-        <div id="controls">
+        <div id="controls-Map" style="width: 300px; padding: 20px; background-color: #e0f7f4; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); font-family: Arial, sans-serif;">
             <h3>Contrôles de la carte</h3>
 
             <!-- Sélectionner la couche de fond -->

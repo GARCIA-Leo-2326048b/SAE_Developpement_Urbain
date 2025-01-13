@@ -331,12 +331,9 @@
 
         if (chartsElement && chartsElement.hasAttribute('data-charts')) {
             const jsonData = chartsElement.getAttribute('data-charts');
-            console.log(jsonData);
-            console.log("Les données après parse");
 
             try {
                 const chartsData = JSON.parse(jsonData);
-                console.log(chartsData);
 
                 if (Array.isArray(chartsData) && chartsData.length > 0) {
                     chartsData.forEach((chartData, index) => {

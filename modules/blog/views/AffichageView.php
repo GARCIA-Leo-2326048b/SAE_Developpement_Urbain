@@ -22,7 +22,9 @@ class AffichageView
         <script src="/_assets/scripts/affichageCarte.js"></script> <!-- script de création de carte -->
         <link rel="stylesheet" href="/_assets/styles/affichage.css">
 
-        <div id="map"></div>
+        <div id="mapContainer">
+            <div id="map"></div>
+        </div>
         <button id="toggleControls" onclick="toggleControls()">→</button>
         <div id="controls">
 
@@ -110,7 +112,6 @@ class AffichageView
                 </div>
             </div>
         </div>
-
         <?php
         (new GlobalLayout('Affichage', ob_get_clean()))->show();
     }

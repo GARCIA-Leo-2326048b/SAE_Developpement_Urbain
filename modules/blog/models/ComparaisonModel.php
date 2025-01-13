@@ -16,7 +16,7 @@ class ComparaisonModel
         // Connexion à la base de données via SingletonModel
         $this->db = SingletonModel::getInstance()->getConnection();
     }
-    public function saveExperimentationM($data, $geoJsonNameSim, $geoJsonNameVer, $name, $dossier, $project)
+    public function saveExperimentation($data, $geoJsonNameSim, $geoJsonNameVer, $name, $dossier, $project)
     {
         $userId = $_SESSION['user_id'];
 
@@ -77,19 +77,42 @@ class ComparaisonModel
         if ($stmt->rowCount() > 0) {
             $experiment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Récupérer les charts, les geoJson et les données du tableau
+            // Récupérer les charts et les données du tableau
             $experiment['charts'] = $this->getChartsByExperimentationId($id);
-            $experiment['geoJsonSim'] = $this->getGeoJsonSim($id);
-            $experiment['geoJsonVer'] = $this->getGeoJsonVer($id);
-            $experiment['geoJsonSimName'] = $this->getGeoJsonSimName($id);
-            $experiment['geoJsonVerName'] = $this->getGeoJsonVerName($id);
+
+            // Vérifier si les noms de fichiers GeoJSON existent et les décoder
+            $experiment['geoJsonSimName'] = isset($experiment['geoJsonSimName']) ? json_decode($experiment['geoJsonSimName'], true) : [];
+            $experiment['geoJsonVerName'] = isset($experiment['geoJsonVerName']) ? json_decode($experiment['geoJsonVerName'], true) : [];
+
+            // Vérifier si les noms de fichiers GeoJSON sont des tableaux
+            if (!is_array($experiment['geoJsonSimName'])) {
+                $experiment['geoJsonSimName'] = [];
+            }
+            if (!is_array($experiment['geoJsonVerName'])) {
+                $experiment['geoJsonVerName'] = [];
+            }
+
             $experiment['tableData'] = $this->getTableDataByExperimentationId($id);
+
+            // Initialiser les tableaux pour GeoJSON
+            $experiment['geoJsonSim'] = [];
+            $experiment['geoJsonVer'] = [];
+
+            // Ajouter les données GeoJSON pour chaque nom de fichier
+            foreach ($experiment['geoJsonSimName'] as $geoJsonNameSim) {
+                $experiment['geoJsonSim'][] = $this->fetchGeoJson($geoJsonNameSim);
+            }
+
+            foreach ($experiment['geoJsonVerName'] as $geoJsonNameVer) {
+                $experiment['geoJsonVer'][] = $this->fetchGeoJson($geoJsonNameVer);
+            }
 
             return $experiment;
         }
 
         return null;
     }
+
 
     // Fonction pour reformater les données avant de les envoyer à la vue
     public function reformaterDonnees($tableData)
@@ -140,24 +163,14 @@ class ComparaisonModel
     }
 
 
-
-
-    private function getGeoJsonSim($id)
+    public function fetchGeoJson($name)
     {
-        // Récupérer les geojson
-        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ,experimentation WHERE id_xp = :id AND file_name = nom_sim");
-        $stmt->bindParam(':id', $id);
+        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE file_name = :name");
+        $stmt->bindParam(':name', $name);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 
-    private function getGeoJsonVer($id)
-    {
-        // Récupérer les geojson
-        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ,experimentation WHERE id_xp = :id AND file_name = nom_ver");
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Retourner les données GeoJSON
+        return $stmt->fetchColumn();
     }
 
     private function getChartsByExperimentationId($id) {
@@ -166,22 +179,6 @@ class ComparaisonModel
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    private function getGeoJsonSimName($id) {
-        // Récupérer le nom du fichier GeoJSON pour la simulation
-        $stmt = $this->db->prepare("SELECT nom_sim FROM experimentation WHERE id_xp = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    private function getGeoJsonVerName($id) {
-        // Récupérer le nom du fichier GeoJSON pour la vérité terrain
-        $stmt = $this->db->prepare("SELECT nom_ver FROM experimentation WHERE id_xp = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        return $stmt->fetchColumn();
     }
 
     private function getTableDataByExperimentationId($id) {
