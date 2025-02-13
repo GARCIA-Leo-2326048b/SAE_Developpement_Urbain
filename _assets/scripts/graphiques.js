@@ -217,9 +217,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const geoJsonNamesElement = document.getElementById('geoJsonNames');
-        const geoJsonSimName = geoJsonNamesElement.getAttribute('data-geojson-sim');
-        const geoJsonVerName = geoJsonNamesElement.getAttribute('data-geojson-ver');
-
+        const geoJsonSimName = JSON.parse(geoJsonNamesElement.dataset.geojsonSim);
+        const geoJsonVerName = JSON.parse(geoJsonNamesElement.dataset.geojsonVer);
         const saveBtn = document.getElementById('saveBtn');
         const modal = document.getElementById('saveModal');
         const closeBtn = modal.querySelector('.close');

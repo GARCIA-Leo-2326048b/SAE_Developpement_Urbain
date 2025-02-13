@@ -222,9 +222,10 @@ class ComparaisonView
         </div>
         <!-- Passer les noms des fichiers GeoJSON au JavaScript via des attributs data-* -->
         <div id="geoJsonNames"
-             data-geojson-sim="<?php echo implode(',', $filesSimName); ?>"
-             data-geojson-ver="<?php echo implode(',', $filesVerName); ?>">
+             data-geojson-sim='<?php echo json_encode($filesSimName, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'
+             data-geojson-ver='<?php echo json_encode($filesVerName, JSON_HEX_APOS | JSON_HEX_QUOT); ?>'>
         </div>
+
         <?php
             if($this->idExp === null){
         ?>

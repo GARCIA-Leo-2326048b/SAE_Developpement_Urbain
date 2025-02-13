@@ -31,8 +31,8 @@ class ComparaisonController{
         $data = json_decode(file_get_contents('php://input'), true);
 
         // Récupérer les noms des fichiers GeoJSON pour la simulation et la vérité terrain
-        $geoJsonSimNames = $data['geoJsonSimNames'] ?? [];
-        $geoJsonVerNames = $data['geoJsonVerNames'] ?? [];
+        $geoJsonSimNames = $data['geoJsonSimName'] ?? [];
+        $geoJsonVerNames = $data['geoJsonVerName'] ?? [];
 
         // Récupérer le nom, le dossier, et le projet depuis la requête AJAX
         $name = $data['name'] ?? 'Nom par défaut';
@@ -91,7 +91,7 @@ class ComparaisonController{
             // Passer chaque donnée individuellement à la vue
             $this->view->showComparison($formattedData, $geoJsonSimName,$geoJsonVerName,$geoJsonSim,$geoJsonVer,$charts);
             $this->view->setId($experimentId);
-            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
+//            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
         } else {
             // Charger les GeoJSON depuis la base de données
             $fileDataSim = [];

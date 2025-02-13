@@ -20,23 +20,25 @@ class ComparaisonModel
     {
         $userId = $_SESSION['user_id'];
 
-        // Encoder et valider les données JSON
+        // Encoder les tableaux en JSON
         try {
             $chartsJson = json_encode($data['charts'], JSON_THROW_ON_ERROR);
             $tableDataJson = json_encode($data['tableData'], JSON_THROW_ON_ERROR);
+            $geoJsonNameSimJson = json_encode($geoJsonNameSim, JSON_THROW_ON_ERROR);
+            $geoJsonNameVerJson = json_encode($geoJsonNameVer, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             error_log('Erreur lors de l\'encodage JSON : ' . $e->getMessage());
             return false;
         }
 
-        // Sauvegarder dans la base de données
+        // Sauvegarde en base de données
         $sql = "INSERT INTO experimentation (nom_sim, nom_ver, nom_xp, data_xp, table_data, id_utilisateur, dossier, projet) 
-            VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id, :dossier, :project)";
+        VALUES (:geoJsonNameSim, :geoJsonNameVer, :name, :chartsJson, :tableDataJson, :user_id, :dossier, :project)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':user_id', $userId);
         $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':geoJsonNameSim', $geoJsonNameSim);
-        $stmt->bindParam(':geoJsonNameVer', $geoJsonNameVer);
+        $stmt->bindParam(':geoJsonNameSim', $geoJsonNameSimJson);  // Converti en JSON
+        $stmt->bindParam(':geoJsonNameVer', $geoJsonNameVerJson);  // Converti en JSON
         $stmt->bindParam(':chartsJson', $chartsJson);
         $stmt->bindParam(':tableDataJson', $tableDataJson);
         $stmt->bindParam(':dossier', $dossier);
@@ -49,6 +51,7 @@ class ComparaisonModel
             return false;
         }
     }
+
 
     public function deleteFileExp($filename,$project)
     {
@@ -81,14 +84,16 @@ class ComparaisonModel
             $experiment['charts'] = $this->getChartsByExperimentationId($id);
 
             // Vérifier si les noms de fichiers GeoJSON existent et les décoder
-            $experiment['geoJsonSimName'] = isset($experiment['geoJsonSimName']) ? json_decode($experiment['geoJsonSimName'], true) : [];
-            $experiment['geoJsonVerName'] = isset($experiment['geoJsonVerName']) ? json_decode($experiment['geoJsonVerName'], true) : [];
+            $experiment['geoJsonSimName'] = isset($experiment['nom_sim']) ? json_decode($experiment['nom_sim'], true) : [];
+            $experiment['geoJsonVerName'] = isset($experiment['nom_ver']) ? json_decode($experiment['nom_ver'], true) : [];
 
-            // Vérifier si les noms de fichiers GeoJSON sont des tableaux
-            if (!is_array($experiment['geoJsonSimName'])) {
+            // Vérifier si le JSON est bien décodé
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log('Erreur JSON lors du décodage de geoJsonSimName: ' . json_last_error_msg());
                 $experiment['geoJsonSimName'] = [];
             }
-            if (!is_array($experiment['geoJsonVerName'])) {
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log('Erreur JSON lors du décodage de geoJsonVerName: ' . json_last_error_msg());
                 $experiment['geoJsonVerName'] = [];
             }
 
@@ -112,6 +117,7 @@ class ComparaisonModel
 
         return null;
     }
+
 
 
     // Fonction pour reformater les données avant de les envoyer à la vue

@@ -245,7 +245,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const georaster = await parseGeoraster(arrayBuffer); // Utilisation de georaster pour lire le fichier
                 tiffLayer = new GeoRasterLayer({
                     // Configuration de la couche GeoTIFF
-                });
+                    georaster: georaster,
+                    opacity: 1,
+                    resolution: 64
+                }).addTo(map.map);
 
                 // Récupérer le nom du fichier
                 const layerName = file.name; // Nom de la couche basé sur le nom du fichier
