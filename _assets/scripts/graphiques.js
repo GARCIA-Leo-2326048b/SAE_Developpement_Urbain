@@ -299,6 +299,7 @@
     }
 
     function saveExperimentation(experimentationData) {
+        console.log(experimentationData);
         fetch('index.php?action=save_experimentation', {
             method: 'POST',
             headers: {

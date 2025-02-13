@@ -61,10 +61,16 @@ class GlobalLayout
                 <a href="?action=accueil"><img class="logo-img" src="_assets/includes/logoMAS.png" alt="Logo MAS"></a>
             </div>
         </header>
+        <?php
+              if(isset($_SESSION['suid'])) {
+        ?>
         <!-- Bouton de retour -->
         <button class="return-button" id="gobackButton" onclick="goBack()">
             <i class="fas fa-arrow-left"></i>
         </button>
+        <?php
+              }
+        ?>
 
         <div class="content" data-aos="fade-up">
             <?php echo $this->content; ?>

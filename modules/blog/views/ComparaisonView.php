@@ -3,45 +3,40 @@
 namespace blog\views;
 
 /**
- * Classe ComparaisonView
- *
- * Cette classe gère l'affichage de la vue de comparaison des données de simulation et de vérité terrain.
+ * Class ComparaisonView
+ * Gère l'affichage de la vue de comparaison entre les données de simulation et les données de vérité terrain.
  */
 class ComparaisonView
 {
     /**
-     * @var HistoriqueView $hfolders Vue pour l'historique des dossiers
+     * @var HistoriqueView Instance de la classe HistoriqueView pour gérer les dossiers d'historique.
      */
     private HistoriqueView $hfolders;
 
     /**
-     * @var int|null $idExp ID de l'expérimentation
+     * @var int|null Identifiant de l'expérimentation (null si non défini).
      */
     private $idExp = null;
 
     /**
-     * Constructeur de la classe ComparaisonView
+     * ComparaisonView constructor.
      *
-     * Initialise la vue avec l'historique des dossiers.
-     *
-     * @param array $hfolders Historique des dossiers
+     * @param HistoriqueView $hfolders Instance de la classe HistoriqueView.
      */
-    public function __construct($hfolders){
+    public function __construct($hfolders)
+    {
         $this->hfolders = new HistoriqueView($hfolders);
     }
 
     /**
-     * Afficher la vue de comparaison
+     * Affiche la vue de comparaison avec les cartes, graphiques, et statistiques.
      *
-     * Affiche les cartes de simulation et de vérité terrain, ainsi que les statistiques et graphiques associés.
-     *
-     * @param array $results Résultats des comparaisons
-     * @param array $filesSimName Noms des fichiers de simulation
-     * @param array $filesVerName Noms des fichiers de vérité terrain
-     * @param array $fileDataSim Données des fichiers de simulation
-     * @param array $fileDataVer Données des fichiers de vérité terrain
-     * @param array|null $charts Graphiques (optionnel)
-     * @return void
+     * @param array $results Résultats contenant les statistiques et erreurs pour les graphiques.
+     * @param array $filesSimName Noms des fichiers GeoJSON pour la simulation.
+     * @param array $filesVerName Noms des fichiers GeoJSON pour la vérité terrain.
+     * @param array $fileDataSim Données GeoJSON pour la simulation.
+     * @param array $fileDataVer Données GeoJSON pour la vérité terrain.
+     * @param array|null $charts Liste des graphiques déjà générés (optionnel).
      */
     public function showComparison($results, $filesSimName,$filesVerName,$fileDataSim,$fileDataVer,$charts = null): void
     {
@@ -262,17 +257,13 @@ class ComparaisonView
         (new GlobalLayout('comparer', ob_get_clean()))->show();
     }
 
-
     /**
-     * Rendre une ligne de tableau
+     * Génère une ligne de tableau pour afficher une statistique.
      *
-     * Affiche une ligne de tableau avec les valeurs de simulation, de vérité terrain et d'erreur.
-     *
-     * @param string $label Libellé de la statistique
-     * @param float $simValue Valeur de simulation
-     * @param float $verValue Valeur de vérité terrain
-     * @param float $errorValue Valeur d'erreur
-     * @return void
+     * @param string $label Libellé de la statistique (ex. "Moyenne des surfaces").
+     * @param mixed $simValue Valeur pour la simulation.
+     * @param mixed $verValue Valeur pour la vérité terrain.
+     * @param mixed $errorValue Valeur de l'erreur.
      */
     private function renderRow($label, $simValue, $verValue, $errorValue)
     {
@@ -284,14 +275,10 @@ class ComparaisonView
           </tr>";
     }
 
-
     /**
-     * Afficher les contrôles de la carte
+     * Génère les contrôles de la carte (opacité, couches, etc.).
      *
-     * Affiche les contrôles de la carte pour changer la couche de fond, ajuster l'opacité et uploader des fichiers GeoTIFF.
-     *
-     * @param string $mapId ID de la carte
-     * @return void
+     * @param string $mapId Identifiant de la carte à laquelle appliquer les contrôles.
      */
     private function mapControls($mapId) { ?>
         <div id="controls-Map" style="width: 300px; padding: 20px; background-color: #e0f7f4; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); font-family: Arial, sans-serif;">
@@ -322,13 +309,11 @@ class ComparaisonView
         </div>
 
     <?php }
+
     /**
-     * Définir l'ID de l'expérimentation
+     * Définit l'identifiant de l'expérimentation pour les opérations de sauvegarde ou mise à jour.
      *
-     * Définit l'ID de l'expérimentation pour la mise à jour.
-     *
-     * @param int $idExp ID de l'expérimentation
-     * @return void
+     * @param int $idExp Identifiant de l'expérimentation.
      */
     public function setId($idExp)
     {

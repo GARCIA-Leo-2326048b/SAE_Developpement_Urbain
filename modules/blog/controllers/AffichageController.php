@@ -70,10 +70,13 @@ class AffichageController
         foreach ($files as $file) {
             // Récupérer les données GeoJson pour chaque fichier
             $fileData[] = $this->model->fetchGeoJson($file);
+
         }
 
         // Afficher les données en utilisant la vue AffichageView
         (new AffichageView($repertoires))->show($fileData);
+
     }
+
 }
 ?>
