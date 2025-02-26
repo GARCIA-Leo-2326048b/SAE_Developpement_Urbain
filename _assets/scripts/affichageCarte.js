@@ -315,8 +315,14 @@ class MapManager {
             slope_w: document.getElementById('slope_w').value
         };
 
-        // Exécuter la simulation avec les paramètres choisis
-        console.log('la il faut mettre la commande terminal A FAIRE A FAAAIIIIRE :', params);
+        // Construire la commande terminal
+        let command = 'COMMANDE TERMINAL A FAIRE A FAAAAAIIIRE';
+        for (const [key, value] of Object.entries(params)) {
+            command += ` ${key}=${value}`;
+        }
+
+        // Exécuter la commande terminal
+        console.log('Commande à exécuter :', command);
 
         // Fermer la pop-up après l'exécution
         this.closeSimulationPopup();
