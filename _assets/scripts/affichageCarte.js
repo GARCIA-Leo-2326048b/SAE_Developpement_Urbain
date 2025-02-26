@@ -278,6 +278,51 @@ class MapManager {
             layerButtonsDiv.appendChild(button);
         });
     }
+
+    /**
+     * Affiche la pop-up de simulation.
+     */
+    showSimulationPopup() {
+        document.getElementById('simulationPopup').style.display = 'block';
+    }
+
+    /**
+     * Ferme la pop-up de simulation.
+     */
+    closeSimulationPopup() {
+        document.getElementById('simulationPopup').style.display = 'none';
+    }
+
+    /**
+     * Exécute la simulation avec les paramètres choisis.
+     */
+    executeSimulation() {
+        // Récupérer les valeurs des sliders
+        const params = {
+            neighbours_l_min: document.getElementById('neighbours_l_min').value,
+            neighbours_l_0: document.getElementById('neighbours_l_0').value,
+            neighbours_l_max: document.getElementById('neighbours_l_max').value,
+            neighbours_w: document.getElementById('neighbours_w').value,
+            roads_l_min: document.getElementById('roads_l_min').value,
+            roads_l_0: document.getElementById('roads_l_0').value,
+            roads_l_max: document.getElementById('roads_l_max').value,
+            roads_w: document.getElementById('roads_w').value,
+            paths_l_min: document.getElementById('paths_l_min').value,
+            paths_l_max: document.getElementById('paths_l_max').value,
+            paths_w: document.getElementById('paths_w').value,
+            slope_l_min: document.getElementById('slope_l_min').value,
+            slope_l_max: document.getElementById('slope_l_max').value,
+            slope_w: document.getElementById('slope_w').value
+        };
+
+        // Exécuter la simulation avec les paramètres choisis
+        console.log('la il faut mettre la commande terminal A FAIRE A FAAAIIIIRE :', params);
+
+        // Fermer la pop-up après l'exécution
+        this.closeSimulationPopup();
+    }
+
+
 }
 
 
