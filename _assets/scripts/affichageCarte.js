@@ -4,13 +4,13 @@
 class MapManager {
     /**
      * Constructeur de la classe MapManager.
+     * @param {Array} layers - Liste des données GeoJSON et GeoTIFF.
      * @param {Object} house - Données GeoJSON des maisons.
      * @param {Object} road - Données GeoJSON des routes.
      * @param {string} tiffUrl - URL du fichier GeoTIFF.
      * @param {string} idMap - ID de l'élément HTML contenant la carte.
      */
-    constructor(house = null, road = null, tiffUrl = null, idMap = 'map') {
-        // Initialisation de la carte
+    constructor(layers = [] = null, house = null, road = null, tiffUrl = null, idMap = 'map') {
         this.map = L.map(idMap).setView([0, 0], 16);
         this.idMap = idMap;
         this.key = 'phT89U7mj4WtQWinX1ID';
@@ -39,7 +39,6 @@ class MapManager {
         // Ajout de la couche satellite par défaut
         this.streetsLayer.addTo(this.map);
 
-        // Ajout des couches de maisons et de routes si fournies
         if (house) {
             const houseLayer = L.geoJSON(house, { color: '#bd134c', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(this.map);
             this.overlayMaps["Maisons"] = houseLayer;
@@ -54,6 +53,54 @@ class MapManager {
         if (tiffUrl) {
             this.addGeoTiffLayer(tiffUrl, "GeoTIFF");
         }
+
+
+        if (layers) {
+            const fileNames = this.getFilesFromCurrentUrl();
+            console.log("Fichiers trouvés dans l'URL :", fileNames);
+
+            const mappedLayers = fileNames.map((name, index) => ({
+                name,
+                data: layers[index] || null
+            }));
+            console.log("Association fichiers - layers :", mappedLayers);
+
+
+            layers.forEach((layer, index) => {
+                this.addGeoJsonLayer(layer, mappedLayers[index].name);
+                this.updateLayerControl();
+            });
+        }
+    }
+
+    getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    getFilesFromCurrentUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const filesParam = urlParams.get("files");
+        return filesParam ? filesParam.split(",") : [];
+    }
+
+    /**
+     * Ajoute une couche GeoJSON à la carte.
+     * @param {Object} geoJsonData - Données GeoJSON.
+     * @param {string} layerName - Nom de la couche.
+     */
+    addGeoJsonLayer(geoJsonData, layerName) {
+        geoJsonData = JSON.parse(geoJsonData);
+        const color = this.getRandomColor();
+        const geoJsonLayer = L.geoJSON(geoJsonData, { color: color, weight: 2, fillColor: color, fillOpacity: 1 }).addTo(this.map);
+        this.overlayMaps[layerName] = geoJsonLayer;
+        this.updateLayerControl();
+        // this.updateLayerButtons();
+        this.map.fitBounds(geoJsonLayer.getBounds());
     }
 
     /**
@@ -197,6 +244,7 @@ class MapManager {
      * @returns {string|null} - Le nom de la couche ou null si non trouvé.
      */
     getLayerName(layer) {
+        // Si tu as un nom spécifique pour chaque couche, tu peux ajuster cette fonction.
         for (let key in this.overlayMaps) {
             if (this.overlayMaps[key] === layer) {
                 return key;
@@ -232,6 +280,7 @@ class MapManager {
     }
 }
 
+
 /**
  * Gestion de l'upload et affichage du fichier GeoTIFF.
  */
@@ -244,13 +293,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const arrayBuffer = e.target.result;
                 const georaster = await parseGeoraster(arrayBuffer); // Utilisation de georaster pour lire le fichier
                 tiffLayer = new GeoRasterLayer({
-                    // Configuration de la couche GeoTIFF
                     georaster: georaster,
                     opacity: 1,
                     resolution: 64
                 }).addTo(map.map);
-
-                // Récupérer le nom du fichier
+                //recuperer le nom du fichier
                 const layerName = file.name; // Nom de la couche basé sur le nom du fichier
                 // Ajouter la couche à overlayMaps avec le nom de la couche
                 map.overlayMaps[layerName] = tiffLayer;
@@ -264,4 +311,4 @@ document.addEventListener('DOMContentLoaded', function () {
             reader.readAsArrayBuffer(file);
         }
     });
-});
+})

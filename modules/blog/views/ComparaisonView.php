@@ -82,20 +82,11 @@ class ComparaisonView
         </div>
 
         <script>
-            console.log(<?php echo json_encode($fileDataSim); ?>);  // Afficher les données dans la console
-            console.log(<?php echo json_encode($fileDataVer); ?>);  // Afficher les données dans la console
+            window.geoJsonSimData = <?php echo json_encode($fileDataSim); ?>;
+            window.geoJsonSimName = <?php echo json_encode($filesSimName); ?>;
 
-            window.geoJsonHouseSim = <?php echo $fileDataSim[0] ?>;
-            window.geoJsonHouseVer = <?php echo $fileDataVer[0] ?>;
-
-            // Ajouter les données seulement si elles existent
-            <?php if (!empty($fileDataSim[1])): ?>
-            window.geoJsonRoadSim = <?php echo $fileDataSim[1] ?>;
-            <?php endif; ?>
-
-            <?php if (!empty($fileDataVer[1])): ?>
-            window.geoJsonRoadVer = <?php echo $fileDataVer[1] ?>;
-            <?php endif; ?>
+            window.geoJsonVerData = <?php echo json_encode($fileDataVer); ?>;
+            window.geoJsonVerName = <?php echo json_encode($filesVerName); ?>;
         </script>
 
 
@@ -103,14 +94,24 @@ class ComparaisonView
             <div class="map-card">
                 <div id="mapSim"></div>
                 <script>
-                    const mapSim = new MapManager(<?php echo $fileDataSim[0] ?>,<?php echo !empty($fileDataSim[1]) ? $fileDataSim[1] : 'null'; ?>, null, 'mapSim');
+                    const filesSimData = <?php echo json_encode($fileDataSim); ?>;
+                    const filesSimName = <?php echo json_encode($filesSimName); ?>;
+                    const mapSim = new MapManager(null, null, null, null, 'mapSim');
+                    filesSimData.forEach((file, index) => {
+                        mapSim.addGeoJsonLayer(file, filesSimName[index]);
+                    });
                 </script>
             </div>
 
             <div class="map-card">
                 <div id="mapVer"></div>
                 <script>
-                    const mapVer = new MapManager(<?php echo $fileDataVer[0] ?>,<?php echo !empty($fileDataVer[1]) ? $fileDataVer[1] : 'null'; ?>, null, 'mapVer');
+                    const filesVerData = <?php echo json_encode($fileDataVer); ?>;
+                    const filesVerName = <?php echo json_encode($filesVerName); ?>;
+                    const mapVer = new MapManager(null, null, null, null, 'mapVer');
+                    filesVerData.forEach((file, index) => {
+                        mapVer.addGeoJsonLayer(file, filesVerName[index]);
+                    });
                 </script>
             </div>
         </div>

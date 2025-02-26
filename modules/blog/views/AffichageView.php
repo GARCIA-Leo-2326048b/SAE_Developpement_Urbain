@@ -83,12 +83,8 @@ class AffichageView
         </div>
 
         <script>
-
-            const map = new MapManager(null,null,null,'map');
-            map.addHouseLayer(<?php echo $filesData[0] ?: 'null'; ?>, '<?php echo filter_input(INPUT_GET, 'house') ?: 'null'; ?>');
-            <?php if (!empty($filesData[1])): ?>
-            map.addRoadLayer(<?php echo $filesData[1]; ?>, '<?php echo filter_input(INPUT_GET, 'road') ?: 'null'; ?>');
-            <?php endif; ?>
+            const files = <?php echo json_encode($filesData); ?>;
+            const map = new MapManager(files, null, null, null, 'map');
 
             function toggleFileSelector() {
                 const container = document.getElementById('fileSelectorContainer');
