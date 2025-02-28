@@ -94,7 +94,14 @@ class MapManager {
      * @param {string} layerName - Nom de la couche.
      */
     addGeoJsonLayer(geoJsonData, layerName) {
-        geoJsonData = JSON.parse(geoJsonData);
+        if (typeof geoJsonData === 'string') {
+            try {
+                geoJsonData = JSON.parse(geoJsonData);
+            } catch (e) {
+                console.error("Invalid GeoJSON string:", e);
+                return;
+            }
+        }
         const color = this.getRandomColor();
         const geoJsonLayer = L.geoJSON(geoJsonData, { color: color, weight: 2, fillColor: color, fillOpacity: 1 }).addTo(this.map);
         this.overlayMaps[layerName] = geoJsonLayer;
