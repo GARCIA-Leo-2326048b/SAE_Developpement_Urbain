@@ -1,5 +1,16 @@
+/**
+ * Classe gérant l'affichage de la carte et les différentes couches.
+ */
 class MapManager {
-    constructor(house = null, road = null, tiffUrl = null, idMap = 'map') {
+    /**
+     * Constructeur de la classe MapManager.
+     * @param {Array} layers - Liste des données GeoJSON et GeoTIFF.
+     * @param {Object} house - Données GeoJSON des maisons.
+     * @param {Object} road - Données GeoJSON des routes.
+     * @param {string} tiffUrl - URL du fichier GeoTIFF.
+     * @param {string} idMap - ID de l'élément HTML contenant la carte.
+     */
+    constructor(layers = [] = null, house = null, road = null, tiffUrl = null, idMap = 'map') {
         this.map = L.map(idMap).setView([0, 0], 16);
         this.idMap = idMap;
         this.key = 'phT89U7mj4WtQWinX1ID';
@@ -42,8 +53,60 @@ class MapManager {
         if (tiffUrl) {
             this.addGeoTiffLayer(tiffUrl, "GeoTIFF");
         }
+
+
+        if (layers) {
+            const fileNames = this.getFilesFromCurrentUrl();
+            console.log("Fichiers trouvés dans l'URL :", fileNames);
+
+            const mappedLayers = fileNames.map((name, index) => ({
+                name,
+                data: layers[index] || null
+            }));
+            console.log("Association fichiers - layers :", mappedLayers);
+
+
+            layers.forEach((layer, index) => {
+                this.addGeoJsonLayer(layer, mappedLayers[index].name);
+                this.updateLayerControl();
+            });
+        }
     }
 
+    getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    getFilesFromCurrentUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const filesParam = urlParams.get("files");
+        return filesParam ? filesParam.split(",") : [];
+    }
+
+    /**
+     * Ajoute une couche GeoJSON à la carte.
+     * @param {Object} geoJsonData - Données GeoJSON.
+     * @param {string} layerName - Nom de la couche.
+     */
+    addGeoJsonLayer(geoJsonData, layerName) {
+        geoJsonData = JSON.parse(geoJsonData);
+        const color = this.getRandomColor();
+        const geoJsonLayer = L.geoJSON(geoJsonData, { color: color, weight: 2, fillColor: color, fillOpacity: 1 }).addTo(this.map);
+        this.overlayMaps[layerName] = geoJsonLayer;
+        this.updateLayerControl();
+        // this.updateLayerButtons();
+        this.map.fitBounds(geoJsonLayer.getBounds());
+    }
+
+    /**
+     * Ajoute une couche de maisons à la carte.
+     * @param {Object} house - Données GeoJSON des maisons.
+     */
     addHouseLayer(house) {
         const houseLayer = L.geoJSON(house, { color: '#bd134c', weight: 2, fillColor: '#e4a0b5', fillOpacity: 1 }).addTo(this.map);
         this.overlayMaps["Maisons"] = houseLayer;
@@ -52,6 +115,10 @@ class MapManager {
         this.map.fitBounds(houseLayer.getBounds());
     }
 
+    /**
+     * Ajoute une couche de routes à la carte.
+     * @param {Object} road - Données GeoJSON des routes.
+     */
     addRoadLayer(road) {
         const roadLayer = L.geoJSON(road, { color: '#0d61fa', weight: 2, fillColor: '#0d61fa', fillOpacity: 1 }).addTo(this.map);
         this.overlayMaps["Routes"] = roadLayer;
@@ -59,6 +126,11 @@ class MapManager {
         this.updateLayerButtons();
     }
 
+    /**
+     * Ajoute une couche GeoTIFF à la carte.
+     * @param {string} tiffUrl - URL du fichier GeoTIFF.
+     * @param {string} layerName - Nom de la couche.
+     */
     addGeoTiffLayer(tiffUrl, layerName) {
         fetch(tiffUrl)
             .then(response => response.arrayBuffer())
@@ -76,6 +148,9 @@ class MapManager {
             .catch(error => console.error('Erreur lors du chargement du GeoTIFF:', error));
     }
 
+    /**
+     * Met à jour le contrôle des couches.
+     */
     updateLayerControl() {
         // Supprimer l'ancien contrôle s'il existe
         if (this.layerControl) {
@@ -87,6 +162,10 @@ class MapManager {
         this.layerControl.addTo(this.map);
     }
 
+    /**
+     * Sélectionne une couche à afficher.
+     * @param {string} layerName - Nom de la couche à sélectionner.
+     */
     selectLayer(layerName) {
         if (this.overlayMaps[layerName]) {
             this.currentLayer = this.overlayMaps[layerName];
@@ -95,6 +174,9 @@ class MapManager {
         }
     }
 
+    /**
+     * Met à jour l'opacité de la couche sélectionnée.
+     */
     updateLayerOpacity() {
         const opacity = document.getElementById('opacitySlider'+this.idMap).value;
         if (this.currentLayer) {
@@ -111,18 +193,27 @@ class MapManager {
         }
     }
 
+    /**
+     * Bascule vers la couche satellite.
+     */
     switchToSatellite() {
         this.map.removeLayer(this.streetsLayer);
         this.map.addLayer(this.satelliteLayer);
         this.satelliteLayer.bringToBack();
     }
 
+    /**
+     * Bascule vers la couche des rues.
+     */
     switchToStreets() {
         this.map.removeLayer(this.satelliteLayer);
         this.map.addLayer(this.streetsLayer);
         this.streetsLayer.bringToBack();
     }
 
+    /**
+     * Supprime la couche sélectionnée.
+     */
     supprimerCouche() {
         if (this.currentLayer) {
             // Supprimer la couche de la carte
@@ -147,7 +238,11 @@ class MapManager {
         }
     }
 
-    // Fonction pour récupérer le nom de la couche (c'est un exemple, tu peux l'adapter selon ton besoin)
+    /**
+     * Récupère le nom de la couche.
+     * @param {Object} layer - La couche dont on veut le nom.
+     * @returns {string|null} - Le nom de la couche ou null si non trouvé.
+     */
     getLayerName(layer) {
         // Si tu as un nom spécifique pour chaque couche, tu peux ajuster cette fonction.
         for (let key in this.overlayMaps) {
@@ -158,6 +253,9 @@ class MapManager {
         return null;
     }
 
+    /**
+     * Met à jour les boutons de sélection des couches.
+     */
     updateLayerButtons() {
         const layerButtonsDiv = document.getElementById('layerButtons'+ this.idMap);
         layerButtonsDiv.innerHTML = ''; // Efface tous les boutons existants pour éviter les doublons
@@ -178,12 +276,63 @@ class MapManager {
 
             // Ajoute le bouton au conteneur
             layerButtonsDiv.appendChild(button);
-    });
-}
+        });
+    }
+
+    /**
+     * Affiche la pop-up de simulation.
+     *
+     */
+    showSimulationPopup() {
+        document.getElementById('simulationPopup').style.display = 'block';
+    }
+
+    /**
+     * Ferme la pop-up de simulation.
+     */
+    closeSimulationPopup() {
+        document.getElementById('simulationPopup').style.display = 'none';
+    }
+
+    /**
+     * Exécute la simulation avec les paramètres choisis.
+     */
+    executeSimulation() {
+        // Récupérer les valeurs des sliders
+        const params = {
+            neighbours_l_min: document.getElementById('neighbours_l_min').value,
+            neighbours_l_0: document.getElementById('neighbours_l_0').value,
+            neighbours_l_max: document.getElementById('neighbours_l_max').value,
+            neighbours_w: document.getElementById('neighbours_w').value,
+            roads_l_min: document.getElementById('roads_l_min').value,
+            roads_l_0: document.getElementById('roads_l_0').value,
+            roads_l_max: document.getElementById('roads_l_max').value,
+            roads_w: document.getElementById('roads_w').value,
+            paths_l_min: document.getElementById('paths_l_min').value,
+            paths_l_max: document.getElementById('paths_l_max').value,
+            paths_w: document.getElementById('paths_w').value,
+            slope_l_min: document.getElementById('slope_l_min').value,
+            slope_l_max: document.getElementById('slope_l_max').value,
+            slope_w: document.getElementById('slope_w').value
+        };
+
+        // Construire la commande terminal
+        let command = 'COMMANDE TERMINAL A FAIRE A FAAAAAIIIRE';
+        for (const [key, value] of Object.entries(params)) {
+            command += ` ${key}=${value}`;
+        }
+
+        // Exécuter la commande terminal
+        console.log('Commande à exécuter :', command);
+    }
+
+
 }
 
 
-// Gestion de l'upload et affichage du fichier GeoTIFF
+/**
+ * Gestion de l'upload et affichage du fichier GeoTIFF.
+ */
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('uploadGeoTiff').addEventListener('change', async (event) => {
         const file = event.target.files[0];

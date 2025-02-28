@@ -3,19 +3,64 @@ namespace blog\models;
 
 use PDO;
 
+/**
+ * Classe UploadModel
+ *
+ * Cette classe gère les opérations liées aux uploads de fichiers GeoJSON et GeoTIFF.
+ */
 class UploadModel {
+    /**
+     * @var \PDO $db Connexion à la base de données
+     */
     private $db;
+
+    /**
+     * @var string $p Paramètre de projet
+     */
     private $p = ':project';
+
+    /**
+     * @var string $u Paramètre d'utilisateur
+     */
     private $u = ':user';
+
+    /**
+     * @var string $uId Paramètre d'ID utilisateur
+     */
     private $uId = ':userId';
+
+    /**
+     * @var string $fname Paramètre de nom de dossier
+     */
     private $fname = ':folderName';
+
+    /**
+     * @var string $file Paramètre de nom de fichier
+     */
     private $file = ':file_name';
 
+    /**
+     * Constructeur de la classe UploadModel
+     *
+     * Initialise la connexion à la base de données.
+     *
+     * @param \PDO $dbConnection Connexion à la base de données
+     */
     public function __construct($dbConnection)
     {
         $this->db = $dbConnection;
     }
 
+
+    /**
+     * Tester si le projet existe
+     *
+     * Vérifie si un projet existe dans la base de données pour un utilisateur donné.
+     *
+     * @param string $project Nom du projet
+     * @param int $userId ID de l'utilisateur
+     * @return bool True si le projet existe, sinon false
+     */
     public function projetExiste($project,$userId)
     {
         $query = "SELECT COUNT(*) FROM projets WHERE nom = :projet and utilisateur = :utilisateur";
@@ -27,6 +72,17 @@ class UploadModel {
         return $stmt->fetchColumn() > 0;
     }
 
+
+    /**
+     * Créer un projet
+     *
+     * Ajoute un nouveau projet dans la base de données pour un utilisateur donné.
+     *
+     * @param string $project Nom du projet
+     * @param int $userId ID de l'utilisateur
+     * @return bool True si la création réussit, sinon false
+     * @throws \Exception En cas d'erreur lors de la création du projet
+     */
     public function createProjectM($project,$userId)
     {
          try {
@@ -43,6 +99,15 @@ class UploadModel {
         }
     }
 
+
+    /**
+     * Récupérer les projets de l'utilisateur
+     *
+     * Récupère la liste des projets d'un utilisateur donné.
+     *
+     * @param int $userId ID de l'utilisateur
+     * @return array Liste des projets de l'utilisateur
+     */
     public function getUserProjects($userId)
     {
         $queryFolders = "SELECT nom AS projet FROM projets WHERE utilisateur = :userId ORDER BY nom";
@@ -53,7 +118,19 @@ class UploadModel {
     }
 
 
-    // Enregistrer un upload GeoJSON
+    /**
+     * Enregistrer un upload GeoJSON
+     *
+     * Enregistre un fichier GeoJSON dans la base de données.
+     *
+     * @param string $fileName Nom du fichier
+     * @param string $fileContent Contenu du fichier
+     * @param int $userId ID de l'utilisateur
+     * @param string $dossierParent Dossier parent
+     * @param string $project Nom du projet
+     * @return bool True si l'enregistrement réussit, sinon false
+     * @throws \Exception En cas d'erreur lors de l'enregistrement du GeoJSON
+     */
     public function saveUploadGJ($fileName, $fileContent, $userId,$dossierParent,$project)
     {
         try {
@@ -72,7 +149,18 @@ class UploadModel {
         }
     }
 
-    // Enregistrer un upload GeoTIFF
+
+    /**
+     * Enregistrer un upload GeoTIFF
+     *
+     * Enregistre un fichier GeoTIFF dans la base de données.
+     *
+     * @param string $fileName Nom du fichier
+     * @param string $fileContent Contenu du fichier
+     * @param int $userId ID de l'utilisateur
+     * @return bool True si l'enregistrement réussit, sinon false
+     * @throws \Exception En cas d'erreur lors de l'enregistrement du GeoTIFF
+     */
     public function saveUploadGT($fileName, $fileContent, $userId)
     {
         try {
@@ -89,6 +177,17 @@ class UploadModel {
         }
     }
 
+
+    /**
+     * Vérifier si un fichier GeoJSON existe
+     *
+     * Vérifie si un fichier GeoJSON existe dans la base de données pour un utilisateur et un projet donnés.
+     *
+     * @param string $customName Nom personnalisé du fichier
+     * @param int $userID ID de l'utilisateur
+     * @param string $project Nom du projet
+     * @return bool True si le fichier existe, sinon false
+     */
     public function fileExistGJ($customName,$userID,$project)
     {
         $query = "SELECT COUNT(*) FROM uploadGJ WHERE file_name = :file_name and user = :user and projet = :project";
@@ -101,6 +200,17 @@ class UploadModel {
         return  $stmt->fetchColumn() > 0;
     }
 
+
+    /**
+     * Supprimer un fichier GeoJSON
+     *
+     * Supprime un fichier GeoJSON de la base de données.
+     *
+     * @param string $fileName Nom du fichier
+     * @param int $userId ID de l'utilisateur
+     * @param string $projet Nom du projet
+     * @return bool True si la suppression réussit, sinon false
+     */
     public function deleteFileGJ($fileName,$userId,$projet) {
 
         $query = "DELETE FROM uploadGJ WHERE file_name = :file_name and user = :user and projet = :projet";
@@ -112,6 +222,17 @@ class UploadModel {
     }
 
 
+    /**
+     * Vérifier l'existence d'un dossier
+     *
+     * Vérifie si un dossier existe dans la base de données pour un utilisateur, un dossier parent et un projet donnés.
+     *
+     * @param int $userId ID de l'utilisateur
+     * @param string $parentFolder Dossier parent
+     * @param string $folderName Nom du dossier
+     * @param string $project Nom du projet
+     * @return bool True si le dossier existe, sinon false
+     */
     public function verifyFolder($userId, $parentFolder, $folderName,$project): bool {
         $query = "SELECT COUNT(*) FROM organisation WHERE id_dossier = :folderName AND dossierParent = :parentFolder AND id_utilisateur = :userId AND projet = :project";
         $stmt = $this->db->prepare($query);
@@ -124,6 +245,18 @@ class UploadModel {
         return (bool) $stmt->fetchColumn();
     }
 
+
+    /**
+     * Créer un dossier
+     *
+     * Ajoute un nouveau dossier dans la base de données pour un utilisateur, un dossier parent et un projet donnés.
+     *
+     * @param int $userId ID de l'utilisateur
+     * @param string $parentFolder Dossier parent
+     * @param string $folderName Nom du dossier
+     * @param string $project Nom du projet
+     * @throws \Exception En cas d'erreur lors de la création du dossier
+     */
     public function createFolder($userId, $parentFolder, $folderName,$project): void {
         try {
             // Vérifier si le dossier existe déjà
@@ -144,6 +277,16 @@ class UploadModel {
         }
     }
 
+
+    /**
+     * Récupérer l'expérimentation
+     *
+     * Récupère la hiérarchie des dossiers et des fichiers d'expérimentation pour un utilisateur et un projet donnés.
+     *
+     * @param int $userId ID de l'utilisateur
+     * @param string $project Nom du projet
+     * @return array Arborescence des dossiers et des fichiers d'expérimentation
+     */
     public function getExperimentation($userId,$project) {
         // Récupérer les dossier
         $queryFolders = "SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent FROM organisation WHERE id_utilisateur = :userId AND projet = :project ORDER BY dossierParent, id_dossier";
@@ -219,6 +362,16 @@ class UploadModel {
         return $folderTree; // Retourne l'arborescence
     }
 
+
+    /**
+     * Récupérer la hiérarchie des dossiers
+     *
+     * Récupère la hiérarchie des dossiers et des fichiers pour un utilisateur et un projet donnés.
+     *
+     * @param string $project Nom du projet
+     * @param int $userId ID de l'utilisateur
+     * @return array Arborescence des dossiers et des fichiers
+     */
     public function getFolderHierarchy($project, $userId) {
         // Récupérer les dossiers
         $queryFolders = "SELECT id_dossier AS dossier_id, id_dossier AS folder_name, dossierParent FROM organisation WHERE id_utilisateur = :userId AND projet = :project ORDER BY dossierParent, id_dossier";
@@ -291,6 +444,16 @@ class UploadModel {
     }
 
 
+    /**
+     * Récupérer les sous-dossiers
+     *
+     * Récupère les sous-dossiers d'un dossier donné pour un utilisateur et un projet donnés.
+     *
+     * @param int $currentUserId ID de l'utilisateur
+     * @param string $folderName Nom du dossier
+     * @param string $project Nom du projet
+     * @return array Liste des sous-dossiers
+     */
     public function getSubFolder($currentUserId, $folderName,$project) {
         $queryFolders = "SELECT id_dossier AS folder_id, id_dossier AS folder_name FROM organisation WHERE id_utilisateur = :userId AND dossierParent = :folderName AND projet = :project ORDER BY id_dossier";
         $stmtFolders = $this->db->prepare($queryFolders);
@@ -302,7 +465,17 @@ class UploadModel {
     }
 
 
-
+    /**
+     * Supprimer un dossier par son nom
+     *
+     * Supprime un dossier et son contenu de la base de données pour un utilisateur et un projet donnés.
+     *
+     * @param string $folderName Nom du dossier
+     * @param int $userId ID de l'utilisateur
+     * @param string $project Nom du projet
+     * @return bool True si la suppression réussit, sinon false
+     * @throws \Exception En cas d'erreur lors de la suppression du dossier
+     */
     public function deleteFolderByName($folderName, $userId,$project) {
         try {
             // Étape 1 : Supprimer les fichiers du dossier
@@ -345,6 +518,17 @@ class UploadModel {
     }
 
 
+    /**
+     * Supprimer un dossier de manière transactionnelle
+     *
+     * Supprime un dossier et son contenu de la base de données de manière transactionnelle pour un utilisateur et un projet donnés.
+     *
+     * @param string $folderName Nom du dossier
+     * @param int $userId ID de l'utilisateur
+     * @param string $project Nom du projet
+     * @return bool True si la suppression réussit, sinon false
+     * @throws \Exception En cas d'erreur lors de la suppression du dossier
+     */
     public function deleteFolderT($folderName, $userId,$project)
     {
         $this->db->beginTransaction();

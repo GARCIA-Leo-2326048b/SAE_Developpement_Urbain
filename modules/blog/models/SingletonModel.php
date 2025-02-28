@@ -6,16 +6,33 @@ use _assets\config\Config;
 use PDO;
 use PDOException;
 
-
-
+/**
+ * Classe SingletonModel
+ *
+ * Cette classe implémente le modèle Singleton pour gérer une connexion unique à la base de données.
+ */
 class SingletonModel
 {
-    private static $instance = null; // Instance unique de la classe
-    private $connection;            // Connexion PDO
+    /**
+     * @var SingletonModel|null $instance Instance unique de la classe
+     */
+    private static $instance = null;
 
+    /**
+     * @var \PDO $connection Connexion PDO
+     */
+    private $connection;
+
+    /**
+     * @var Config $config Configuration de la base de données
+     */
     private $config;
 
-    // Constructeur privé pour le Singleton
+    /**
+     * Constructeur privé pour le Singleton
+     *
+     * Initialise la connexion à la base de données en utilisant les paramètres de configuration.
+     */
     private function __construct()
     {
         // Charger la configuration depuis une fonction dédiée
@@ -32,7 +49,11 @@ class SingletonModel
         }
     }
 
-    // Méthode pour obtenir l'instance unique de la classe
+    /**
+     * Obtenir l'instance unique de la classe
+     *
+     * @return SingletonModel Instance unique de la classe
+     */
     public static function getInstance()
     {
         if (self::$instance === null) {
@@ -41,7 +62,11 @@ class SingletonModel
         return self::$instance;
     }
 
-    // Méthode pour récupérer la connexion PDO
+    /**
+     * Récupérer la connexion PDO
+     *
+     * @return \PDO Connexion PDO
+     */
     public function getConnection()
     {
         return $this->connection;

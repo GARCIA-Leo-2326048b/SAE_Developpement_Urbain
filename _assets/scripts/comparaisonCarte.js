@@ -14,14 +14,12 @@ function toggleBackgroundMaps(hide) {
 const mapManagers = {};
 
 // Fonction pour initialiser la carte dans une modale
-function initializeModalMap(geoJsonHouse, geoJsonRoad =null, mapId) {
+function initializeModalMap(geoJsonData, geoJsonName, mapId) {
     if (!mapManagers[mapId]) {
-        mapManagers[mapId] = new MapManager(null, null, null, mapId);
-        mapManagers[mapId].addHouseLayer(geoJsonHouse);
-        if (geoJsonRoad) {
-            mapManagers[mapId].addRoadLayer(geoJsonRoad);
-        }
-
+        mapManagers[mapId] = new MapManager(null,null, null, null, mapId);
+        geoJsonData.forEach((file, index) => {
+            mapManagers[mapId].addGeoJsonLayer(file, geoJsonName[index]);
+        });
     }
 }
 
@@ -31,14 +29,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const modal = document.getElementById('mapModalSimulation');
         modal.style.display = 'block';
         toggleBackgroundMaps(true);
-        initializeModalMap(window.geoJsonHouseSim, window.geoJsonRoadSim, 'mapSimulation');
+        initializeModalMap(window.geoJsonSimData, window.geoJsonSimName, 'mapSimulation');
     });
 
     document.getElementById('showMapVerite').addEventListener('click', function () {
         const modal = document.getElementById('mapModalVerite');
         modal.style.display = 'block';
         toggleBackgroundMaps(true);
-        initializeModalMap(window.geoJsonHouseVer, window.geoJsonRoadVer, 'mapVerite');
+        initializeModalMap(window.geoJsonVerData, window.geoJsonVerName, 'mapVerite');
     });
 
     document.getElementById('closeSimulation').addEventListener('click', function () {

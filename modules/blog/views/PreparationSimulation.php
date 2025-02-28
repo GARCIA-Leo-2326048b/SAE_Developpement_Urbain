@@ -2,13 +2,36 @@
 
 namespace blog\views;
 
+/**
+ * Classe PreparationSimulation
+ *
+ * Cette classe gère l'affichage de la préparation de la simulation.
+ */
 class PreparationSimulation
 {
+    /**
+     * @var array $files Liste des fichiers
+     */
     private $files;
+
+    /**
+     * Constructeur de la classe PreparationSimulation
+     *
+     * Initialise la vue avec la liste des fichiers.
+     *
+     * @param array $files Liste des fichiers
+     */
     public function __construct($files) {
         $this->files = $files;
     }
 
+    /**
+     * Afficher la préparation de la simulation
+     *
+     * Affiche le contenu de la préparation de la simulation, y compris la sélection des fichiers et les actions associées.
+     *
+     * @return void
+     */
     public function show(): void {
         ob_start(); ?>
         <div class="container-content">

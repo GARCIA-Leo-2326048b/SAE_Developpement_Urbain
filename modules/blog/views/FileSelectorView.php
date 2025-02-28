@@ -2,16 +2,42 @@
 
 namespace blog\views;
 
+/**
+ * Classe FileSelectorView
+ *
+ * Cette classe gère l'affichage de la vue de sélection des fichiers.
+ */
 class FileSelectorView
 {
+    /**
+     * @var array $files Liste des fichiers
+     */
     private $files;
+
+    /**
+     * @var HistoriqueView $historiqueView Vue pour l'historique des fichiers
+     */
     private $historiqueView;
 
+    /**
+     * Constructeur de la classe FileSelectorView
+     *
+     * Initialise la vue avec la liste des fichiers et l'historique des fichiers.
+     *
+     * @param array $files Liste des fichiers
+     */
     public function __construct($files) {
         $this->files = $files;
         $this->historiqueView = new HistoriqueView($this->files);
     }
 
+    /**
+     * Afficher la vue de sélection des fichiers
+     *
+     * Affiche l'historique des fichiers, le formulaire d'importation et le formulaire de création de dossier.
+     *
+     * @return void
+     */
     public function show() : void{?>
 
         <div class="container-content">

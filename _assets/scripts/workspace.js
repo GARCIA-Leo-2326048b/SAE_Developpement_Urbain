@@ -567,7 +567,7 @@ function addToSelection() {
             updateComparisonSelectedFilesUI();
         }
 
-        closePopupS();
+        closePopup(document.getElementById('popup'));
     }
 }
 
@@ -633,6 +633,14 @@ function simulateSelectedFiles() {
     window.location.href = 'index.php?action=affichage&files=' + fileNames;
 }
 
+function afficher(){
+    // Récupérer l'élément et vérifier qu'il existe
+    let file = document.getElementById('popup-file-nameS');
+
+    // Rediriger vers l'URL
+    window.location.href = 'index.php?action=affichage&files=' + file;
+}
+
 //reload
 function reloadExp() {
     // Récupérer l'élément et vérifier qu'il existe
@@ -690,7 +698,7 @@ $(document).ready(function () {
     const currentURL = window.location.href;
 
     // Déterminez si c'est l'accueil (ajustez le critère selon votre URL)
-    if (currentURL.includes('?action=accueil') || currentURL.endsWith('/') || currentURL.endsWith('index.php')) {
+    if (currentURL.includes('index.php?action=accueil') || currentURL.endsWith('/') || currentURL.endsWith('index.php') || currentURL.includes('homepage') ) {
         $('#gobackButton').hide(); // Cache le bouton
     }
 });
