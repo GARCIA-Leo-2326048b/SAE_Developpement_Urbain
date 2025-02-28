@@ -281,6 +281,7 @@ class MapManager {
 
     /**
      * Affiche la pop-up de simulation.
+     *
      */
     showSimulationPopup() {
         document.getElementById('simulationPopup').style.display = 'block';
@@ -323,9 +324,6 @@ class MapManager {
 
         // Exécuter la commande terminal
         console.log('Commande à exécuter :', command);
-
-        // Fermer la pop-up après l'exécution
-        this.closeSimulationPopup();
     }
 
 
