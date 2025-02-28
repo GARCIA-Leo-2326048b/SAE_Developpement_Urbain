@@ -1,0 +1,11 @@
+# Bloquer l'accès aux fichiers PHP sauf index.php
+<FilesMatch "^(?!index\.php$).+\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Empêcher l'accès aux fichiers de configuration
+<FilesMatch "^(config|composer)\.(json|lock)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>

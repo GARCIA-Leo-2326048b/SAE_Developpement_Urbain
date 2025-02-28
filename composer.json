@@ -8,7 +8,7 @@
     "autoload": {
         "psr-4": {
             "blog\\": "modules/blog/",
-            "_assets\\config\\": "_assets/config/",
+            "_assets\\config\\": "public/_assets/config/",
           "proj4php\\": "vendor/proj4php/proj4php/src/"
         }
     },
