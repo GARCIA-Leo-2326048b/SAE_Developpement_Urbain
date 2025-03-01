@@ -124,8 +124,8 @@ class ComparaisonController
 
 
             // Passer chaque donnée individuellement à la vue
-            $this->view->showComparison($formattedData, $geoJsonSimName,$geoJsonVerName,$geoJsonSim,$geoJsonVer,$charts);
             $this->view->setId($experimentId);
+            $this->view->showComparison($formattedData, $geoJsonSimName,$geoJsonVerName,$geoJsonSim,$geoJsonVer,$charts);
 //            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
         } else {
             $fileDataSim = [];

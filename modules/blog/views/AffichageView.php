@@ -123,59 +123,59 @@ class AffichageView
             <h2>Paramètres de la simulation</h2>
             <div>
                 <label for="neighbours_l_min">Neighbours L Min</label>
-                <input type="range" id="neighbours_l_min" name="neighbours_l_min" min="0" max="200" step="0.0001" value="10.8696">
+                <input type="number" id="neighbours_l_min" name="neighbours_l_min" min="0" max="200" step="0.0001" value="10.8696">
             </div>
             <div>
                 <label for="neighbours_l_0">Neighbours L 0</label>
-                <input type="range" id="neighbours_l_0" name="neighbours_l_0" min="0" max="200" step="0.0001" value="85.4895">
+                <input type="number" id="neighbours_l_0" name="neighbours_l_0" min="0" max="200" step="0.0001" value="85.4895">
             </div>
             <div>
                 <label for="neighbours_l_max">Neighbours L Max</label>
-                <input type="range" id="neighbours_l_max" name="neighbours_l_max" min="0" max="200" step="0.0001" value="185.1387">
+                <input type="number" id="neighbours_l_max" name="neighbours_l_max" min="0" max="200" step="0.0001" value="185.1387">
             </div>
             <div>
                 <label for="neighbours_w">Neighbours W</label>
-                <input type="range" id="neighbours_w" name="neighbours_w" min="0" max="1" step="0.0001" value="0.3543">
+                <input type="number" id="neighbours_w" name="neighbours_w" min="0" max="1" step="0.0001" value="0.3543">
             </div>
             <div>
                 <label for="roads_l_min">Roads L Min</label>
-                <input type="range" id="roads_l_min" name="roads_l_min" min="0" max="200" step="0.0001" value="6.6065">
+                <input type="number" id="roads_l_min" name="roads_l_min" min="0" max="200" step="0.0001" value="6.6065">
             </div>
             <div>
                 <label for="roads_l_0">Roads L 0</label>
-                <input type="range" id="roads_l_0" name="roads_l_0" min="0" max="200" step="0.0001" value="73.5635">
+                <input type="number" id="roads_l_0" name="roads_l_0" min="0" max="200" step="0.0001" value="73.5635">
             </div>
             <div>
                 <label for="roads_l_max">Roads L Max</label>
-                <input type="range" id="roads_l_max" name="roads_l_max" min="0" max="200" step="0.0001" value="99.0350">
+                <input type="number" id="roads_l_max" name="roads_l_max" min="0" max="200" step="0.0001" value="99.0350">
             </div>
             <div>
                 <label for="roads_w">Roads W</label>
-                <input type="range" id="roads_w" name="roads_w" min="0" max="1" step="0.0001" value="0.2363">
+                <input type="number" id="roads_w" name="roads_w" min="0" max="1" step="0.0001" value="0.2363">
             </div>
             <div>
                 <label for="paths_l_min">Paths L Min</label>
-                <input type="range" id="paths_l_min" name="paths_l_min" min="0" max="200" step="0.0001" value="94.1375">
+                <input type="number" id="paths_l_min" name="paths_l_min" min="0" max="200" step="0.0001" value="94.1375">
             </div>
             <div>
                 <label for="paths_l_max">Paths L Max</label>
-                <input type="range" id="paths_l_max" name="paths_l_max" min="0" max="200" step="0.0001" value="95.9844">
+                <input type="number" id="paths_l_max" name="paths_l_max" min="0" max="200" step="0.0001" value="95.9844">
             </div>
             <div>
                 <label for="paths_w">Paths W</label>
-                <input type="range" id="paths_w" name="paths_w" min="0" max="1" step="0.0001" value="0.1263">
+                <input type="number" id="paths_w" name="paths_w" min="0" max="1" step="0.0001" value="0.1263">
             </div>
             <div>
                 <label for="slope_l_min">Slope L Min</label>
-                <input type="range" id="slope_l_min" name="slope_l_min" min="0" max="1" step="0.0001" value="0.7988">
+                <input type="number" id="slope_l_min" name="slope_l_min" min="0" max="1" step="0.0001" value="0.7988">
             </div>
             <div>
                 <label for="slope_l_max">Slope L Max</label>
-                <input type="range" id="slope_l_max" name="slope_l_max" min="0" max="1" step="0.0001" value="0.8041">
+                <input type="number" id="slope_l_max" name="slope_l_max" min="0" max="1" step="0.0001" value="0.8041">
             </div>
             <div>
                 <label for="slope_w">Slope W</label>
-                <input type="range" id="slope_w" name="slope_w" min="0" max="1" step="0.0001" value="0.2832">
+                <input type="number" id="slope_w" name="slope_w" min="0" max="1" step="0.0001" value="0.2832">
             </div>
             <div>
                 <button onclick="executeSimulation()">Exécuter simulation avec les paramètres choisis</button>
