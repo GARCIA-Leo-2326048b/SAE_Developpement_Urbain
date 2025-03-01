@@ -43,10 +43,10 @@ class AffichageView
         ob_start();
         ?>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
-        <script src="https://unpkg.com/georaster"></script>
-        <script src="/_assets/scripts/affichageCarte.js"></script> <!-- script de création de carte -->
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" ></script>
+        <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js" ></script>
+        <script src="https://unpkg.com/georaster" ></script>
+        <script src="/_assets/scripts/affichageCarte.js" ></script> <!-- script de création de carte -->
         <link rel="stylesheet" href="/_assets/styles/affichage.css">
 
         <div id="mapContainer">

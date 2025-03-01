@@ -84,9 +84,10 @@ class GlobalLayout
             <p>&copy; 2024 Simulation de développement urbain</p>
         </footer>
 
+        <script src="/_assets/scripts/workspace.js"></script>
         </body>
 
-        <script src="/_assets/scripts/workspace.js"></script>
+
         </html>
         <?php
 

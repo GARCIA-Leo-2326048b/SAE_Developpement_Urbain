@@ -38,7 +38,7 @@ class FileSelectorView
      *
      * @return void
      */
-    public function show() : void{?>
+    public function show() : void { ?>
 
         <div class="container-content">
         <div class="main-content">
@@ -87,5 +87,7 @@ class FileSelectorView
                 </div>
 
 
-   <?}
+        <?php
+    }
 }
+?>

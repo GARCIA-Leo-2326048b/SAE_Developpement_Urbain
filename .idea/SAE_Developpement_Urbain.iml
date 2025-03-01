@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/vendor/proj4php/proj4php/src" isTestSource="false" packagePrefix="proj4php\" />
       <sourceFolder url="file://$MODULE_DIR$/proj4php/proj4php/test" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/amenadiel/jpgraph" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/phayes/geophp" />

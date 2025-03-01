@@ -77,17 +77,17 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.12.1",
-            "version_normalized": "1.12.1.0",
+            "version": "1.13.0",
+            "version_normalized": "1.13.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845"
+                "reference": "024473a478be9df5fdaca2c793f2232fe788e414"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/123267b2c49fbf30d78a7b2d333f6be754b94845",
-                "reference": "123267b2c49fbf30d78a7b2d333f6be754b94845",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/024473a478be9df5fdaca2c793f2232fe788e414",
+                "reference": "024473a478be9df5fdaca2c793f2232fe788e414",
                 "shasum": ""
             },
             "require": {
@@ -103,7 +103,7 @@
                 "phpspec/prophecy": "^1.10",
                 "phpunit/phpunit": "^7.5.20 || ^8.5.23 || ^9.5.13"
             },
-            "time": "2024-11-08T17:47:46+00:00",
+            "time": "2025-02-12T12:17:51+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -128,7 +128,7 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.12.1"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.0"
             },
             "funding": [
                 {
@@ -704,17 +704,17 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.40",
-            "version_normalized": "10.5.40.0",
+            "version": "10.5.45",
+            "version_normalized": "10.5.45.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "e6ddda95af52f69c1e0c7b4f977cccb58048798c"
+                "reference": "bd68a781d8e30348bc297449f5234b3458267ae8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e6ddda95af52f69c1e0c7b4f977cccb58048798c",
-                "reference": "e6ddda95af52f69c1e0c7b4f977cccb58048798c",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/bd68a781d8e30348bc297449f5234b3458267ae8",
+                "reference": "bd68a781d8e30348bc297449f5234b3458267ae8",
                 "shasum": ""
             },
             "require": {
@@ -748,7 +748,7 @@
             "suggest": {
                 "ext-soap": "To be able to generate mocks based on WSDL files"
             },
-            "time": "2024-12-21T05:49:06+00:00",
+            "time": "2025-02-06T16:08:12+00:00",
             "bin": [
                 "phpunit"
             ],
@@ -788,7 +788,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.40"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.45"
             },
             "funding": [
                 {
