@@ -118,5 +118,81 @@
     cursor: pointer;
 }
 
+/* Pop-up container */
+#simulationPopup {
+    display: none;
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background-color: #534998;
+    overflow: auto;
+    z-index: 1000;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* Close button */
+#simulationPopup button.close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Pop-up header */
+#simulationPopup h2 {
+    margin-top: 0;
+    color: #6b5eba;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Input container */
+#simulationPopup div {
+    margin-bottom: 15px;
+}
+
+/* Input labels */
+#simulationPopup label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Number inputs */
+#simulationPopup input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Execute button */
+#simulationPopup button.execute {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+}
+
+#simulationPopup button.execute:hover {
+    background-color: #45a049;
+}
+
 
 
