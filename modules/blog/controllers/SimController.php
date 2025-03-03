@@ -5,13 +5,40 @@ use blog\models\SingletonModel;
 use blog\models\UploadModel;
 use Exception;
 
+/**
+ * Classe SimController
+ *
+ * Cette classe gère l'exécution des simulations pour les utilisateurs connectés.
+ */
 class SimController
 {
+    /**
+     * @var \PDO $db Connexion à la base de données
+     */
     private $db;
+
+    /**
+     * @var UploadModel $uploadModel Instance du modèle d'upload
+     */
     private $uploadModel;
+
+    /**
+     * @var int $currentUserId ID de l'utilisateur actuel
+     */
     private $currentUserId;
+
+    /**
+     * @var int|null $currentProject ID du projet actuel
+     */
     private $currentProject;
 
+    /**
+     * Constructeur de la classe SimController
+     *
+     * Initialise la connexion à la base de données, le modèle d'upload et vérifie si l'utilisateur est connecté.
+     *
+     * @throws Exception Si l'utilisateur n'est pas connecté
+     */
     public function __construct()
     {
         session_start();
@@ -27,6 +54,13 @@ class SimController
         $this->currentProject = $_SESSION['current_project_id'] ?? null;
     }
 
+    /**
+     * Exécute la simulation
+     *
+     * Vérifie la méthode HTTP, lit les données JSON envoyées par le client, et exécute le script Python pour la simulation.
+     *
+     * @return void
+     */
     public function runSimulation()
     {
         header('Content-Type: application/json');
@@ -75,6 +109,12 @@ class SimController
         }
     }
 
+    /**
+     * Crée un répertoire temporaire pour stocker les fichiers de simulation
+     *
+     * @return string Chemin du répertoire temporaire
+     * @throws Exception Si la création du répertoire échoue
+     */
     private function createTempDirectory()
     {
         $tempDir = sys_get_temp_dir() . '/sim_' . md5(session_id() . microtime());
@@ -84,6 +124,13 @@ class SimController
         return $tempDir;
     }
 
+    /**
+     * Stocke les fichiers GeoJSON dans le répertoire temporaire
+     *
+     * @param array $selectedFiles Liste des fichiers sélectionnés
+     * @param string $tempDir Chemin du répertoire temporaire
+     * @return array Chemins des fichiers stockés
+     */
     private function storeGeoJSONFiles($selectedFiles, $tempDir)
     {
         $filePaths = [];
@@ -108,6 +155,13 @@ class SimController
         return $filePaths;
     }
 
+    /**
+     * Génère le fichier de configuration TOML pour la simulation
+     *
+     * @param array $filePaths Chemins des fichiers GeoJSON
+     * @param string $tempDir Chemin du répertoire temporaire
+     * @return string Chemin du fichier TOML généré
+     */
     private function generateTomlConfig($filePaths, $tempDir)
     {
         $starting_date = $_POST['starting_date'] ?? '1994';
@@ -210,6 +264,12 @@ TOML;
     }
 
 
+    /**
+     * Vérifie la catégorie des fichiers GeoJSON
+     *
+     * @param string $filePath Chemin du fichier GeoJSON
+     * @return array Catégories des fichiers (isRoad, isBuilding)
+     */
     private function checkGeoJSONCategory($filePath)
     {
         if (!file_exists($filePath)) {
@@ -238,6 +298,16 @@ TOML;
         return ["isRoad" => $isRoad, "isBuilding" => $isBuilding];
     }
 
+    /**
+     * Exécute le script Python pour la simulation
+     *
+     * @param string $tomlPath Chemin du fichier TOML
+     * @param array $params Paramètres de la simulation
+     * @param string $namesim Nom de la simulation
+     * @param string $folder Dossier de stockage
+     * @return string Résultat de la simulation
+     * @throws Exception Si l'exécution du script échoue
+     */
     private function executePythonScript($tomlPath, $params, $namesim, $folder)
     {
         // Création d'un fichier temporaire pour les paramètres
@@ -328,13 +398,24 @@ TOML;
 
 
 
-
-
+    /**
+     * Formate le résultat de la simulation
+     *
+     * @param array $output Résultat brut de la simulation
+     * @return array Résultat formaté
+     */
     private function formatResult($output)
     {
         return array_map('htmlspecialchars', $output);
     }
 
+    /**
+     * Stocke le résultat de la simulation dans un fichier
+     *
+     * @param array $output Résultat de la simulation
+     * @param string $tempDir Chemin du répertoire temporaire
+     * @return string URL de téléchargement du fichier de résultat
+     */
     private function storeResult($output, $tempDir)
     {
         $resultFile = "{$tempDir}/result.geojson";

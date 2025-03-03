@@ -219,6 +219,10 @@ cancelButton.addEventListener('click', () => {
     toggleButton.querySelector('i').classList.remove('fa-times');
 });
 
+/**
+ * Fonction pour mettre à jour les options de chargement de projet.
+ * Récupère la liste de tous les projets depuis le serveur et met à jour la liste déroulante des projets.
+ */
 function updateProjectload(){
 
     fetch('index.php?action=get_all_projects')
@@ -238,6 +242,11 @@ function updateProjectload(){
             console.error("Erreur lors de la mise à jour de l'historique :", error);
         });
 }
+
+/**
+ * Fonction pour afficher le formulaire approprié en fonction du type.
+ * @param {string} type - Le type de formulaire à afficher ('vector' ou 'raster').
+ */
 function showForm(type) {
     if (type === 'vector') {
         document.getElementById('vectorForm').style.display = 'block';
@@ -248,18 +257,28 @@ function showForm(type) {
     }
 }
 
-
+/**
+ * Fonction pour fermer le formulaire de création de dossier.
+ * Masque le formulaire de création de nouveau dossier.
+ */
 function closeCreateFolderForm() {
     document.getElementById('createFolderForm').style.display = 'none';
 }
 
-
+/**
+ * Fonction pour afficher le formulaire de création de nouveau dossier.
+ * Affiche le formulaire pour créer un nouveau dossier.
+ */
 function createNewFolder() {
 
     document.getElementById('createFolderForm').style.display = 'block';
 
 }
 
+/**
+ * Fonction pour basculer l'affichage des fichiers et sous-dossiers dans un dossier.
+ * @param {string} folderId - L'ID du dossier à basculer.
+ */
 function toggleFolder(folderId) {
     const filesElement = document.getElementById(`${folderId}-files`);
     const childrenElement = document.getElementById(`${folderId}-children`);
@@ -284,7 +303,10 @@ function toggleFolder(folderId) {
     }
 }
 
-
+/**
+ * Fonction pour mettre à jour l'historique des fichiers.
+ * Récupère les fichiers depuis le serveur et met à jour l'affichage de l'historique.
+ */
 function updateHistory() {
     fetch('index.php?action=reloading')
         .then(response => response.text()) // Change to .text() to handle HTML response
@@ -297,6 +319,11 @@ function updateHistory() {
             console.error("Erreur lors de la mise à jour de l'historique :", error);
         });
 }
+
+/**
+ * Fonction pour mettre à jour l'historique des expérimentations.
+ * Récupère les expérimentations depuis le serveur et met à jour l'affichage de l'historique.
+ */
 function updateHistoryExp() {
     fetch('index.php?action=reloadingExp')
         .then(response => response.text()) // Change to .text() to handle HTML response
@@ -310,6 +337,10 @@ function updateHistoryExp() {
         });
 }
 
+/**
+ * Fonction pour mettre à jour les options de dossier.
+ * Récupère la liste de tous les dossiers depuis le serveur et met à jour les listes déroulantes des dossiers.
+ */
 function updateFolderOptions() {
     globalParentFolder = 'root';
     fetch('index.php?action=get_all_folders')
@@ -336,6 +367,10 @@ function updateFolderOptions() {
         });
 }
 
+/**
+ * Fonction pour afficher une fenêtre contextuelle avec le nom du fichier.
+ * @param {string} fileName - Le nom du fichier à afficher dans la fenêtre contextuelle.
+ */
 function showPopup(fileName) {
     const popup1 = document.getElementById('popup');
     const popupFileName1 = document.getElementById('popup-file-name');
@@ -353,12 +388,21 @@ function showPopup(fileName) {
     }
 }
 
+/**
+ * Fonction pour afficher une fenêtre contextuelle avec le nom de l'expérimentation.
+ * @param {string} fileName - Le nom de l'expérimentation à afficher dans la fenêtre contextuelle.
+ * @param {string} id - L'ID de l'expérimentation.
+ */
 function showExperimentPopup(fileName,id){
     document.getElementById('popup-file-nameExp').textContent = fileName;
     document.getElementById('experimentId').value = id;
     document.getElementById('popupExp').style.display = 'block';
 }
 
+/**
+ * Fonction pour fermer une fenêtre contextuelle.
+ * @param {HTMLElement} element - L'élément déclencheur à partir duquel remonter pour trouver la fenêtre contextuelle.
+ */
 function closePopup(element) {
     // Remonter jusqu'au parent avec la classe 'popup'
     const popup = element.closest('.popup');
@@ -369,10 +413,17 @@ function closePopup(element) {
         console.error('Aucun élément parent avec la classe "popup" trouvé.');
     }
 }
+
+/**
+ * Fonction pour fermer la fenêtre contextuelle principale.
+ */
 function closePopupS(){
     document.getElementById('popup').style.display = 'none';
 }
 
+/**
+ * Fonction pour récupérer le nom du fichier depuis la fenêtre contextuelle et rediriger l'utilisateur vers une nouvelle URL avec le nom du fichier en tant que paramètre de requête.
+ */
 function performAction() {
     const fileId = document.getElementById('popup-file-name').textContent;
 
@@ -380,6 +431,10 @@ function performAction() {
 
 }
 
+/**
+ * Fonction pour supprimer un fichier.
+ * Affiche une boîte de dialogue de confirmation avant de supprimer le fichier.
+ */
 function deleteFile() {
     const fileName = document.getElementById('popup-file-name').textContent;
     Swal.fire({
@@ -421,6 +476,11 @@ function deleteFile() {
         }
     });
 }
+
+/**
+ * Fonction pour supprimer une expérimentation.
+ * Affiche une boîte de dialogue de confirmation avant de supprimer l'expérimentation.
+ */
 function deleteFileExp() {
     const fileName = document.getElementById('popup-file-nameExp').textContent;
     console.log(fileName);
@@ -466,7 +526,11 @@ function deleteFileExp() {
 
 
 
-
+/**
+ * Fonction pour afficher un menu contextuel avec le nom du dossier.
+ * @param {Event} event - L'événement déclencheur.
+ * @param {string} folderName - Le nom du dossier à afficher dans le menu contextuel.
+ */
 function showContextMenu(event, folderName) {
 
     event.preventDefault(); // Empêche le menu contextuel natif
@@ -496,7 +560,9 @@ function showContextMenu(event, folderName) {
     document.addEventListener('click', hideContextMenu, { once: true });
 }
 
-
+/**
+ * Fonction pour masquer le menu contextuel.
+ */
 function hideContextMenu() {
     const contextMenu = document.getElementById('context-menu');
     if (contextMenu) {
@@ -504,7 +570,10 @@ function hideContextMenu() {
     }
 }
 
-
+/**
+ * Fonction pour supprimer un dossier.
+ * Affiche une boîte de dialogue de confirmation avant de supprimer le dossier.
+ */
 function deleteFolder() {
     Swal.fire({
         title: "Êtes-vous sûr ?",
@@ -547,6 +616,11 @@ function deleteFolder() {
     hideContextMenu();
 }
 
+/**
+ * Fonction pour fermer un formulaire.
+ * Masque le formulaire spécifié par son identifiant.
+ * @param {string} formId - L'identifiant du formulaire à fermer.
+ */
 function closeForm(formId) {
     const form = document.getElementById(formId);
     if (form) {
@@ -554,6 +628,10 @@ function closeForm(formId) {
     }
 }
 
+/**
+ * Fonction pour ajouter un fichier à la sélection.
+ * Ajoute le fichier sélectionné à la liste des fichiers sélectionnés et met à jour l'interface utilisateur.
+ */
 function addToSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
 
@@ -572,6 +650,10 @@ function addToSelection() {
     }
 }
 
+/**
+ * Fonction pour retirer un fichier de la sélection.
+ * Supprime le fichier sélectionné de la liste des fichiers sélectionnés et met à jour l'interface utilisateur.
+ */
 function removeFromSelection() {
     const fileId = document.getElementById('popup-file-name').textContent;
 
@@ -586,6 +668,10 @@ function removeFromSelection() {
     }
 }
 
+/**
+ * Fonction pour mettre à jour l'interface utilisateur des fichiers sélectionnés pour la simulation.
+ * Réinitialise la liste des fichiers sélectionnés et met à jour l'affichage.
+ */
 function updateSimulationSelectedFilesUI() {
     const list = document.getElementById('selected-files-list');
     list.innerHTML = ''; // Réinitialiser la liste à chaque mise à jour
@@ -605,6 +691,10 @@ function updateSimulationSelectedFilesUI() {
     }
 }
 
+/**
+ * Fonction pour mettre à jour l'interface utilisateur des fichiers sélectionnés pour la comparaison.
+ * Réinitialise la liste des fichiers sélectionnés et met à jour l'affichage.
+ */
 function updateComparisonSelectedFilesUI() {
     const list = document.getElementById('selected-files-list');
     list.innerHTML = ''; // Réinitialiser la liste à chaque mise à jour
@@ -625,7 +715,10 @@ function updateComparisonSelectedFilesUI() {
 }
 
 
-
+/**
+ * Fonction pour simuler les fichiers sélectionnés.
+ * Stocke les fichiers sélectionnés et affiche la fenêtre contextuelle des paramètres de simulation.
+ */
 function simulateSelectedFiles() {
     // Stocker les fichiers sélectionnés et afficher la popup
     simulationFiles = selectionFiles;
@@ -645,11 +738,22 @@ function showParamPopup() {
 function closeParamPop() {
     document.getElementById('simulationParamPopup').style.display = 'none';
 }
+
+/**
+ * Exécute la simulation avec les paramètres spécifiés.
+ * Récupère les paramètres de simulation, affiche une fenêtre contextuelle de chargement,
+ * envoie les données au serveur et redirige l'utilisateur vers la page de résultats.
+ */
 function executeSimulationP(){
     document.getElementById('simulationParamPopup').style.display = 'none';
     document.getElementById('popupNameSim').style.display = 'block';
 }
 
+/**
+ * Exécute la simulation avec les paramètres spécifiés.
+ * Récupère les paramètres de simulation, affiche une fenêtre contextuelle de chargement,
+ * envoie les données au serveur et redirige l'utilisateur vers la page de résultats.
+ */
 function executeSimulationPY() {
     document.getElementById('popupNameSim').style.display = 'none';
     // Récupération des paramètres depuis les sliders et champs
@@ -726,7 +830,10 @@ function executeSimulationPY() {
 }
 
 
-
+/**
+ * Fonction pour afficher un fichier sélectionné.
+ * Récupère le nom du fichier depuis la fenêtre contextuelle et redirige l'utilisateur vers une nouvelle URL avec le nom du fichier en tant que paramètre de requête.
+ */
 function afficher(){
     // Récupérer l'élément et vérifier qu'il existe
     let file = document.getElementById('popup-file-nameS').textContent;
@@ -734,7 +841,11 @@ function afficher(){
     window.location.href = 'index.php?action=affichage&files=' + file;
 }
 
-//reload
+/**
+ * Recharge l'expérimentation spécifiée.
+ * Récupère l'ID de l'expérimentation depuis le DOM, vérifie sa validité,
+ * et redirige l'utilisateur vers l'URL de rechargement avec l'ID encodé.
+ */
 function reloadExp() {
     // Récupérer l'élément et vérifier qu'il existe
     const experimentElement = document.getElementById('experimentId');
@@ -757,7 +868,11 @@ function reloadExp() {
     console.log("Reloading experiment with ID:", experimentId);
 }
 
-
+/**
+ * Compare les fichiers sélectionnés.
+ * Récupère la liste des fichiers sélectionnés, génère une chaîne de noms de fichiers,
+ * et redirige l'utilisateur vers l'URL de comparaison avec les noms de fichiers en tant que paramètre de requête.
+ */
 function compareSelectedFiles(){
     // On prend la liste des fichiers sélectionnés
     let files = selectionFiles; // Ceci peut être un tableau de fichiers
@@ -796,6 +911,9 @@ $(document).ready(function () {
     }
 });
 
+/**
+ * Utilise l'historique du navigateur pour naviguer vers la page précédente.
+ */
 function goBack() {
     window.history.back();
 }

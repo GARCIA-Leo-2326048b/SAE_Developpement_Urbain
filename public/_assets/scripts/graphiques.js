@@ -1,6 +1,11 @@
     let chartType = 'bar';
 
-    //initialiser les données
+    /**
+     * Initialise les données du graphique.
+     * @param {Array} labels - Les étiquettes pour les données.
+     * @param {Array} dataSim - Les données de simulation.
+     * @param {Array} dataVer - Les données de vérité terrain.
+     */
     function initializeChart(labels, dataSim, dataVer) {
         window.chartData = { labels, dataSim, dataVer };
     }
@@ -12,13 +17,17 @@
     });
 
 
-    // Afficher/Masquer le formulaire d'ajout
+    /**
+     * Affiche ou masque le formulaire d'ajout de graphique.
+     */
     function toggleChartForm() {
         const formContainer = document.getElementById('chartFormContainer');
         formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
     }
 
-    // Créer un nouveau graphique
+    /**
+     * Crée un nouveau graphique en fonction des options sélectionnées.
+     */
     function createNewChart() {
         const chartName = document.getElementById('chartName').value;
         chartType = document.querySelector('input[name="chartType"]:checked').value;
@@ -59,7 +68,11 @@
         document.getElementById('chartFormContainer').style.display = 'none';
     }
 
-    // Filtrer les données en fonction des options sélectionnées
+    /**
+     * Filtre les données en fonction des options sélectionnées.
+     * @param {Array} selectedOptions - Les options sélectionnées.
+     * @returns {Object} Les données filtrées.
+     */
     function getFilteredData(selectedOptions = []) {
         const labels = [];
         const dataSim = [];
@@ -93,6 +106,15 @@
 
         return { labels, dataSim, dataVer };
     }
+
+    /**
+     * Crée les ensembles de données pour le graphique.
+     * @param {Object} filteredData - Les données filtrées.
+     * @param {string} chartType - Le type de graphique.
+     * @param {boolean} showSimulation - Indique si les données de simulation doivent être affichées.
+     * @param {boolean} showVeriteTerrain - Indique si les données de vérité terrain doivent être affichées.
+     * @returns {Array} Les ensembles de données pour le graphique.
+     */
     function createDatasets(filteredData, chartType, showSimulation, showVeriteTerrain) {
         const datasets = [];
         const colors = [
@@ -154,6 +176,14 @@
         return datasets;
     }
 
+    /**
+     * Configure et crée le graphique.
+     * @param {HTMLElement} chartDiv - Le conteneur du graphique.
+     * @param {string} chartType - Le type de graphique.
+     * @param {Object} filteredData - Les données filtrées.
+     * @param {Array} datasets - Les ensembles de données pour le graphique.
+     * @returns {Object} Le graphique créé.
+     */
     function configureChart(chartDiv, chartType, filteredData, datasets) {
         const config = {
             type: chartType === 'bar' ? 'bar' : chartType === 'spider' ? 'radar' : 'pie',
@@ -186,6 +216,13 @@
 
         return chart;
     }
+
+    /**
+     * Applique la normalisation aux données si nécessaire.
+     * @param {Object} filteredData - Les données filtrées.
+     * @param {boolean} normalizeChecked - Indique si la normalisation doit être appliquée.
+     * @returns {Object} Les données normalisées.
+     */
     function applyNormalization(filteredData, normalizeChecked) {
         if (normalizeChecked) {
             const normalizedData = normalizeData(filteredData.dataSim, filteredData.dataVer);
@@ -195,6 +232,12 @@
         return filteredData;
     }
 
+    /**
+     * Normalise les données de simulation et de vérité terrain.
+     * @param {Array} dataSim - Les données de simulation.
+     * @param {Array} dataVer - Les données de vérité terrain.
+     * @returns {Object} Les données normalisées.
+     */
     function normalizeData(dataSim, dataVer) {
         const normalizedSim = [];
         const normalizedVer = [];
@@ -208,6 +251,12 @@
 
         return { normalizedSim, normalizedVer };
     }
+
+    /**
+     * Supprime un graphique.
+     * @param {HTMLElement} chartDiv - Le conteneur du graphique.
+     * @param {Object} chart - Le graphique à supprimer.
+     */
     function removeChart(chartDiv, chart) {
         chartDiv.remove(); // Supprimer l'élément graphique
         if (chart) {
@@ -287,6 +336,10 @@
     });
 
 
+    /**
+     * Récupère les données du tableau.
+     * @returns {Array} Les données du tableau.
+     */
     function getTableData() {
         const tableRows = document.querySelectorAll('table tr'); // Sélectionne toutes les lignes de tous les tableaux
         const tableData = Array.from(tableRows).map(row => {
@@ -298,6 +351,10 @@
         return tableData.filter(row => row.some(cell => cell.trim() !== ''));
     }
 
+    /**
+     * Sauvegarde les données de l'expérimentation.
+     * @param {Object} experimentationData - Les données de l'expérimentation.
+     */
     function saveExperimentation(experimentationData) {
         console.log(experimentationData);
         fetch('index.php?action=save_experimentation', {
