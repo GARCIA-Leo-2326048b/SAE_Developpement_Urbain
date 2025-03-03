@@ -714,7 +714,7 @@ function executeSimulationPY() {
         .then(data => {
             Swal.close();
             if (data.success) {
-                window.location.href = `index.php?action=affichagesim&files=${encodeURIComponent(JSON.stringify(data.result.geojson))}&sim_name=${encodeURIComponent(requestData.sim_name)}`;
+                window.location.href = `index.php?action=affichage&files=${encodeURIComponent(requestData.sim_name)}`;
             } else {
                 Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
             }

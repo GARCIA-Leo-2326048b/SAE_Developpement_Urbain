@@ -23,7 +23,8 @@ try {
             case 'affichage':
                 // Récupérer les fichiers depuis l'URL
                 $files = filter_input(INPUT_GET, 'files'); // Cela sera une chaîne encodée
-
+            var_dump("on est la ");
+                var_dump($files);
                 if ($files) {
                     // Décoder la chaîne et convertir en tableau
                     $filesArray = explode(',', urldecode($files));
@@ -39,7 +40,7 @@ try {
                 $simName = filter_input(INPUT_GET, 'sim_name', FILTER_SANITIZE_STRING);
 
                 $_SESSION['simFiles'] = $simName;
-                var_dump($_SESSION['simFiles']);
+
                 $geojsonFile = filter_input(INPUT_GET, 'files');
                 $geojsonFile = trim($geojsonFile, '"');  // Retire les guillemets en début et fin
 
@@ -49,6 +50,7 @@ try {
                 }
 
                 $geojsonContent = file_get_contents($geojsonFile);
+
 
 
                 $geojsonDecoded = json_decode($geojsonContent, true);

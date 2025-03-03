@@ -116,8 +116,19 @@ class SimController
         $length = intval($validation_date) - intval($starting_date);
         $nameSim = $_POST['sim_name'] ?? 'Simulation';
 
-        $roadFile = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/roads_2002.geojson';
-        $buildingFile = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/buildings_1994.geojson';
+        // 🔹 Obtenir le chemin absolu de `saeIA/`
+        $basePath = realpath(dirname(__DIR__, 3) . "/saeIA");
+
+        if (!$basePath) {
+            throw new Exception("❌ Le dossier saeIA est introuvable !");
+        }
+
+        // 🔹 Définir les chemins dynamiques
+        $roadFile = $basePath . "/data/valenicina/features/roads_2002.geojson";
+        $buildingFile = $basePath . "/data/valenicina/features/buildings_1994.geojson";
+        $borderFile = $basePath . "/data/valenicina/features/border.geojson";
+        $demFile = $basePath . "/data/valenicina/features/dem_2019.tiff";
+        $incomeFile = $basePath . "/data/valenicina/factors/income_2019.csv";
 
         foreach ($filePaths as $file) {
             $category = $this->checkGeoJSONCategory($file);
@@ -129,6 +140,14 @@ class SimController
             }
         }
 
+        // 🔹 Remplacer `\` par `/` pour éviter les erreurs sous Windows
+        $roadFile = str_replace('\\', '/', $roadFile);
+        $buildingFile = str_replace('\\', '/', $buildingFile);
+        $borderFile = str_replace('\\', '/', $borderFile);
+        $demFile = str_replace('\\', '/', $demFile);
+        $incomeFile = str_replace('\\', '/', $incomeFile);
+
+        // 🔹 Générer le contenu du fichier TOML
         $tomlContent = <<<TOML
 name = '{$nameSim}'
 starting_date = '{$starting_date}'
@@ -142,7 +161,7 @@ unit = 'years'
 building_delta = {$building_delta}
 
 [border]
-file = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/border.geojson'
+file = '{$borderFile}'
 
 [[agents]]
 class_name = 'Road'
@@ -166,10 +185,9 @@ scheduled = true
 [[agents.individuals]]
 unique_id = 'LO'
 
-
 [[rasters]]
 name = 'topography'
-file = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/dem_2019.tiff'
+file = '{$demFile}'
 undefined_value = -10000
 
 # Beware, all CSV share this loading settings
@@ -183,13 +201,14 @@ name = 'weekly_income'
 index_column = 'Weekly income'
 probabilities_column = 'Prob.'
 [factors.files]
-2019 = 'C:/Users/yousr/Documents/saeIa/data/valenicina/factors/income_2019.csv'
+2019 = '{$incomeFile}'
 TOML;
 
         $tomlPath = "{$tempDir}/config.toml";
         file_put_contents($tomlPath, $tomlContent);
         return $tomlPath;
     }
+
 
     private function checkGeoJSONCategory($filePath)
     {
@@ -219,16 +238,37 @@ TOML;
         return ["isRoad" => $isRoad, "isBuilding" => $isBuilding];
     }
 
-    private function executePythonScript($tomlPath, $params,$namesim,$folder)
+    private function executePythonScript($tomlPath, $params, $namesim, $folder)
     {
         // Création d'un fichier temporaire pour les paramètres
         $tempFile = tempnam(sys_get_temp_dir(), 'params_');
         file_put_contents($tempFile, json_encode($params));
 
-        $scriptPath = "C:/Users/yousr/Documents/saeIa/run_simulation.py";
-        $tomlPath = str_replace('\\', '/', $tomlPath);
-        $geojsonFile = "C:/Users/yousr/Documents/saeIa/simulation_finalS.geojson"; // Chemin du GeoJSON attendu
+        $testPath = dirname(__DIR__, 3) . "/saeIA";
+        error_log("🔍 PHP doit chercher ici : " . $testPath);
 
+        if (!file_exists($testPath)) {
+            throw new Exception("❌ Le dossier saeIA est toujours introuvable à : " . $testPath);
+        }
+
+
+        $basePath = realpath(dirname(__DIR__, 3) . "/saeIA");
+
+
+        if (!$basePath) {
+            throw new Exception("Le dossier saeIA est introuvable !");
+        }
+
+        // 🔹 Définir les chemins absolus
+        $scriptPath = $basePath . "/run_simulation.py";
+        $geojsonFile = $basePath . "/simulation_final.geojson";
+
+        // 🔹 Correction du format des chemins pour éviter les erreurs sous Windows
+        $scriptPath = str_replace('\\', '/', $scriptPath);
+        $tomlPath = str_replace('\\', '/', $tomlPath);
+        $geojsonFile = str_replace('\\', '/', $geojsonFile);
+
+        // 🔹 Construire la commande d'exécution du script Python
         $command = sprintf(
             'pixi run python %s --config %s --params_file %s 2>&1',
             escapeshellarg($scriptPath),
@@ -236,13 +276,20 @@ TOML;
             escapeshellarg($tempFile)
         );
 
+        // 🔹 Debugging - Vérifier la commande exécutée
         error_log("Commande exécutée : " . $command);
 
+        // 🔹 Vérifier si Pixi est bien installé dans le bon dossier
+        if (!is_dir($basePath)) {
+            throw new Exception("Le dossier saeIA est introuvable !");
+        }
+
+        // 🔹 Exécution de la commande
         $descriptorspec = [
             1 => ['pipe', 'w'], // stdout
             2 => ['pipe', 'w'], // stderr
         ];
-        $process = proc_open($command, $descriptorspec, $pipes, "C:/Users/yousr/Documents/saeIa");
+        $process = proc_open($command, $descriptorspec, $pipes, $basePath);
 
         if (!is_resource($process)) {
             throw new Exception("Échec de l'exécution du script", 500);
@@ -255,27 +302,28 @@ TOML;
 
         $returnCode = proc_close($process);
 
-        // Affichage des logs d'exécution pour le débogage
+        // 🔹 Logs d'exécution pour le débogage
         error_log("Sortie script : " . $output);
         error_log("Erreur script : " . $errorOutput);
 
-
-        // Vérifier si le fichier GeoJSON a bien été généré
+        // 🔹 Vérifier si le fichier GeoJSON a bien été généré
         if (!file_exists($geojsonFile)) {
             throw new Exception("Le fichier GeoJSON de sortie n'a pas été trouvé !", 500);
         }
 
-        // Lire et retourner le contenu du GeoJSON
+        // 🔹 Lire et retourner le contenu du GeoJSON
         $geojsonContent = file_get_contents($geojsonFile);
-        $this->uploadModel->saveUploadGJ($namesim, $geojsonContent,$this->currentUserId, $folder,$this->currentProject );
-        // Nettoyage du fichier temporaire
+        $this->uploadModel->saveUploadGJ($namesim, $geojsonContent, $this->currentUserId, $folder, $this->currentProject);
+
+        // 🔹 Nettoyage du fichier temporaire
         unlink($tempFile);
 
         return json_encode([
             "success" => true,
-            "geojson" => $geojsonFile // Garde le format JSON sans reconversion inutile
+            "geojson" => $geojsonFile
         ]);
     }
+
 
 
 
