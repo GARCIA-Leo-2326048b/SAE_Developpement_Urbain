@@ -118,7 +118,7 @@
     cursor: pointer;
 }
 
-/* Pop-up container */
+/* Conteneur pop-up */
 #simulationPopup {
     display: none;
     position: fixed;
@@ -134,7 +134,7 @@
     padding: 20px;
 }
 
-/* Close button */
+/*  bouton fermeture */
 #simulationPopup button.close {
     position: absolute;
     top: 5px;
@@ -152,12 +152,12 @@
     font-family: 'Arial', sans-serif;
 }
 
-/* Input container */
+/* Conteneur input */
 #simulationPopup div {
     margin-bottom: 15px;
 }
 
-/* Input labels */
+/* labels input */
 #simulationPopup label {
     display: block;
     margin-bottom: 5px;
@@ -165,7 +165,7 @@
     font-family: 'Arial', sans-serif;
 }
 
-/* Number inputs */
+/* Nombre inputs */
 #simulationPopup input[type="number"] {
     width: 100%;
     padding: 8px;
@@ -176,7 +176,7 @@
     font-family: 'Arial', sans-serif;
 }
 
-/* Execute button */
+/* Bouton executer */
 #simulationPopup button.execute {
     display: block;
     width: 100%;
