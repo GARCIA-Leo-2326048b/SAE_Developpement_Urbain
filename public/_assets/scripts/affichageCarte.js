@@ -322,20 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
 })
 
 
-/**
- * Affiche la pop-up de simulation.
- *
- */
- function showSimulationPopup() {
-    document.getElementById('simulationPopup').style.display = 'block';
-}
 
-/**
- * Ferme la pop-up de simulation.
- */
-function closeSimulationPopup() {
-    document.getElementById('simulationPopup').style.display = 'none';
-}
 
 /**
  * Exécute la simulation avec les paramètres choisis.

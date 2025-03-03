@@ -78,5 +78,13 @@ class AffichageController
 
     }
 
+    public function afficherSimulation($geojsonFile)
+    {
+        // Récupérer la hiérarchie des répertoires pour le projet courant et l'utilisateur
+        $repertoires = $this->uploadModel->getFolderHierarchy($_SESSION['current_project_id'], $this->utilisateur);
+        // Afficher les données en utilisant la vue AffichageView
+        (new AffichageView($repertoires))->show($geojsonFile);
+    }
+
 }
 ?>

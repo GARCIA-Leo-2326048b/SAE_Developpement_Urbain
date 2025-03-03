@@ -198,6 +198,7 @@ $(document).ready(function() {
 let selectedFolderName = null;
 let selectedFiles = [];
 let selectionFiles = [];
+let simulationFiles = []; // Variable globale pour stocker les fichiers sélectionnés
 let currentMode = 'simulation';
 let actualpopup = null;
 
@@ -623,7 +624,7 @@ function updateComparisonSelectedFilesUI() {
     }
 }
 
-let simulationFiles = []; // Variable globale pour stocker les fichiers sélectionnés
+
 
 function simulateSelectedFiles() {
     // Stocker les fichiers sélectionnés et afficher la popup
@@ -646,6 +647,7 @@ function closeParamPop() {
 }
 
 function executeSimulationP() {
+    // Récupération des paramètres depuis les sliders et champs
     const params = {
         neighbours_l_min: document.getElementById('neighbours_l_min').value,
         neighbours_l_0: document.getElementById('neighbours_l_0').value,
@@ -663,6 +665,11 @@ function executeSimulationP() {
         slope_w: document.getElementById('slope_w').value
     };
 
+    // Récupération des dates et du building_delta
+    const starting_date = document.getElementById('starting_date').value || '1994';
+    const validation_date = document.getElementById('validation_date').value || '2002';
+    const building_delta = document.getElementById('building_delta').value || 22;
+
     // Afficher un indicateur de chargement
     Swal.fire({
         title: 'Simulation en cours',
@@ -673,31 +680,41 @@ function executeSimulationP() {
         }
     });
 
-    // Préparer les données pour l'envoi
-    const formData = new FormData();
-    formData.append('params', JSON.stringify(params));
-    formData.append('files', JSON.stringify(simulationFiles.map(f => f.name)));
+    // Création de l'objet JSON à envoyer
+    const requestData = {
+        params: params,
+        files: simulationFiles.map(f => f.name), // Fichiers sélectionnés
+        starting_date: starting_date,
+        validation_date: validation_date,
+        building_delta: building_delta
+    };
 
-    // Envoyer la requête AJAX
+    console.log("Données envoyées :", requestData); // Debugging
+
+    // Envoyer la requête `POST` en JSON
     fetch('index.php?action=run_simulation', {
         method: 'POST',
-        body: formData
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
     })
         .then(response => response.json())
         .then(data => {
             Swal.close();
             if (data.success) {
-                // Redirection vers la page d'affichage avec le résultat
-                window.location.href = `index.php?action=affichage&files=${encodeURIComponent(data.resultFile)}`;
+                window.location.href = `index.php?action=affichagesim&files=${encodeURIComponent(JSON.stringify(data.result.geojson))}`;
             } else {
                 Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
             }
         })
         .catch(error => {
             Swal.fire('Erreur', 'Connexion au serveur échouée', 'error');
-            console.error('Error:', error);
+            console.error('Erreur:', error);
         });
 }
+
+
 
 function afficher(){
     // Récupérer l'élément et vérifier qu'il existe

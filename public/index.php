@@ -35,7 +35,27 @@ try {
                     $_SESSION['simFiles'] = $filesArray;
                 }
                 break;
+            case 'affichagesim':
+                $geojsonFile = filter_input(INPUT_GET, 'files');
+                $geojsonFile = trim($geojsonFile, '"');  // Retire les guillemets en début et fin
 
+
+                if (!file_exists($geojsonFile)) {
+                    die("Erreur : Le fichier n'existe pas.");
+                }
+
+                $geojsonContent = file_get_contents($geojsonFile);
+
+
+                $geojsonDecoded = json_decode($geojsonContent, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    die("Erreur de décodage JSON : " . json_last_error_msg());
+                }
+
+// Affichage du GeoJSON dans ton contrôleur
+                (new blog\controllers\AffichageController())->afficherSimulation($geojsonDecoded);
+                break;
             case 'compare':
                 // Récupérer les fichiers stockés en session
                 $simFiles = $_SESSION['simFiles'] ?? [];
@@ -74,6 +94,9 @@ try {
                 break;
             case 'new_simulation':
                 (new blog\controllers\WorkSpaceController())->execute();
+                break;
+            case 'run_simulation':
+                (new blog\controllers\SimController())->runSimulation();
                 break;
             case 'save_experimentation':
                 (new blog\controllers\ComparaisonController())->saveExperimentation();
@@ -117,6 +140,8 @@ try {
             case 'logout':
                 (new blog\controllers\AuthentificationController())->deconnexion();
                 break;
+            case 'home':
+                (new blog\controllers\HomepageController())->execute();
             default:
                 (new blog\controllers\HomepageController())->execute();
         }

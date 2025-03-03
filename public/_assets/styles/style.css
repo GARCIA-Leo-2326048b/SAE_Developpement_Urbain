@@ -1,0 +1,837 @@
+/* Reset de base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden; /* Évite les débordements horizontaux */
+    transition: background-color 0.3s ease;
+}
+
+/* Stylisation du header */
+header {
+    position: relative;
+    top: 0;
+    width: 100%;
+    z-index: 1000;  /* Assure qu'il soit au-dessus du contenu */
+    background: linear-gradient(45deg, rgba(231, 229, 215, 0.9), rgba(149, 119, 99, 0.8));
+    color: #4b3a19;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeUp 0.8s ease-out forwards;
+}
+
+
+/* Animation de glissement pour le header */
+@keyframes slideIn {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+.logo-img {
+    width: 12rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.1); /* Zoom léger au survol */
+}
+
+/* Contenu principal ajusté */
+.content {
+    padding: 20px;
+    margin: 5rem auto;
+    max-width: 1100px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s ease-out forwards;
+    margin-top: 80px; /* Ajoute un espace sous le header pour ne pas le cacher */
+}
+
+/* Animation de montée subtile */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Boutons */
+.buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.buttons button {
+    padding: 12px 24px;
+    margin: 10px;
+    font-size: 1rem;
+    background-color: #957743;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.buttons button:hover {
+    background-color: #4b3a19;
+    transform: scale(1.05);
+}
+
+/* Bouton de retour */
+.return-button {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background-color: #957743;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    transition: background-color 0.3s, transform 0.2s ease;
+}
+
+.return-button:hover {
+    background-color: #4b3a19;
+    transform: scale(1.1);
+}
+
+/* Assurez-vous que l'élément footer est toujours en bas */
+footer {
+    background-color: #59481d;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    z-index: 1000;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Effet au survol des liens */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: #957743;
+}
+
+/* Stylisation de l'historique */
+#history {
+    width: 60%; /* Plus large pour l'historique */
+    background-color: #f3f3f3;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    margin-right: 20px;
+}
+
+#history h2 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+#history-files {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-file {
+    background-color: #ffffff;
+    color: #333;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.history-file:hover {
+    background-color: #957743;
+    transform: scale(1.03);
+}
+
+.history-file:active {
+    transform: scale(1);
+}
+
+/* Section d'import */
+#import {
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+#import button {
+    width: 100%;
+    padding: 10px 30px;  /* Augmenter la taille des boutons */
+    margin: 15px;
+    background-color: #d0e6a5; /* Une couleur différente pour l'effet visuel */
+    color: #474e23;
+    border-radius: 1em; /* Forme arrondie */
+    font-size: 1rem;  /* Augmenter la taille de la police */
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s ease;
+    text-transform: uppercase; /* Rendre le texte plus visible */
+}
+
+#import button:hover {
+    background-color: #474e23;
+    color: #e2eba7;
+    transform: scale(1.05);
+}
+
+
+#import button:hover {
+    background-color: #474e23;
+    color: #e2eba7;
+    transform: scale(1.05);
+}
+/* Animation pour faire apparaître un formulaire */
+#import .importform {
+    display: none;  /* Initialement caché */
+    animation: slideIn 0.5s ease-in-out;
+}
+
+#import button:active + .importform {
+    display: block;  /* Afficher le formulaire lorsque le bouton est cliqué */
+}
+
+/* Animation pour le formulaire */
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.importform {
+    margin: 1em;
+    text-align: center;
+}
+
+/* Formulaires */
+form {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    margin: auto;
+}
+
+form input[type="text"], form input[type="file"], form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+input[type="submit"] {
+    padding: 1em;
+    border-radius: 5em;
+    font-family: cursive;
+    color: white;
+    background-color: #474e23;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #957743;
+}
+
+/* Pop-up */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: #e2eba7;
+    top : 20%;
+    padding: 3em;
+    margin: 5em;
+    border-radius: 2em;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.popup h2 {
+    color: #474e23;
+}
+
+.popup-button {
+    background-color: #957743;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-button:hover {
+    background-color: #59481d;
+}
+
+.popup-close {
+    background-color: #474e23;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background-color: #957743;
+}
+
+/* Section de la gestion des projets */
+.project-management {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.project-management input[type="text"], .project-management textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+
+
+/* Style général pour les éléments de dossier */
+.folder-toggle {
+    font-size: 20px;  /* Taille de la police plus grande pour les dossiers */
+    background-color: #254c27;  /* Couleur de fond plus professionnelle */
+    color: white;  /* Texte blanc */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.folder-toggle:hover {
+    background-color: #214325;  /* Couleur de survol */
+}
+
+/* Style pour l'icône du dossier */
+.icon-folder {
+    font-size: 24px; /* Augmente la taille de l'icône du dossier */
+    margin-right: 10px;
+}
+
+/* Style pour les boutons de fichiers */
+.history-file {
+    background-color: #685039;  /* Couleur des boutons de fichiers */
+    color: white;
+    padding: 8px 15px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.history-file:hover {
+    background-color: #716459;  /* Couleur au survol des fichiers */
+}
+
+/* Effet de tabulation pour les sous-dossiers */
+ul ul {
+    margin-left: 20px;  /* Ajout de l'indentation pour les sous-dossiers */
+}
+
+/* Icone de dossier en survol */
+.folder-toggle:hover .icon-folder {
+    transform: rotate(180deg);  /* Animation de l'icône pour donner un effet de rotation */
+    transition: transform 0.3s;
+}
+
+/* Ajout d'une ligne sous les boutons de mode actif */
+#mode-switch {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+#mode-switch button {
+    position: relative;
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 16px;
+    background-color: #957743;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#mode-switch button.active {
+    position: relative;
+    border-bottom: 3px solid #e2eba7; /* Ligne en dessous du bouton actif */
+    box-shadow: 0 0 10px #e2eba7; /* Effet lumineux */
+    background-color: #59481d; /* Optionnel : changer la couleur de fond */
+}
+
+#mode-switch button:hover {
+    background-color: #59481d;
+}
+
+#mode-switch button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #e2eba7; /* Couleur lumineuse */
+    box-shadow: 0 0 10px #e2eba7;
+}
+
+
+/* Rendre l'historique plus large */
+#history {
+    width: 50%; /* Augmenté de 40% à 50% */
+    margin-right: 20px;
+}
+
+/* Ajustement pour éviter que le contenu déborde */
+.main-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px; /* Espacement entre les sections */
+}
+
+.context-menu {
+    position: absolute;
+    top: 0;
+    z-index: 1000;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu li {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.context-menu li:hover {
+    background-color: #f0f0f0;
+}
+
+
+
+
+.selected-button {
+    border: 2px solid #6b5eba; /* Bordure bleue pour le bouton sélectionné */
+    background-color: #f0f8ff; /* Fond légèrement bleu pour le bouton sélectionné */
+}
+
+
+
+
+.project-management {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.project-management h4 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.project-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.select-project-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.project-selection {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.project-selection select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+    flex-grow: 1;
+}
+
+.add-project-button {
+    background-color: #2b3e51;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.add-project-button:hover {
+    background-color: #6a99cc;
+}
+
+.add-project-button i {
+    font-size: 1rem;
+}
+
+.create-project-form {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fefefe;
+    animation: slideDown 0.3s ease-in-out;
+}
+
+.hidden {
+    display: none;
+}
+
+.create-button {
+    background-color: #685039;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.create-button:hover {
+    background-color: #ffffff;
+    color: #4b3a19;
+}
+
+.cancel-button {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-left: 1rem;
+}
+
+.cancel-button:hover {
+    color: #a71d2a;
+}
+
+.active-project {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #007bff;
+}
+
+.info-message {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*mes simulation view*/
+
+.switcher-container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+}
+
+.tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #e0e0e0;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.tab-button.active {
+    background-color: #957743;
+    color: white;
+}
+
+.tabs-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/*Style modale*/
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%;
+    border-radius: 8px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+/* Style pour le bouton "volant" */
+#saveBtn {
+    position: fixed; /* Fixe le bouton à un endroit précis dans la fenêtre */
+    bottom: 20%; /* Distance du bas de l'écran */
+    right: 10%; /* Distance du côté droit */
+    background-color: #007BFF; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    padding: 10px 20px; /* Espacement interne */
+    border: none; /* Pas de bordure */
+    border-radius: 5px; /* Coins arrondis */
+    cursor: pointer; /* Curseur interactif */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Ombre pour l'effet volant */
+    z-index: 1000; /* S'assurer qu'il est au-dessus des autres éléments */
+    transition: transform 0.2s; /* Animation pour un effet au survol */
+}
+
+#saveBtn:hover {
+    transform: scale(1.1); /* Agrandissement au survol */
+    background-color: #0056b3; /* Couleur légèrement plus sombre */
+}
+/* Style pour l'image du logo */
+.logo-img {
+    width: 10em;
+    height: auto;
+}
+
+
+/* Style spécifique pour la pop-up de simulation */
+#simulationParamPopup {
+    display: none;  /* Contrôlé par JS */
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background: #fff;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Bouton de fermeture */
+#simulationParamPopup .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #333;
+    width: auto;
+    height: auto;
+}
+
+/* Style du titre */
+#simulationParamPopup h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    text-align: center;
+    color: #474e23;
+}
+
+/* Conteneur pour chaque champ du formulaire */
+#simulationParamPopup .popup-field {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style des labels */
+#simulationParamPopup label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #474e23;
+    font-size: 1rem;
+}
+
+/* Style des inputs */
+#simulationParamPopup input[type="number"] {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Bouton de soumission */
+#simulationParamPopup .popup-submit {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #957743;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#simulationParamPopup .popup-submit:hover {
+    background-color: #59481d;
+}
+

@@ -50,6 +50,84 @@ class PreparationSimulation
                     <button id="simulate-button" onclick="simulateSelectedFiles()" disabled>Simuler les fichiers sélectionnés</button>
                 </div>
 
+                <!-- Pop-up pour la simulation -->
+                <div id="simulationParamPopup" class="popup">
+                    <button class="close-btn" onclick="closeParamPop()">&times;</button>
+                    <h2>Paramètres de la simulation</h2>
+                    <div class="popup-field">
+                        <label for="starting_date">Starting Date</label>
+                        <input type="number" id="starting_date" name="starting_date" min="0" max="200" step="0.0001" value="1994">
+                    </div>
+                    <div class="popup-field">
+                        <label for="validation_date">Validation Date</label>
+                        <input type="number" id="validation_date" name="validation_date" min="0" max="200" step="0.0001" value="2002">
+                    </div>
+                    <div class="popup-field">
+                        <label for="building_delta">Building Delta</label>
+                        <input type="number" id="building_delta" name="building_delta" min="0" max="200" step="0.0001" value="22">
+                    </div>
+                    <div class="popup-field">
+                        <label for="neighbours_l_min">Neighbours L Min</label>
+                        <input type="number" id="neighbours_l_min" name="neighbours_l_min" min="0" max="200" step="0.0001" value="10.8696">
+                    </div>
+                    <div class="popup-field">
+                        <label for="neighbours_l_0">Neighbours L 0</label>
+                        <input type="number" id="neighbours_l_0" name="neighbours_l_0" min="0" max="200" step="0.0001" value="85.4895">
+                    </div>
+                    <div class="popup-field">
+                        <label for="neighbours_l_max">Neighbours L Max</label>
+                        <input type="number" id="neighbours_l_max" name="neighbours_l_max" min="0" max="200" step="0.0001" value="185.1387">
+                    </div>
+                    <div class="popup-field">
+                        <label for="neighbours_w">Neighbours W</label>
+                        <input type="number" id="neighbours_w" name="neighbours_w" min="0" max="1" step="0.0001" value="0.3543">
+                    </div>
+                    <div class="popup-field">
+                        <label for="roads_l_min">Roads L Min</label>
+                        <input type="number" id="roads_l_min" name="roads_l_min" min="0" max="200" step="0.0001" value="6.6065">
+                    </div>
+                    <div class="popup-field">
+                        <label for="roads_l_0">Roads L 0</label>
+                        <input type="number" id="roads_l_0" name="roads_l_0" min="0" max="200" step="0.0001" value="73.5635">
+                    </div>
+                    <div class="popup-field">
+                        <label for="roads_l_max">Roads L Max</label>
+                        <input type="number" id="roads_l_max" name="roads_l_max" min="0" max="200" step="0.0001" value="99.0350">
+                    </div>
+                    <div class="popup-field">
+                        <label for="roads_w">Roads W</label>
+                        <input type="number" id="roads_w" name="roads_w" min="0" max="1" step="0.0001" value="0.2363">
+                    </div>
+                    <div class="popup-field">
+                        <label for="paths_l_min">Paths L Min</label>
+                        <input type="number" id="paths_l_min" name="paths_l_min" min="0" max="200" step="0.0001" value="94.1375">
+                    </div>
+                    <div class="popup-field">
+                        <label for="paths_l_max">Paths L Max</label>
+                        <input type="number" id="paths_l_max" name="paths_l_max" min="0" max="200" step="0.0001" value="95.9844">
+                    </div>
+                    <div class="popup-field">
+                        <label for="paths_w">Paths W</label>
+                        <input type="number" id="paths_w" name="paths_w" min="0" max="1" step="0.0001" value="0.1263">
+                    </div>
+                    <div class="popup-field">
+                        <label for="slope_l_min">Slope L Min</label>
+                        <input type="number" id="slope_l_min" name="slope_l_min" min="0" max="1" step="0.0001" value="0.7988">
+                    </div>
+                    <div class="popup-field">
+                        <label for="slope_l_max">Slope L Max</label>
+                        <input type="number" id="slope_l_max" name="slope_l_max" min="0" max="1" step="0.0001" value="0.8041">
+                    </div>
+                    <div class="popup-field">
+                        <label for="slope_w">Slope W</label>
+                        <input type="number" id="slope_w" name="slope_w" min="0" max="1" step="0.0001" value="0.2832">
+                    </div>
+                    <div class="popup-field">
+                        <button class="popup-submit" onclick="executeSimulationP()">Exécuter la simulation</button>
+                    </div>
+                </div>
+
+
                 <!-- Pop-up pour les actions selon le mode -->
                 <div id="popup" class="popup" style="display: none;">
                     <div class="popup-content">

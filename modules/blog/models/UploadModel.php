@@ -200,6 +200,28 @@ class UploadModel {
         return  $stmt->fetchColumn() > 0;
     }
 
+    /**
+     * Récupère le contenu d'un fichier GeoJSON depuis la base de données.
+     *
+     * @param string $customName Nom personnalisé du fichier
+     * @param int $userID ID de l'utilisateur
+     * @param string $project Nom du projet
+     * @return string|null Le contenu du GeoJSON si trouvé, sinon null
+     */
+    public function getGeoJSONContent($customName, $userID, $project)
+    {
+        $query = "SELECT file_data FROM uploadGJ WHERE file_name = :file_name AND user = :user AND projet = :project LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':file_name', $customName);
+        $stmt->bindParam(':user', $userID);
+        $stmt->bindParam(':project', $project);
+        $stmt->execute();
+
+        $content = $stmt->fetchColumn();
+        return $content !== false ? $content : null;
+    }
+
+
 
     /**
      * Supprimer un fichier GeoJSON
