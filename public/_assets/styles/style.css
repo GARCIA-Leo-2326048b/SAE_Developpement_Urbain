@@ -834,4 +834,62 @@ ul ul {
 #simulationParamPopup .popup-submit:hover {
     background-color: #59481d;
 }
+/* Style de la pop-up pour nommer et stocker la simulation */
+#popupNameSim {
+    display: none; /* Masqué par défaut */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1100;
+}
+
+/* Style des labels */
+#popupNameSim label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Style des champs de saisie et listes déroulantes */
+#popupNameSim input[type="text"],
+#popupNameSim select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+#popupNameSim input[type="text"]:focus,
+#popupNameSim select:focus {
+    border-color: #957743;
+    outline: none;
+}
+
+/* Style du bouton de soumission */
+#popupNameSim .popup-submit {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #957743;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#popupNameSim .popup-submit:hover {
+    background-color: #59481d;
+}
 

@@ -129,14 +129,20 @@ class ComparaisonController
 //            $this->view->showComparison($formattedData, $geoJsonSim,$geoJsonVer,$geoJsonSimName,$geoJsonVerName,$charts);
         } else {
             $fileDataSim = [];
-            foreach ($filesSimName as $file) {
-                $fileDataSim[] = $this->geoJsonModel->fetchGeoJson($file);
+            if (is_array($filesSimName)) {
+                foreach ($filesSimName as $file) {
+                    var_dump($file);
+                    $fileDataSim[] = $this->geoJsonModel->fetchGeoJson($file);
+                }
+            } else {
+                // Si $filesSimName n'est pas un tableau, on traite directement la valeur
+                $fileDataSim[] = $this->geoJsonModel->fetchGeoJson($filesSimName);
             }
+
             $fileDataVer = [];
             foreach ($filesVerName as $file) {
                 $fileDataVer[] = $this->geoJsonModel->fetchGeoJson($file);
             }
-
             $geoJsonSimProj = $this->comparaisonModel->projectGeoJson($fileDataSim[0]);
             $geoJsonVerProj = $this->comparaisonModel->projectGeoJson($fileDataVer[0]);
 

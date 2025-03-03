@@ -349,13 +349,12 @@ class ComparaisonModel
     public function getEPSGCode($geoJson)
     {
         $geometry = geoPHP::load($geoJson);
-
         // Récupérer la longitude, en prenant en compte le type de géométrie
         $longitude = match ($geometry->geometryType()) {
             'Point' => $geometry->x(),
             default => $geometry->centroid()?->x() ?? $geometry->getComponents()[0]?->centroid()?->x(),
         };
-
+        var_dump($longitude);
 
         if ($longitude === null || $longitude < -180 || $longitude > 180) {
             throw new \InvalidArgumentException('Longitude invalide : doit être entre -180 et 180 degrés.');

@@ -50,12 +50,15 @@ class SimController
             $starting_date = $input['starting_date'] ?? '1994';
             $validation_date = $input['validation_date'] ?? '2002';
             $building_delta = $input['building_delta'] ?? 22;
+            $namesim = $input['sim_name'] ?? 'Simulation';
+            $folder = $input['sim_folder'] ?? 'root';
+
 
             // Création d'un dossier temporaire
             $tempDir = $this->createTempDirectory();
             $filePaths = $this->storeGeoJSONFiles($files, $tempDir);
             $tomlPath = $this->generateTomlConfig($filePaths, $tempDir);
-            $output = $this->executePythonScript($tomlPath, $params);
+            $output = $this->executePythonScript($tomlPath, $params,$namesim,$folder);
 
             echo json_encode([
                 'success' => true,
@@ -111,6 +114,7 @@ class SimController
         $validation_date = $_POST['validation_date'] ?? '2002';
         $building_delta = $_POST['building_delta'] ?? 22;
         $length = intval($validation_date) - intval($starting_date);
+        $nameSim = $_POST['sim_name'] ?? 'Simulation';
 
         $roadFile = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/roads_2002.geojson';
         $buildingFile = 'C:/Users/yousr/Documents/saeIa/data/valenicina/features/buildings_1994.geojson';
@@ -126,7 +130,7 @@ class SimController
         }
 
         $tomlContent = <<<TOML
-name = 'Simulation'
+name = '{$nameSim}'
 starting_date = '{$starting_date}'
 validation_date = '{$validation_date}'
 timezone = 'Pacific/Fiji'
@@ -215,7 +219,7 @@ TOML;
         return ["isRoad" => $isRoad, "isBuilding" => $isBuilding];
     }
 
-    private function executePythonScript($tomlPath, $params)
+    private function executePythonScript($tomlPath, $params,$namesim,$folder)
     {
         // Création d'un fichier temporaire pour les paramètres
         $tempFile = tempnam(sys_get_temp_dir(), 'params_');
@@ -263,6 +267,7 @@ TOML;
 
         // Lire et retourner le contenu du GeoJSON
         $geojsonContent = file_get_contents($geojsonFile);
+        $this->uploadModel->saveUploadGJ($namesim, $geojsonContent,$this->currentUserId, $folder,$this->currentProject );
         // Nettoyage du fichier temporaire
         unlink($tempFile);
 

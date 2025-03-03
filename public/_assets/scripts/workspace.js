@@ -645,8 +645,13 @@ function showParamPopup() {
 function closeParamPop() {
     document.getElementById('simulationParamPopup').style.display = 'none';
 }
+function executeSimulationP(){
+    document.getElementById('simulationParamPopup').style.display = 'none';
+    document.getElementById('popupNameSim').style.display = 'block';
+}
 
-function executeSimulationP() {
+function executeSimulationPY() {
+    document.getElementById('popupNameSim').style.display = 'none';
     // Récupération des paramètres depuis les sliders et champs
     const params = {
         neighbours_l_min: document.getElementById('neighbours_l_min').value,
@@ -670,6 +675,10 @@ function executeSimulationP() {
     const validation_date = document.getElementById('validation_date').value || '2002';
     const building_delta = document.getElementById('building_delta').value || 22;
 
+    const sim_name = document.getElementById('sim_name').value || `simulation_${Date.now()}`;
+    const sim_folder = document.getElementById('sim_folder').value || 'root';
+
+
     // Afficher un indicateur de chargement
     Swal.fire({
         title: 'Simulation en cours',
@@ -686,7 +695,9 @@ function executeSimulationP() {
         files: simulationFiles.map(f => f.name), // Fichiers sélectionnés
         starting_date: starting_date,
         validation_date: validation_date,
-        building_delta: building_delta
+        building_delta: building_delta,
+        sim_name: sim_name,
+        sim_folder: sim_folder
     };
 
     console.log("Données envoyées :", requestData); // Debugging
@@ -703,7 +714,7 @@ function executeSimulationP() {
         .then(data => {
             Swal.close();
             if (data.success) {
-                window.location.href = `index.php?action=affichagesim&files=${encodeURIComponent(JSON.stringify(data.result.geojson))}`;
+                window.location.href = `index.php?action=affichagesim&files=${encodeURIComponent(JSON.stringify(data.result.geojson))}&sim_name=${encodeURIComponent(requestData.sim_name)}`;
             } else {
                 Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
             }

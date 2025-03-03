@@ -36,6 +36,10 @@ try {
                 }
                 break;
             case 'affichagesim':
+                $simName = filter_input(INPUT_GET, 'sim_name', FILTER_SANITIZE_STRING);
+
+                $_SESSION['simFiles'] = $simName;
+                var_dump($_SESSION['simFiles']);
                 $geojsonFile = filter_input(INPUT_GET, 'files');
                 $geojsonFile = trim($geojsonFile, '"');  // Retire les guillemets en début et fin
 
@@ -48,6 +52,7 @@ try {
 
 
                 $geojsonDecoded = json_decode($geojsonContent, true);
+
 
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     die("Erreur de décodage JSON : " . json_last_error_msg());

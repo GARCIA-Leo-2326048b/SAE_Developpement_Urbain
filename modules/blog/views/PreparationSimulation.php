@@ -15,6 +15,11 @@ class PreparationSimulation
     private $files;
 
     /**
+     * @var HistoriqueView $folderHistory Vue pour l'historique des dossiers
+     */
+    private $folderHistory;
+
+    /**
      * Constructeur de la classe PreparationSimulation
      *
      * Initialise la vue avec la liste des fichiers.
@@ -23,6 +28,7 @@ class PreparationSimulation
      */
     public function __construct($files) {
         $this->files = $files;
+        $this->folderHistory = new HistoriqueView($files);
     }
 
     /**
@@ -138,7 +144,21 @@ class PreparationSimulation
                         <button class="popup-close" onclick="closePopup(this)"><i class="fas fa-window-close"></i></button>
                     </div>
                 </div>
-        </div>
+
+                <!-- Pop-up pour nommer et stocker la simulation -->
+                <div class="popup-field" id="popupNameSim" style="display: none;">
+                    <label for="sim_name">Nom de la simulation</label>
+                    <input type="text" id="sim_name" name="sim_name" placeholder="Ex : Simulation_2002">
+                    <label for="sim_folder">Dossier de destination</label>
+                    <?php if (isset($_SESSION['suid'])): ?>
+                    <select id="sim_folder" class="folder-selector"  name="sim_folder">
+                                <?php $this->folderHistory->generateFolderOptions($this->folderHistory->getFiles()); ?>
+                    </select>
+                    <?php endif; ?>
+                    <button class="popup-submit" onclick="executeSimulationPY()">Exécuter la simulation</button>
+                </div>
+
+                </div>
 
         </div>
         <?php
