@@ -23,8 +23,6 @@ try {
             case 'affichage':
                 // Récupérer les fichiers depuis l'URL
                 $files = filter_input(INPUT_GET, 'files'); // Cela sera une chaîne encodée
-            var_dump("on est la ");
-                var_dump($files);
                 if ($files) {
                     // Décoder la chaîne et convertir en tableau
                     $filesArray = explode(',', urldecode($files));
@@ -35,33 +33,6 @@ try {
                     // Stocker les fichiers de simulation en session pour réutilisation
                     $_SESSION['simFiles'] = $filesArray;
                 }
-                break;
-            case 'affichagesim':
-                $simName = filter_input(INPUT_GET, 'sim_name', FILTER_SANITIZE_STRING);
-
-                $_SESSION['simFiles'] = $simName;
-
-                $geojsonFile = filter_input(INPUT_GET, 'files');
-                $geojsonFile = trim($geojsonFile, '"');  // Retire les guillemets en début et fin
-
-
-                if (!file_exists($geojsonFile)) {
-                    die("Erreur : Le fichier n'existe pas.");
-                }
-
-                $geojsonContent = file_get_contents($geojsonFile);
-
-
-
-                $geojsonDecoded = json_decode($geojsonContent, true);
-
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    die("Erreur de décodage JSON : " . json_last_error_msg());
-                }
-
-// Affichage du GeoJSON dans ton contrôleur
-                (new blog\controllers\AffichageController())->afficherSimulation($geojsonDecoded);
                 break;
             case 'compare':
                 // Récupérer les fichiers stockés en session

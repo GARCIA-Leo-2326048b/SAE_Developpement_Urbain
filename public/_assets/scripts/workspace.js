@@ -729,8 +729,7 @@ function executeSimulationPY() {
 
 function afficher(){
     // Récupérer l'élément et vérifier qu'il existe
-    let file = document.getElementById('popup-file-nameS');
-
+    let file = document.getElementById('popup-file-nameS').textContent;
     // Rediriger vers l'URL
     window.location.href = 'index.php?action=affichage&files=' + file;
 }
