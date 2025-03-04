@@ -36,10 +36,12 @@ class GeoJsonModel
      * @param string $name Nom du fichier GeoJSON
      * @return string Les données GeoJSON du fichier
      */
-    public function fetchGeoJson($name)
+    public function fetchGeoJson($name,$project,$user)
     {
-        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE file_name = :name");
+        $stmt = $this->db->prepare("SELECT file_data FROM uploadGJ WHERE file_name = :name and projet = :project and user = :user");
         $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':project', $project);
+        $stmt->bindParam(':user', $user);
         $stmt->execute();
 
         // Retourner les données GeoJSON
@@ -47,3 +49,4 @@ class GeoJsonModel
     }
 }
 ?>
+

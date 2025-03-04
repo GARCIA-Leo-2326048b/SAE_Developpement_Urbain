@@ -47,9 +47,6 @@ class SimController
 
             $params = $input['params'];
             $files = $input['files'];
-            $starting_date = $input['starting_date'] ?? '1994';
-            $validation_date = $input['validation_date'] ?? '2002';
-            $building_delta = $input['building_delta'] ?? 22;
             $namesim = $input['sim_name'] ?? 'Simulation';
             $folder = $input['sim_folder'] ?? 'root';
 
@@ -300,7 +297,7 @@ TOML;
         fclose($pipes[1]);
         fclose($pipes[2]);
 
-        $returnCode = proc_close($process);
+
 
         // 🔹 Logs d'exécution pour le débogage
         error_log("Sortie script : " . $output);
@@ -324,21 +321,4 @@ TOML;
         ]);
     }
 
-
-
-
-
-
-
-    private function formatResult($output)
-    {
-        return array_map('htmlspecialchars', $output);
-    }
-
-    private function storeResult($output, $tempDir)
-    {
-        $resultFile = "{$tempDir}/result.geojson";
-        file_put_contents($resultFile, implode("\n", $output));
-        return "index.php?action=download&file=" . basename($resultFile);
-    }
 }

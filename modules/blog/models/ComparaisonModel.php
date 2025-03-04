@@ -354,7 +354,6 @@ class ComparaisonModel
             'Point' => $geometry->x(),
             default => $geometry->centroid()?->x() ?? $geometry->getComponents()[0]?->centroid()?->x(),
         };
-        var_dump($longitude);
 
         if ($longitude === null || $longitude < -180 || $longitude > 180) {
             throw new \InvalidArgumentException('Longitude invalide : doit être entre -180 et 180 degrés.');

@@ -69,7 +69,7 @@ class AffichageController
         $fileData = []; // Tableau pour stocker les données des fichiers
         foreach ($files as $file) {
             // Récupérer les données GeoJson pour chaque fichier
-            $fileData[] = $this->model->fetchGeoJson($file);
+            $fileData[] = $this->model->fetchGeoJson($file,$_SESSION['current_project_id'], $this->utilisateur);
 
         }
 
